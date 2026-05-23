@@ -1,0 +1,38 @@
+services:
+  odoo:
+    image: odoo:19.0
+    ports:
+      - "11019:8069"
+    environment:
+      - HOST=db
+      - USER=odoo
+      - PASSWORD_FILE=/run/secrets/odoo_password
+    depends_on:
+      - db
+    secrets:
+      - odoo_password
+    restart: always
+    volumes:
+      - odoo_data:/var/lib/odoo
+      - logs:/var/log/odoo
+      - ./config:/etc/odoo
+      - ./addons:/mnt/extra-addons
+  db:
+    image: postgres:17
+    environment:
+      - POSTGRES_USER=odoo
+      - POSTGRES_PASSWORD_FILE=/run/secrets/odoo_password
+      - POSTGRES_DB=postgres
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    secrets:
+      - odoo_password
+    restart: always
+    volumes:
+      - db_data:/var/lib/postgresql/data
+volumes:
+  odoo_data:
+  db_data:
+  logs:
+secrets:
+  odoo_password:
+    file: ./secrets/odoo_password
