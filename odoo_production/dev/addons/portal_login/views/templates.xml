@@ -1,0 +1,582 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Portal Dashboard -->
+    <template id="portal_dashboard" name="Portal Dashboard Page">
+        <t t-call="website.layout">
+            <div class="row g-0">
+                <div class="col-md-2 left-sidebar">
+                    <!-- <div class="d-flex flex-column align-items-start px-3">
+                        <button class="btn w-100 text-start fw-bold mb-3 d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#employeeMenu">
+                            <i class="bi bi-person-circle fs-4 text-primary"></i>
+                            <span class="ms-2 fw-bold">Employee Dashboard</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                        <div id="employeeMenu" class="collapse ms-3 mb-4">
+                            <a href="/my/leave/apply" class="d-block mb-2 text-decoration-none">Leave Application</a>
+                            <a href="/my/leave/team-approvals" class="d-block mb-2 text-decoration-none">Leave Approval</a>
+                            <a href="/my/payslips" class="d-block mb-2 text-decoration-none">Payslip</a>
+                            <a href="/my/profile" class="d-block text-decoration-none">Profile</a>
+                        </div>
+                    </div> -->
+                </div>
+                <div class="col-md-10 dashboard-main-area">
+                    <div class="row mb-4 align-items-center">
+                        <div class="col-md-8">
+                            <h5 class="mb-0 text-dark">Hello,
+                                <span class="fw-bold text-primary">
+                                    <t t-esc="user.name"/>
+                                </span>, Welcome Back!
+                            </h5>
+                            <small class="text-muted">
+                                <t t-esc="today"/>
+                            </small>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <t t-if="user.employee_id.allow_manual_attendance">
+                                <button class="btn btn-success" id="btn_check_in">Check In</button>
+                                <button class="btn btn-danger" id="btn_check_out">Check Out</button>
+                            </t>
+                            <t t-if="not user.employee_id.allow_manual_attendance">
+                                <small class="text-muted">Manual Attendance Disabled</small>
+                            </t>
+
+                                <t t-if="request.session.get('portal_status')">
+                                    <div t-attf-class="alert alert-{{ request.session['portal_status'][0] }} mt-2">
+                                        <t t-esc="request.session['portal_status'][1]"/>
+                                    </div>
+                                    <t t-set="x" t-value="request.session.pop('portal_status')"/>
+                                </t>
+                              <!-- <script>
+                                document.getElementById("btn_check_in").onclick = function () {
+                                    window.location.href = "/portal/attendance/check_in";
+                                };
+                                document.getElementById("btn_check_out").onclick = function () {
+                                    window.location.href = "/portal/attendance/check_out";
+                                };
+                            </script> -->
+                          <!-- <script>
+                                function getLocationAndRedirect(url) {
+                                    if (navigator.geolocation) {
+                                        navigator.geolocation.getCurrentPosition(function (pos) {
+                                            let location = pos.coords.latitude + "," + pos.coords.longitude;
+                                            window.location.href = url + "?location=" + location;
+                                        }, function () {
+                                            alert("Location permission denied");
+                                        });
+                                    } else {
+                                        alert("Geolocation not supported");
+                                    }
+                                }
+
+                                document.getElementById("btn_check_in").onclick = function () {
+                                    getLocationAndRedirect("/portal/attendance/check_in");
+                                };
+
+                                document.getElementById("btn_check_out").onclick = function () {
+                                    getLocationAndRedirect("/portal/attendance/check_out");
+                                };
+                            </script> -->
+                            <script>
+                                function getLocationAndRedirect(url) {
+                                    if (navigator.geolocation) {
+                                        navigator.geolocation.getCurrentPosition(function (pos) {
+                                            let lat = pos.coords.latitude;
+                                            let lon = pos.coords.longitude;
+                                            window.location.href = url + "?lat=" + lat + "&amp;lon=" + lon;
+                                        }, function () {
+                                            alert("Location permission denied");
+                                        });
+                                    }
+                                }
+
+                                document.getElementById("btn_check_in").onclick = function () {
+                                    getLocationAndRedirect("/portal/attendance/check_in");
+                                };
+
+                                document.getElementById("btn_check_out").onclick = function () {
+                                    getLocationAndRedirect("/portal/attendance/check_out");
+                                };
+                            </script>
+
+
+
+                        </div>
+                    </div>
+                    <div class="red-header-border d-flex justify-content-between align-items-center flex-wrap mb-4">
+                        <div class="p-2 text-center flex-fill">
+                            <div class="d-flex align-items-center justify-content-center mb-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-clock text-primary me-2" viewBox="0 0 16 16">
+                                    <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z" />
+                                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z" />
+                                </svg>
+                                <small class="text-muted">Today Working Period</small>
+                            </div>
+                            <h6 id="workingPeriod" class="fw-bold text-dark mt-1">
+                                <t t-esc="today_working_period"/>
+                            </h6>
+                            <script>
+                                document.addEventListener("DOMContentLoaded", function () {
+                                    var active = JSON.parse("
+                                <t t-esc='active_session'/>
+                                        ");
+                                    var seconds = parseInt("
+                                <t t-esc='running_seconds'/>
+                                        ");
+
+                                    if (!active) return;
+
+                                    function updateWorkPeriod() {
+                                        seconds++;
+
+                                        let hrs = Math.floor(seconds / 3600);
+                                        let mins = Math.floor((seconds % 3600) / 60);
+
+                                        document.getElementById("workingPeriod").innerText =
+                                            `${hrs} hr ${mins} min`;
+                                    }
+
+                                    setInterval(updateWorkPeriod, 1000);  // update every second
+                                });
+                            </script>
+                        </div>
+                        <div class="p-2 text-center flex-fill">
+                            <h6 class="fw-bold text-success">General Shift </h6>
+                            <!-- <h6 class="fw-bold text-success mt-1">09:00 AM - Unlimited🤭​</h6> -->
+                        </div>
+                        <div class="p-2 text-center flex-fill border-start">
+                            <small class="text-muted d-block">Length of Service</small>
+                            <h6 class="fw-bold text-dark mt-1">
+                                <t t-esc="length_of_service"/>
+                            </h6>
+                        </div>
+                        <div class="p-2 text-center flex-fill border-start">
+                            <small class="text-muted d-block">Joining Date</small>
+                            <h6 class="fw-bold text-dark mt-1">
+                                <t t-if="joining_date">
+                                    <t t-esc="joining_date.strftime('%d %b, %Y')" />
+                                </t>
+                                <t t-else="">N/A</t>
+                            </h6>
+                        </div>
+                        <div class="p-2 text-center flex-fill border-start">
+                            <small class="text-muted d-block">Confirmation Date</small>
+                            <h6 class="fw-bold text-dark mt-1">
+                                <t t-if="confirmation_date">
+                                    <t t-esc="confirmation_date.strftime('%d %b, %Y')" />
+                                </t>
+                                <t t-else="">N/A</t>
+                            </h6>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-lg-8">
+                            <div class="ed-attendance-section">
+                                <!-- Modern Calendar Header -->
+                                <div class="ed-attendance-header d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                                    <h5 class="mb-0">Attendance Calendar</h5>
+                                    <div class="d-flex align-items-center">
+                                        <select id="month_select" class="modern-select month-box me-2">
+                                            <t t-foreach="month_list" t-as="m">
+                                                <option t-att-value="m['number']" t-att-selected="1 if m['number'] == month else None">
+                                                    <t t-esc="m['name']"/>
+                                                </option>
+                                            </t>
+                                        </select>
+                                        <select id="year_select" class="modern-select year-box">
+                                            <t t-foreach="year_list" t-as="y">
+                                                <option t-att-value="y" t-att-selected="1 if y == year else None">
+                                                    <t t-esc="y"/>
+                                                </option>
+                                            </t>
+                                        </select>
+                                        <script>
+                                            document.addEventListener('DOMContentLoaded', function() {
+                                                var monthSelect = document.getElementById('month_select');
+                                                var yearSelect = document.getElementById('year_select');
+
+                                                function redirect() {
+                                                    var month = monthSelect.value;
+                                                    var year = yearSelect.value;
+                                                    window.location.href = '/my/employee-dashboard?month=' + month + '&amp;year=' + year;
+                                                }
+
+                                                monthSelect.addEventListener('change', redirect);
+                                                yearSelect.addEventListener('change', redirect);
+                                            });
+                                        </script>
+                                    </div>
+                                </div>
+                                <!-- Attendance Summary Stats -->
+                                <div class="ed-attendance-stats row row-cols-6 justify-content-between mb-4">
+                                    <div class="ed-stat-item text-center">
+                                        <div class="text-muted small">Payable Days</div>
+                                        <div class="fw-bold fs-6" t-esc="total_days"/>
+                                    </div>
+                                    <div class="ed-stat-item text-center">
+                                        <div class="text-muted small">Present</div>
+                                        <div class="fw-bold fs-6 text-success" t-esc="present_count"/>
+                                    </div>
+                                    <div class="ed-stat-item text-center">
+                                        <div class="text-muted small">Late</div>
+                                        <div class="fw-bold fs-6 text-warning" t-esc="late_count"/>
+                                    </div>
+                                    <div class="ed-stat-item text-center">
+                                        <div class="text-muted small">Movement</div>
+                                        <div class="fw-bold fs-6 text-info" t-esc="movement_count"/>
+                                    </div>
+                                    <div class="ed-stat-item text-center">
+                                        <div class="text-muted small">Leave</div>
+                                        <div class="fw-bold fs-6 text-primary" t-esc="leave_count"/>
+                                    </div>
+                                    <div class="ed-stat-item text-center">
+                                        <div class="text-muted small">Absent</div>
+                                        <div class="fw-bold fs-6 text-danger" t-esc="absent_count"/>
+                                    </div>
+                                </div>
+                                <!-- Calendar Grid -->
+                                <div class="ed-calendar-grid">
+                                    <!-- Calendar Headers -->
+                                    <div class="ed-calendar-header row">
+                                        <div class="ed-calendar-day-header">SUN</div>
+                                        <div class="ed-calendar-day-header">MON</div>
+                                        <div class="ed-calendar-day-header">TUE</div>
+                                        <div class="ed-calendar-day-header">WED</div>
+                                        <div class="ed-calendar-day-header">THU</div>
+                                        <div class="ed-calendar-day-header">FRI</div>
+                                        <div class="ed-calendar-day-header">SAT</div>
+                                    </div>
+                                    <!-- Calendar Dates -->
+                                    <div class="ed-calendar-dates">
+                                        <t t-foreach="month_days" t-as="week">
+                                            <div class="ed-calendar-week row">
+                                                <t t-foreach="week" t-as="day">
+                                                    <t t-if="day == 0">
+                                                        <div class="ed-calendar-date empty"></div>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <div class="ed-calendar-date">
+                                                            <div class="ed-date-number" t-esc="day"/>
+                                                            <t t-if="day in attendance">
+                                                                <div t-attf-class="ed-status-tag status-#{attendance[day]}">
+                                                                    <t t-if="attendance[day] == 'present'">Present</t>
+                                                                    <t t-if="attendance[day] == 'absent'">Absent</t>
+                                                                    <t t-if="attendance[day] == 'late'">Late</t>
+                                                                    <t t-if="attendance[day] == 'offday'">Offday</t>
+                                                                    <t t-if="attendance[day] == 'movement'">Movement</t>
+                                                                    <t t-if="attendance[day] == 'leave'">Leave</t>
+                                                                </div>
+                                                            </t>
+                                                        </div>
+                                                    </t>
+                                                </t>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Rest of your sidebar content -->
+                        <div class="col-lg-4">
+                            <div class="dashboard-card p-3">
+                                <h6 class="mb-3 fw-bold border-bottom pb-2">My Manager</h6>
+                                <ul class="list-unstyled">
+                                    <!-- Loop Managers -->
+                                    <t t-if="manager_data">
+                                        <t t-foreach="manager_data" t-as="mg">
+                                            <li class="d-flex align-items-center mb-2">
+                                                <i class="fa fa-user-circle fs-5 me-2" t-att-class="mg['icon']"></i>
+                                                <div class="flex-grow-1">
+                                                    <div class="fw-bold">
+                                                        <t t-esc="mg['name']"/>
+                                                    </div>
+                                                    <small class="text-muted">
+                                                        <t t-esc="mg['role']"/>
+                                                    </small>
+                                                </div>
+                                            </li>
+                                        </t>
+                                    </t>
+                                    <!-- No manager fallback -->
+                                    <t t-if="not manager_data">
+                                        <li class="text-muted text-center">No manager found</li>
+                                    </t>
+                                </ul>
+                            </div>
+                            <div class="dashboard-card p-3" style="max-height: 300px; overflow-y: auto;">
+                                <h6 class="mb-3 fw-bold border-bottom pb-2">Attendance Log</h6>
+                                <!-- If data found -->
+                                <t t-if="attendance_logs">
+                                    <t t-foreach="attendance_logs" t-as="log">
+                                        <div class="log-item-checkin" t-if="not log['duration']">
+                                            <div class="d-flex justify-content-between">
+                                                <div class="log-time text-success">
+                                                    <t t-esc="log['check_in']"/>
+                                                </div>
+                                                <div class="log-status">
+                                                    <t t-esc="log['date']"/>
+                                                </div>
+                                            </div>
+                                            <small class="text-muted">Check In</small>
+                                        </div>
+                                        <!-- If both check in + check out -->
+                                        <div class="log-item-checkout" t-if="log['duration']">
+                                            <div class="d-flex justify-content-between">
+                                                <div class="log-time text-success">
+                                                    <t t-esc="log['duration']"/>
+                                                </div>
+                                                <div class="log-status">
+                                                    <t t-esc="log['date']"/>
+                                                </div>
+                                            </div>
+                                            <small class="text-muted">
+                                                                 Check In:
+                                                <t t-esc="log['check_in']"/>
+                                                                           |
+                                                                     Check Out:
+                                                <t t-esc="log['check_out']"/>
+                                            </small>
+                                        </div>
+                                    </t>
+                                </t>
+                                <!-- If no attendance -->
+                                <t t-if="not attendance_logs">
+                                    <div class="text-muted text-center">No attendance records found</div>
+                                </t>
+                            </div>
+                            <div class="dashboard-card p-3">
+                                <h6 class="mb-3 fw-bold border-bottom pb-2">Leave Balance</h6>
+
+                                <div class="leave-balance-wrapper" style="max-height: 200px; overflow-y: auto;">
+                                    <table class="table table-sm table-borderless leave-balance-table mb-0">
+                                        <thead class="bg-light sticky-top">
+                                            <tr>
+                                                <th>Type</th>
+                                                <th>Taken</th>
+                                                <th>Balance</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-if="leave_balances">
+                                                <t t-foreach="leave_balances" t-as="lv">
+                                                    <tr>
+                                                        <td>
+                                                            <t t-esc="lv['type']"/>
+                                                        </td>
+                                                        <td>
+                                                            <t t-esc="lv['taken']"/>
+                                                        </td>
+                                                        <td>
+                                                            <t t-esc="lv['remaining']"/>
+                                                        </td>
+                                                        <td>
+                                                            <span t-att-class="'fw-bold ' + ('text-success' if lv['status']=='Active' else 'text-danger')">
+                                                                <t t-esc="lv['status']"/>
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </t>
+
+                                            <t t-if="not leave_balances">
+                                                <tr>
+                                                    <td colspan="4" class="text-center text-muted">No leave records available</td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-4">
+                            <div class="dashboard-card p-3">
+                                <h6 class="fw-bold border-bottom pb-2">My Applications</h6>
+                                <!-- Leave Requests Here -->
+                                <t t-if="not leaves">
+                                    <div class="text-center py-4 text-muted small">No leave requests found.</div>
+                                </t>
+                                <t t-if="leaves">
+                                    <div class="my-app-wrapper table-responsive">
+                                        <table class="table table-hover table-sm mb-0 my-app-table">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Type</th>
+                                                    <th>Days</th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-foreach="leaves" t-as="lv">
+                                                    <tr>
+                                                        <td>
+                                                            <span t-esc="lv.holiday_status_id.name"/>
+                                                        </td>
+                                                        <td>
+                                                            <span t-esc="str(int(lv.number_of_days))"/>
+                                                        </td>
+                                                        <td>
+                                                            <t t-if="lv.state == 'draft'">
+                                                                <span class="badge bg-secondary">Draft</span>
+                                                            </t>
+                                                            <t t-elif="lv.state == 'confirm'">
+                                                                <span class="badge bg-warning">Pending</span>
+                                                            </t>
+                                                            <t t-elif="lv.state == 'validate'">
+                                                                <span class="badge bg-success">Approved</span>
+                                                            </t>
+                                                            <t t-elif="lv.state == 'refuse'">
+                                                                <span class="badge bg-danger">Refused</span>
+                                                            </t>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </t>
+                                <div class="mt-3 text-center">
+                                    <a href="/my/leave/history" class="btn btn-primary btn-sm">
+                                        View All
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="dashboard-card p-3">
+                                <h6 class="fw-bold border-bottom pb-2">Company Policy</h6>
+                                <t t-if="policies">
+                                    <div class="accordion mt-3" id="companyPolicyAccordion">
+                                        <t t-foreach="policies" t-as="pl" t-index="i">
+                                            <div class="accordion-item mb-2 shadow-sm rounded">
+                                                <h2 class="accordion-header">
+                                                    <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" t-att-data-bs-target="'#policy_item_' + str(i)" aria-expanded="false">
+                                                        <t t-esc="pl.title"/>
+                                                    </button>
+                                                </h2>
+                                                <div t-att-id="'policy_item_' + str(i)" class="accordion-collapse collapse" data-bs-parent="#companyPolicyAccordion">
+                                                    <div class="accordion-body small">
+                                                        <!-- Start / End Date -->
+                                                        <!-- <div class="text-end text-muted small mb-2">
+                                                            Start:
+                                                            <t t-esc="pl.date_start"/>
+                                                            <t t-if="pl.date_end">
+                                                                | End: <t t-esc="pl.date_end"/>
+                                                            </t>
+                                                        </div> -->
+                                                        <!-- Description -->
+                                                        <div>
+                                                            <t t-raw="pl.description"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <div class="text-center py-4 text-muted small">
+                                        No company policies available.
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <!-- Notice Board Card Container -->
+                            <div class="dashboard-card p-3" style="max-height:500px; overflow-y:auto;">
+                                <h6 class="fw-bold border-bottom pb-2">Notice Board</h6>
+                                <t t-if="announcements">
+                                    <t t-foreach="announcements" t-as="ann">
+                                        <div class="card mb-3 p-2">
+                                            <div class="text-end text-muted small mb-1">
+                                                Start:
+                                                <t t-esc="ann.date_start"/>
+                                                    | End:
+                                                <t t-esc="ann.date_end"/>
+                                            </div>
+                                            <!-- Title -->
+                                            <h6 class="fw-bold mb-1">
+                                                <t t-esc="ann.announcement_reason"/>
+                                            </h6>
+                                            <!-- Description -->
+                                            <div class="mb-2">
+                                                <t t-raw="ann.announcement"/>
+                                            </div>
+                                            <!-- Attachments -->
+                                            <t t-if="ann.attachment_id">
+                                                <div>
+                                                    <t t-foreach="ann.attachment_id" t-as="att">
+                                                        <a href="#" t-att-data-url="'/portal/announcement/attachment/%s' % att.id" class="badge bg-primary text-white me-1 attachment-link">
+                                                            <t t-esc="att.name"/>
+                                                        </a>
+                                                    </t>
+                                                </div>
+                                            </t>
+                                        </div>
+                                    </t>
+                                </t>
+                                <t t-if="not announcements">
+                                    <div class="text-center py-4 text-muted small">No notices found.</div>
+                                </t>
+                            </div>
+                            <!-- Attachment Modal -->
+                            <div class="modal fade" id="attachmentModal" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Attachment</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <iframe src="" id="attachmentFrame" style="width:100%; height:500px;" frameborder="0"></iframe>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function () {
+
+                                    var links = document.querySelectorAll('.attachment-link');
+
+                                    links.forEach(function (link) {
+                                        link.addEventListener('click', function (ev) {
+                                            ev.preventDefault();
+
+                                            var url = this.getAttribute('data-url');
+
+                                            // File extension check
+                                            var fileExtension = url.split('.').pop().toLowerCase();
+                                            var frame = document.getElementById('attachmentFrame');
+
+                                            // PDF show directly in iframe
+                                            if (fileExtension === 'pdf') {
+                                                frame.setAttribute('src', url);
+                                            }
+                                            // Images show directly in iframe
+                                            else if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension)) {
+                                                frame.setAttribute('src', url);
+                                            }
+                                            // Other file types: download instead of preview
+                                            else {
+                                                frame.setAttribute('src', 'about:blank');
+                                                window.open(url, '_blank');
+                                                return;
+                                            }
+
+                                            // Show modal
+                                            var modal = new bootstrap.Modal(document.getElementById('attachmentModal'));
+                                            modal.show();
+                                        });
+                                    });
+                                });
+                            </script>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+</odoo>
+

@@ -1,0 +1,21 @@
+{
+    'name': 'HR Employee Festival Bonus',
+    'version': '19.0.1.0',
+    'summary': 'Add Festival Bonus fields under Wage in Employee',
+    'description': 'Adds Festival Bonus, Gross Amount, and Net Amount fields in hr.employee',
+    'author': 'Anwar Hossain',
+    'category': 'Human Resources',
+    'depends': ['hr','hr_payroll','portal_login','hr_expense'],
+    'data': [
+        'security/ir.model.access.csv',
+        'security/security.xml',
+        'views/hr_employee_views.xml',
+        'views/festival_bonus_menu.xml',
+        'views/hr_payslip_view.xml',
+        'views/portal_expense_template.xml',
+        'views/portal_movement_template.xml',
+        'views/portal_menu.xml',        
+    ],
+    'installable': True,
+    'application': False,
+}

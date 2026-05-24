@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Main Menu -->
+    <menuitem id="menu_zkbio_root"
+              name="ZKBio Time"
+              sequence="50"
+              web_icon="zkbio_time_api,static/description/icon.png"/>
+
+    <!-- Terminals Menu -->
+    <menuitem id="menu_zkbio_terminals"
+              name="Terminals"
+              parent="menu_zkbio_root"
+              sequence="10"/>
+
+    <menuitem id="menu_zkbio_terminal_list"
+              name="Biometric Terminals"
+              parent="menu_zkbio_terminals"
+              action="action_zkbio_terminal"
+              sequence="10"/>
+
+    <!-- Attendance Menu -->
+    <menuitem id="menu_zkbio_attendance"
+              name="Attendance"
+              parent="menu_zkbio_root"
+              sequence="20"/>
+
+    <menuitem id="menu_zkbio_transaction_list"
+              name="Attendance Logs"
+              parent="menu_zkbio_attendance"
+              action="action_zkbio_transaction"
+              sequence="10"/>
+
+    <!-- Configuration Menu -->
+    <menuitem id="menu_zkbio_configuration"
+              name="Configuration"
+              parent="menu_zkbio_root"
+              sequence="100"/>
+
+    <menuitem id="menu_zkbio_config_settings"
+              name="API Configuration"
+              parent="menu_zkbio_configuration"
+              action="action_zkbio_config"
+              sequence="10"/>
+</odoo>

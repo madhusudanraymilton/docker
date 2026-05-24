@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+ 
+    <record id="company_policy_tree_view" model="ir.ui.view">
+        <field name="name">company.policy.tree</field>
+        <field name="model">company.policy</field>
+        <field name="arch" type="xml">
+            <list string="Company Policies">
+                <field name="title"/>
+                <field name="is_general"/>
+                <field name="policy_type"/>
+                <field name="date_start"/>
+                <field name="date_end"/>
+                <field name="active"/>
+                <field name="position_ids"/>
+            </list>
+        </field>
+    </record>
+
+
+
+    <record id="company_policy_form_view" model="ir.ui.view">
+        <field name="name">company.policy.form</field>
+        <field name="model">company.policy</field>
+        <field name="arch" type="xml">
+            <form string="Company Policy" create="true" edit="true">
+                <sheet>
+
+                    <div class="oe_title">
+                        <h1>
+                            <field name="title" placeholder="Policy Title..."/>
+                        </h1>
+
+                        <div>
+                            <label for="is_general"/>
+                            <field name="is_general" class="oe_inline"/>
+                        </div>
+                    </div>
+
+                    <group>
+                        <group>
+                            <field name="date_start"/>
+                            <field name="policy_type"
+                                   invisible="is_general"/>
+                        </group>
+
+                        <group>
+                            <field name="date_end"/>
+                            <field name="employee_ids" widget="many2many_tags"
+                                   invisible="is_general or policy_type != 'employee'"/>
+                            <field name="department_ids" widget="many2many_tags"
+                                   invisible="is_general or policy_type != 'department'"/>
+                            <field name="position_ids" widget="many2many_tags"
+                                   invisible="is_general or policy_type != 'job'"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Description">
+                            <field name="description"/>
+                        </page>
+                    </notebook>
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+ 
+    <record id="company_policy_search_view" model="ir.ui.view">
+        <field name="name">company.policy.search</field>
+        <field name="model">company.policy</field>
+        <field name="arch" type="xml">
+            <search string="Policies">
+                <field name="title"/>
+                <field name="is_general"/>
+                <field name="policy_type"/>
+
+                <separator/>
+
+                <filter name="general" string="General Policies"
+                        domain="[('is_general', '=', True)]"/>
+
+                <filter name="employee_based" string="Employee Based"
+                        domain="[('policy_type', '=', 'employee')]"/>
+
+                <filter name="department_based" string="Department Based"
+                        domain="[('policy_type', '=', 'department')]"/>
+
+                <filter name="job_based" string="Job Based"
+                        domain="[('policy_type', '=', 'job')]"/>
+
+                <separator/>
+
+                <filter name="active" string="Active"
+                        domain="[('active', '=', True)]"/>
+                <filter name="inactive" string="Inactive"
+                        domain="[('active', '=', False)]"/>
+
+                <separator/>
+
+                <filter string="Group By Type" name="group_type"
+                        context="{'group_by':'policy_type'}"/>
+
+            </search>
+        </field>
+    </record>
+
+
+    <record id="company_policy_action" model="ir.actions.act_window">
+        <field name="name">Company Policies</field>
+        <field name="res_model">company.policy</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="company_policy_search_view"/>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+                Click here to create a new Company Policy.
+            </p>
+        </field>
+    </record>
+
+</odoo>

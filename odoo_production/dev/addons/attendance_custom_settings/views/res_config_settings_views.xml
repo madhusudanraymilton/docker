@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_config_settings_view_attendance_custom" model="ir.ui.view">
+        <field name="name">res.config.settings.view.attendance.custom</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="hr_attendance.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+
+            <!-- 1. Pre Check-In Tolerance — after "Attendances from Backend" -->
+            <xpath expr="//setting[.//field[@name='attendance_from_systray']]" position="after">
+                <setting string="Pre Check-In Tolerance"
+                         company_dependent="1"
+                         help="Hours before shift start an employee is allowed to check in. Set to 0 to disable.">
+                    <field name="attendance_pre_checkin_tolerance"
+                           widget="float_time" class="text-center" style="width:5ch;"/>
+                    <span class="ms-2">Hours</span>
+                    <div class="text-muted mt-1">
+                        <i class="fa fa-info-circle"/>
+                        Example: 3 hrs tolerance, shift at 09:00 → earliest check-in 06:00.
+                    </div>
+                </setting>
+            </xpath>
+
+            <!-- 2. Post Check-Out Tolerance — after "Automatic Check-Out" -->
+            <xpath expr="//setting[.//field[@name='auto_check_out']]" position="after">
+                <setting string="Post Check-Out Tolerance"
+                         company_dependent="1"
+                         help="Hours after shift end an employee is allowed to check out. After this window check-out is blocked / punished. Set to 0 to disable.">
+                    <field name="attendance_post_checkout_tolerance"
+                           widget="float_time" class="text-center" style="width:5ch;"/>
+                    <span class="ms-2">Hours</span>
+                    <div class="text-muted mt-1">
+                        <i class="fa fa-info-circle"/>
+                        Example: 2 hrs tolerance, shift ends 20:00 → latest check-out 22:00.
+                    </div>
+                </setting>
+                <setting string="Punishment Hours of Check-Out"
+                         company_dependent="1"
+                         help="When check-out exceeds Post Check-Out Tolerance, worked hours are set to this value (check_out = check_in + punishment). Set to 0 to block with an error instead.">
+                    <field name="attendance_checkout_punishment_hours"
+                           widget="float_time" class="text-center" style="width:5ch;"/>
+                    <span class="ms-2">Hours</span>
+                    <div class="text-muted mt-1">
+                        <i class="fa fa-exclamation-triangle text-warning"/>
+                        Applied silently — no error shown. Set to 0 to show an error instead.
+                    </div>
+                </setting>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

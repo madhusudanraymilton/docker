@@ -1,0 +1,34 @@
+<odoo>
+    <record id="view_employee_form_custom" model="ir.ui.view">
+        <field name="name">hr.employee.form.custom.joining.date</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+
+        <field name="arch" type="xml">
+
+            <!-- Insert after department_id -->
+            <xpath expr="//page[@name='work_information']//field[@name='department_id']"
+                   position="after">
+                <field name="confirmation_date"/> 
+                <field name="allow_manual_attendance"/>
+            </xpath>
+
+            <xpath expr="//page[@name='payroll_information']/group[@name='payroll_group']/group[@name='contract']/field[@name='structure_type_id']" position="after">
+                
+                    <field name="provident_fund_amount"/>
+                    <field name="pf_deduct_amount"/>
+                
+            </xpath>
+
+            <xpath expr="//field[@name='bank_account_ids']" position="after">
+
+                <separator string="Additional Info"/>
+
+                <field name="blood_group"/>
+                <field name="religion"/>
+
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

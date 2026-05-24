@@ -1,0 +1,1351 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+<t t-name="attendance_dashboard.AttendanceDashboard" owl="1">
+<div class="had-wrap">
+
+    <!-- HEADER -->
+    <header class="had-header">
+        <div class="had-header-left">
+            <div class="had-logo">
+                <span class="had-logo-icon">👥</span>
+                <div>
+                    <h1 class="had-title">HR Attendance Dashboard</h1>
+                    <p class="had-subtitle">Human Resource Analytics</p>
+                </div>
+            </div>
+        </div>
+        <div class="had-header-center">
+        </div>
+        <div class="had-header-right">
+            <div class="had-filter-wrap">
+                <i class="fa fa-globe had-filter-icon"/>
+                <select class="had-select" t-on-change="onCompanyChange">
+                    <option value="all">All Companies</option>
+                    <t t-foreach="state.companies" t-as="comp" t-key="comp.id">
+                        <option t-att-value="comp.id" t-att-selected="state.selectedCompany == comp.id">
+                            <t t-esc="comp.name"/>
+                        </option>
+                    </t>
+                </select>
+            </div>
+            <div class="had-filter-wrap">
+                <i class="fa fa-building-o had-filter-icon"/>
+                <select class="had-select" t-on-change="onDeptChange">
+                    <option value="all">All Departments</option>
+                    <t t-foreach="state.departments" t-as="dept_item" t-key="dept_item.id">
+                        <option t-att-value="dept_item.id" t-att-selected="state.selectedDept == dept_item.id">
+                            <t t-esc="dept_item.name"/>
+                        </option>
+                    </t>
+                </select>
+            </div>
+            <div class="had-date-wrap">
+                <i class="fa fa-calendar-o had-filter-icon"/>
+                <input type="date" class="had-date-input" t-att-value="state.selectedDate" t-on-change="onDateChange"/>
+            </div>
+            <button class="had-refresh-btn" t-on-click="onRefresh" t-att-disabled="state.loading">
+                <i t-attf-class="fa fa-refresh {{ state.loading ? 'fa-spin' : '' }}"/> Refresh
+            </button>
+        </div>
+    </header>
+
+    <!-- LOADING -->
+    <t t-if="state.loading">
+        <div class="had-loader">
+            <div class="had-spinner"><div/><div/><div/><div/></div>
+            <p class="had-loader-text">Loading HR data...</p>
+        </div>
+    </t>
+
+    <!-- ERROR -->
+    <t t-elif="state.error">
+        <div class="had-error">
+            <i class="fa fa-exclamation-triangle fa-2x"/>
+            <p><t t-esc="state.error"/></p>
+            <button class="had-btn had-btn-primary" t-on-click="onRefresh">Retry</button>
+        </div>
+    </t>
+
+    <!-- DASHBOARD CONTENT -->
+    <t t-elif="state.data">
+    <div class="had-body">
+
+        <!--  KPI STRIP  -->
+        <div class="had-kpi-strip">
+
+            <!-- Total Employees -->
+            <div class="had-kpi-card had-kpi-blue" >
+                <div class="had-kpi-icon-wrap had-icon-blue"><i class="fa fa-users emp-icon"/></div>
+                <div class="had-kpi-content">
+                    <div class="had-kpi-value"><t t-esc="state.data.total_emp"/></div>
+                    <div class="had-kpi-label">Total Employees</div>
+                    <div class="had-kpi-sub">WFO: <t t-esc="state.data.wfo_count"/> · WFH: <t t-esc="state.data.wfh_count"/></div>
+                </div>
+            </div>
+
+            <!-- Productivity -->
+            <div class="had-kpi-card had-kpi-teal" >
+                <div class="had-kpi-icon-wrap had-icon-teal"><i class="fa fa-check-circle"/></div>
+                <div class="had-kpi-content">
+                    <div class="had-kpi-value had-text-teal"><t t-esc="state.data.attendance_pct"/>%</div>
+                    <div class="had-kpi-label">Attendance Rate</div>
+                    <div class="had-kpi-sub">Absence: <t t-esc="state.data.absence_pct"/>%</div>
+                </div>
+            </div>
+
+            <!-- Leave Approval -->
+            <div class="had-kpi-card had-kpi-green" >
+                <div class="had-kpi-icon-wrap had-icon-green"><i class="fa fa-calendar-check-o leave-icon"/></div>
+                <div class="had-kpi-content">
+                    <div class="had-kpi-value had-text-green"><t t-esc="state.data.leave_appr_pct"/>%</div>
+                    <div class="had-kpi-label">Leave Approval</div>
+                    <div class="had-kpi-sub">Pending: <t t-esc="state.data.pending_leaves"/> · Refused: <t t-esc="state.data.refused_leaves"/></div>
+                </div>
+            </div>
+
+            <!-- Unscheduled -->
+            <div class="had-kpi-card had-kpi-amber">
+                <div class="had-kpi-icon-wrap had-icon-amber"><i class="fa fa-exclamation-triangle warning-icon"/></div>
+                <div class="had-kpi-content">
+                    <div class="had-kpi-value had-text-amber"><t t-esc="state.data.unscheduled_count"/></div>
+                    <div class="had-kpi-label">Unscheduled Leaves</div>
+                    <div class="had-kpi-sub">Last-minute requests</div>
+                </div>
+            </div>
+
+            <!-- Sick vs Casual -->
+            <div class="had-kpi-card had-kpi-purple">
+                <div class="had-kpi-icon-wrap had-icon-purple"><i class="fa fa-heartbeat heartbeat-icon" /></div>
+                <div class="had-kpi-content">
+                    <div class="had-kpi-split">
+                        <div class="had-split-item">
+                            <span class="had-kpi-value had-kpi-val-sm had-text-purple"><t t-esc="state.data.sick_count"/></span>
+                            <span class="had-kpi-sub">Sick</span>
+                        </div>
+                        <div class="had-split-divider"/>
+                        <div class="had-split-item">
+                            <span class="had-kpi-value had-kpi-val-sm"><t t-esc="state.data.casual_count"/></span>
+                            <span class="had-kpi-sub">Casual</span>
+                        </div>
+                    </div>
+                    <div class="had-kpi-label">Sick vs Casual</div>
+                </div>
+            </div>
+
+            <!-- Workforce -->
+            <div class="had-kpi-card had-kpi-indigo">
+                <div class="had-kpi-icon-wrap had-icon-indigo"><i class="fa fa-pie-chart"/></div>
+                <div class="had-kpi-content">
+                    <div class="had-kpi-split">
+                        <div class="had-split-item">
+                            <span class="had-kpi-value had-kpi-val-sm had-text-teal"><t t-esc="state.data.attendance_pct"/>%</span>
+                            <span class="had-kpi-sub">Present</span>
+                        </div>
+                        <div class="had-split-divider"/>
+                        <div class="had-split-item">
+                            <span class="had-kpi-value had-kpi-val-sm had-text-red"><t t-esc="state.data.absence_pct"/>%</span>
+                            <span class="had-kpi-sub">Absent</span>
+                        </div>
+                    </div>
+                    <div class="had-kpi-label">Workforce Overview</div>
+                </div>
+            </div>
+
+        </div>
+        <!--  END KPI STRIP  -->
+
+        <!--  OVERVIEW TAB  -->
+        <t t-if="state.activeTab === 'overview'">
+        <div class="had-overview">
+
+            <!-- LEFT COLUMN -->
+            <div class="had-col-main">
+
+                <!-- Row 1: Work Mode + Absence Trend -->
+                <div class="had-row-2">
+                    <div class="had-card">
+                        <div class="had-card-header"><i class="fa fa-laptop"/> Work Mode</div>
+                        <div class="had-chart-wrap had-chart-sm" >
+                            <canvas id="chart_work_mode"/>
+                        </div>
+                    </div>
+                    <div class="had-card">
+                        <div class="had-card-header"><i class="fa fa-line-chart"/> Monthly Absence Trend</div>
+                        <div class="had-chart-wrap had-chart-sm" >
+                            <canvas id="chart_absence_trend"/>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Row 2: Leave Pattern + Experience -->
+                <div class="had-row-2">
+                    <div class="had-card">
+                        <div class="had-card-header"><i class="fa fa-calendar"/> Monthly Leave Pattern</div>
+                        <div class="had-chart-wrap had-chart-sm" >
+                            <canvas id="chart_leave_pattern"/>
+                        </div>
+                    </div>
+                    <div class="had-card">
+                        <div class="had-card-header"><i class="fa fa-bar-chart"/> Experience Groups</div>
+                        <div class="had-chart-wrap had-chart-sm" >
+                            <canvas id="chart_experience"/>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="had-row-2">
+
+                    <div class="had-card">
+                        <div class="had-card-header">
+                            <i class="fa fa-clock-o"/> Overtime Analysis
+                            <span style="font-size:.75rem;color:#6b7280;margin-left:8px;">(Last 12 Months)</span>
+                        </div>
+                        <div class="had-chart-wrap had-chart-sm" >
+                            <canvas id="chart_overtime"/>
+                        </div>
+                    </div>
+
+
+                    <div class="had-card">
+                        <div class="had-card-header">
+                            <i class="fa fa-receipt"/> Employee Expenses
+                            <span style="font-size:.75rem;color:#6b7280;margin-left:8px;">by Department</span>
+                        </div>
+
+                        <!-- KPI mini strip -->
+                        <t t-if="state.expenseData">
+                            <div style="display:flex;gap:10px;padding:10px 14px 0;">
+                                <!-- Current Month -->
+                                <div style="flex:1;background:#f0fdf4;border-radius:8px;padding:10px 12px;">
+
+                                    <div style="font-size:.68rem;color:#6b7280;font-weight:600;">This Month</div>
+                                    <div style="font-size:1.1rem;font-weight:800;color:#0f172a;">
+                                        $<t t-esc="state.expenseData.curr_total"/>
+                                    </div>
+                                    <div style="font-size:.68rem;color:#6b7280;">
+                                        <t t-esc="state.expenseData.total_count"/> expenses
+                                    </div>
+                                    
+                                </div>
+                                <!-- Previous Month -->
+                                <div style="flex:1;background:#f8fafc;border-radius:8px;padding:10px 12px;">
+
+                                    <div style="font-size:.68rem;color:#6b7280;font-weight:600;">Last Month</div>
+                                    <div style="font-size:1.1rem;font-weight:800;color:#64748b;">
+                                        $<t t-esc="state.expenseData.prev_total"/>
+                                    </div>
+
+                                    <!-- % change badge -->
+                                    <t t-if="state.expenseData.change !== null and state.expenseData.change !== undefined">
+                                        <div t-attf-style="font-size:.68rem;font-weight:700;color:{{ state.expenseData.change >= 0 ? '#dc2626' : '#16a34a' }};">
+                                            <i t-attf-class="fa fa-arrow-{{ state.expenseData.change >= 0 ? 'up' : 'down' }}"/>
+                                            <t t-esc="state.expenseData.change"/>% vs last month
+                                        </div>
+                                    </t>
+                                </div>
+                            </div>
+                        </t>
+
+                        <!-- Chart -->
+                        <div class="had-chart-wrap had-chart-sm">
+                            <t t-if="state.expenseLoading">
+                                <div class="had-empty"><i class="fa fa-spinner fa-spin"/> Loading...</div>
+                            </t>
+                            <t t-elif="state.expenseData and state.expenseData.dept_breakdown and state.expenseData.dept_breakdown.length">
+                                <canvas id="chart_emp_distribution"/>
+                            </t>
+                            <t t-else="">
+                                <div class="had-empty">No expense data this month.</div>
+                            </t>
+                        </div>
+                    </div>
+
+                    <!-- <div class="had-card">
+                        <div class="had-card-header">
+                            <i class="fa fa-users"/> Employee Expenses
+                            <span style="font-size:.75rem;color:#6b7280;margin-left:8px;">by Department</span>
+                        </div>
+                        <div class="had-chart-wrap had-chart-sm" >
+                            <canvas id="chart_emp_distribution"/>
+                        </div> -->
+                </div>
+
+
+                
+
+                <!-- LOAN & ADVANCE SUMMARY SECTION -->
+                <t t-if="state.loanData">
+                    <div style="margin-bottom:16px;">
+
+                        <!-- KPI Strip: 4 cards -->
+                        <!-- <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px;"> -->
+                        <div class="had-loan-kpi-grid" style="margin-bottom:14px;">
+
+                            <!-- Total Loan This Month -->
+                            <div style="background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:18px 20px;box-shadow:0 1px 3px rgba(0,0,0,.05);">
+                                <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+                                    <div style="width:40px;height:40px;border-radius:10px;background:#eff6ff;display:flex;align-items:center;justify-content:center;">
+                                        <i class="fa fa-bank" style="color:#2563eb;font-size:16px;"/>
+                                    </div>
+                                    <div style="font-size:1.5rem;font-weight:800;color:#0f172a;line-height:1;">
+                                        $<t t-esc="state.loanData.curr_loan_total"/>
+                                    </div>
+                                </div>
+                                <div style="font-size:.75rem;font-weight:600;color:#64748b;">Loans This Month</div>
+                                <div style="font-size:.7rem;color:#64748b;margin-top:4px;">
+                                    <t t-esc="state.loanData.total_loan_count"/> loans
+                                </div>
+                                <t t-if="state.loanData.loan_change !== null and state.loanData.loan_change !== undefined">
+                                    <div t-attf-style="font-size:.7rem;font-weight:700;margin-top:4px;color:{{ state.loanData.loan_change >= 0 ? '#dc2626' : '#16a34a' }};">
+                                        <i t-attf-class="fa fa-arrow-{{ state.loanData.loan_change >= 0 ? 'up' : 'down' }}"/>
+                                        <t t-esc="state.loanData.loan_change"/>% vs last month
+                                    </div>
+                                </t>
+                            </div>
+
+                            <!-- Loan Status -->
+                            <div style="background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:18px 20px;box-shadow:0 1px 3px rgba(0,0,0,.05);">
+                                <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+                                    <div style="width:40px;height:40px;border-radius:10px;background:#fef2f2;display:flex;align-items:center;justify-content:center;">
+                                        <i class="fa fa-tasks" style="color:#dc2626;font-size:16px;"/>
+                                    </div>
+                                    <div style="font-size:.8rem;font-weight:700;color:#0f172a;">Loan Status</div>
+                                </div>
+                                <div style="display:flex;flex-wrap:wrap;gap:5px;">
+                                    <span style="padding:3px 8px;border-radius:20px;font-size:.65rem;font-weight:700;background:#dbeafe;color:#1d4ed8;">
+                                        Approved: <t t-esc="state.loanData.loan_status_count.approved"/>
+                                    </span>
+                                    <span style="padding:3px 8px;border-radius:20px;font-size:.65rem;font-weight:700;background:#d1fae5;color:#065f46;">
+                                        Disbursed: <t t-esc="state.loanData.loan_status_count.disbursed"/>
+                                    </span>
+                                    <span style="padding:3px 8px;border-radius:20px;font-size:.65rem;font-weight:700;background:#fef3c7;color:#b45309;">
+                                        Partial: <t t-esc="state.loanData.loan_status_count.partially_paid"/>
+                                    </span>
+                                    <span style="padding:3px 8px;border-radius:20px;font-size:.65rem;font-weight:700;background:#e0e7ff;color:#4338ca;">
+                                        Paid: <t t-esc="state.loanData.loan_status_count.paid"/>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Advance This Month -->
+                            <div style="background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:18px 20px;box-shadow:0 1px 3px rgba(0,0,0,.05);">
+                                <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+                                    <div style="width:40px;height:40px;border-radius:10px;background:#fdf4ff;display:flex;align-items:center;justify-content:center;">
+                                        <i class="fa fa-money" style="color:#9333ea;font-size:16px;"/>
+                                    </div>
+                                    <div style="font-size:1.5rem;font-weight:800;color:#0f172a;line-height:1;">
+                                        $<t t-esc="state.loanData.curr_adv_total"/>
+                                    </div>
+                                </div>
+                                <div style="font-size:.75rem;font-weight:600;color:#64748b;">Advances This Month</div>
+                                <div style="font-size:.7rem;color:#64748b;margin-top:4px;">
+                                    <t t-esc="state.loanData.total_adv_count"/> advances
+                                </div>
+                                <t t-if="state.loanData.adv_change !== null and state.loanData.adv_change !== undefined">
+                                    <div t-attf-style="font-size:.7rem;font-weight:700;margin-top:4px;color:{{ state.loanData.adv_change >= 0 ? '#dc2626' : '#16a34a' }};">
+                                        <i t-attf-class="fa fa-arrow-{{ state.loanData.adv_change >= 0 ? 'up' : 'down' }}"/>
+                                        <t t-esc="state.loanData.adv_change"/>% vs last month
+                                    </div>
+                                </t>
+                            </div>
+
+                            <!-- Advance Status -->
+                            <div style="background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:18px 20px;box-shadow:0 1px 3px rgba(0,0,0,.05);">
+                                <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+                                    <div style="width:40px;height:40px;border-radius:10px;background:#fefce8;display:flex;align-items:center;justify-content:center;">
+                                        <i class="fa fa-check-circle" style="color:#d97706;font-size:16px;"/>
+                                    </div>
+                                    <div style="font-size:.8rem;font-weight:700;color:#0f172a;">Advance Status</div>
+                                </div>
+                                <div style="display:flex;flex-wrap:wrap;gap:5px;">
+                                    <span style="padding:3px 8px;border-radius:20px;font-size:.65rem;font-weight:700;background:#dbeafe;color:#1d4ed8;">
+                                        Approved: <t t-esc="state.loanData.adv_status_count.approved"/>
+                                    </span>
+                                    <span style="padding:3px 8px;border-radius:20px;font-size:.65rem;font-weight:700;background:#d1fae5;color:#065f46;">
+                                        Paid: <t t-esc="state.loanData.adv_status_count.paid"/>
+                                    </span>
+                                    <span style="padding:3px 8px;border-radius:20px;font-size:.65rem;font-weight:700;background:#fecaca;color:#991b1b;">
+                                        Rejected: <t t-esc="state.loanData.adv_status_count.rejected"/>
+                                    </span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Charts Row: Loan Trend + Advance Trend -->
+                        <!-- <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;"> -->
+
+                        <div class="had-loan-chart-grid">
+
+                            <!-- Loan Trend Chart -->
+                            <div style="background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:16px 20px;box-shadow:0 1px 3px rgba(0,0,0,.05);">
+                                <div style="font-size:.9rem;font-weight:800;color:#0f172a;margin-bottom:2px;">
+                                    <i class="fa fa-bank" style="color:#2563eb;"/> Loan Trend
+                                </div>
+                                <div style="font-size:.72rem;color:#94a3b8;margin-bottom:12px;">Last 6 months</div>
+                                <div style="height:200px;position:relative;">
+                                    <canvas id="chart_loan_trend"/>
+                                </div>
+                            </div>
+
+                            <!-- Advance Trend Chart -->
+                            <div style="background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:16px 20px;box-shadow:0 1px 3px rgba(0,0,0,.05);">
+                                <div style="font-size:.9rem;font-weight:800;color:#0f172a;margin-bottom:2px;">
+                                    <i class="fa fa-money" style="color:#9333ea;"/> Salary Advance Trend
+                                </div>
+                                <div style="font-size:.72rem;color:#94a3b8;margin-bottom:12px;">Last 6 months</div>
+                                <div style="height:200px;position:relative;">
+                                    <canvas id="chart_adv_trend"/>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </t>
+                <!-- END LOAN & ADVANCE SECTION -->
+
+
+                <!-- FLEET COST SECTION -->
+                <t t-if="state.fleetData and state.fleetData.has_fleet">
+                <div class="had-row-2" style="margin-bottom:16px;">
+
+                    <!-- FLEET COST CARD -->
+                    <div class="had-card">
+                        <div class="had-card-header">
+                            <i class="fa fa-car"/> Fleet Cost Analysis
+                            <span style="font-size:.75rem;color:#6b7280;margin-left:8px;">Last 6 Months</span>
+                        </div>
+
+                        <!-- KPI mini strip -->
+                        <div style="display:flex;gap:10px;padding:10px 14px 0;">
+
+                            <!-- This Month -->
+                            <div style="flex:1;background:#eff6ff;border-radius:8px;padding:10px 12px;">
+                                <div style="font-size:.68rem;color:#6b7280;font-weight:600;">This Month</div>
+                                <div style="font-size:1.1rem;font-weight:800;color:#0f172a;">
+                                    $<t t-esc="state.fleetData.curr_total"/>
+                                </div>
+                                <t t-if="state.fleetData.change !== null and state.fleetData.change !== undefined">
+                                    <div t-attf-style="font-size:.68rem;font-weight:700;color:{{ state.fleetData.change >= 0 ? '#dc2626' : '#16a34a' }};">
+                                        <i t-attf-class="fa fa-arrow-{{ state.fleetData.change >= 0 ? 'up' : 'down' }}"/>
+                                        <t t-esc="state.fleetData.change"/>% vs last month
+                                    </div>
+                                </t>
+                            </div>
+
+                            <!-- Last Month -->
+                            <div style="flex:1;background:#f8fafc;border-radius:8px;padding:10px 12px;">
+                                <div style="font-size:.68rem;color:#6b7280;font-weight:600;">Last Month</div>
+                                <div style="font-size:1.1rem;font-weight:800;color:#64748b;">
+                                    $<t t-esc="state.fleetData.prev_total"/>
+                                </div>
+                            </div>
+
+                            <!-- Contract vs Service -->
+                            <div style="flex:1.5;background:#f8fafc;border-radius:8px;padding:10px 12px;">
+                                <div style="font-size:.68rem;color:#6b7280;font-weight:600;margin-bottom:5px;">Breakdown</div>
+                                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                                    <span style="padding:2px 8px;border-radius:20px;font-size:.65rem;font-weight:700;background:#dbeafe;color:#1d4ed8;">
+                                        Contract: $<t t-esc="state.fleetData.contract_total"/>
+                                    </span>
+                                    <span style="padding:2px 8px;border-radius:20px;font-size:.65rem;font-weight:700;background:#fce7f3;color:#be185d;">
+                                        Service: $<t t-esc="state.fleetData.service_total"/>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chart -->
+                        <div class="had-chart-wrap had-chart-sm">
+                            <t t-if="state.fleetLoading">
+                                <div class="had-empty"><i class="fa fa-spinner fa-spin"/> Loading...</div>
+                            </t>
+                            <t t-elif="state.fleetData.monthly_trend and state.fleetData.monthly_trend.length">
+                                <canvas id="chart_fleet_cost"/>
+                            </t>
+                            <t t-else="">
+                                <div class="had-empty">No fleet cost data available.</div>
+                            </t>
+                        </div>
+                    </div>
+
+                    <!-- VEHICLE BREAKDOWN CARD -->
+                    <div class="had-card">
+                        <div class="had-card-header">
+                            <i class="fa fa-list"/> Vehicle Cost Breakdown
+                            <span style="font-size:.75rem;color:#6b7280;margin-left:8px;">This Month</span>
+                        </div>
+
+                        <t t-if="state.fleetData.vehicle_breakdown and state.fleetData.vehicle_breakdown.length">
+                            <div style="padding:10px 14px 14px;">
+                                <t t-foreach="state.fleetData.vehicle_breakdown" t-as="veh" t-key="veh.vehicle">
+                                    <div style="margin-bottom:10px;">
+                                        <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+                                            <span style="font-size:.75rem;font-weight:600;color:#374151;
+                                                overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px;">
+                                                <t t-esc="veh.vehicle"/>
+                                            </span>
+                                            <span style="font-size:.72rem;font-weight:700;color:#0f172a;">
+                                                $<t t-esc="veh.total"/>
+                                            </span>
+                                        </div>
+                                        Stacked bar: contract + service
+                                        <div style="display:flex;height:14px;border-radius:4px;overflow:hidden;background:#e2e8f0;">
+                                            <t t-if="veh.total > 0">
+                                                <div t-attf-style="width:{{ (veh.contract / veh.total * 100) }}%;background:#3b82f6;"/>
+                                                <div t-attf-style="width:{{ (veh.service / veh.total * 100) }}%;background:#f472b6;"/>
+                                            </t>
+                                        </div>
+                                        <div style="display:flex;gap:8px;margin-top:2px;">
+                                            <span style="font-size:.62rem;color:#3b82f6;font-weight:600;">
+                                                Contract: $<t t-esc="veh.contract"/>
+                                            </span>
+                                            <span style="font-size:.62rem;color:#f472b6;font-weight:600;">
+                                                Service: $<t t-esc="veh.service"/>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </t>
+                            </div>
+                        </t>
+                        <t t-else="">
+                            <div class="had-empty">No vehicle data this month.</div>
+                        </t>
+                    </div>
+
+                </div>
+                </t>
+                <!-- END FLEET COST SECTION -->
+
+
+                <!-- FRONTDESK SECTION -->
+                <t t-if="state.frontdeskData and state.frontdeskData.has_frontdesk">
+                <div class="had-row-2" style="margin-bottom:16px;">
+
+                    <!-- VISITOR CARD -->
+                    <div class="had-card">
+                        <div class="had-card-header">
+                            <i class="fa fa-id-badge"/> Visitor Summary
+                            <span style="font-size:.75rem;color:#6b7280;margin-left:8px;">Last 6 Months</span>
+                        </div>
+
+                       
+                        <div style="display:flex;gap:10px;padding:10px 14px 0;">
+
+                            <!-- Today -->
+                            <div style="flex:1;background:#f0fdfa;border-radius:8px;padding:10px 12px;">
+                                <div style="font-size:.68rem;color:#6b7280;font-weight:600;">Today</div>
+                                <div style="font-size:1.2rem;font-weight:800;color:#0f172a;">
+                                    <t t-esc="state.frontdeskData.today_count"/>
+                                </div>
+                                <div style="font-size:.65rem;color:#6b7280;">visitors</div>
+                            </div>
+
+                            <!-- This Month -->
+                            <div style="flex:1;background:#f0fdfa;border-radius:8px;padding:10px 12px;">
+                                <div style="font-size:.68rem;color:#6b7280;font-weight:600;">This Month</div>
+                                <div style="font-size:1.2rem;font-weight:800;color:#0f172a;">
+                                    <t t-esc="state.frontdeskData.curr_visitor_count"/>
+                                </div>
+                                <t t-if="state.frontdeskData.visitor_change !== null and state.frontdeskData.visitor_change !== undefined">
+                                    <div t-attf-style="font-size:.65rem;font-weight:700;color:{{ state.frontdeskData.visitor_change >= 0 ? '#16a34a' : '#dc2626' }};">
+                                        <i t-attf-class="fa fa-arrow-{{ state.frontdeskData.visitor_change >= 0 ? 'up' : 'down' }}"/>
+                                        <t t-esc="state.frontdeskData.visitor_change"/>%
+                                    </div>
+                                </t>
+                            </div>
+
+                            <!-- Last Month -->
+                            <div style="flex:1;background:#f8fafc;border-radius:8px;padding:10px 12px;">
+                                <div style="font-size:.68rem;color:#6b7280;font-weight:600;">Last Month</div>
+                                <div style="font-size:1.2rem;font-weight:800;color:#64748b;">
+                                    <t t-esc="state.frontdeskData.prev_visitor_count"/>
+                                </div>
+                                <div style="font-size:.65rem;color:#6b7280;">visitors</div>
+                            </div>
+
+                            <!-- Purpose top -->
+                            <t t-if="state.frontdeskData.purpose_breakdown and state.frontdeskData.purpose_breakdown.length">
+                                <div style="flex:1.5;background:#f8fafc;border-radius:8px;padding:10px 12px;">
+                                    <div style="font-size:.68rem;color:#6b7280;font-weight:600;margin-bottom:4px;">Top Purpose</div>
+                                    <t t-foreach="state.frontdeskData.purpose_breakdown" t-as="pb" t-key="pb.purpose">
+                                        <t t-if="pb_index lt 3">
+                                            <div style="display:flex;justify-content:space-between;font-size:.65rem;margin-bottom:2px;">
+                                                <span style="color:#374151;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:90px;">
+                                                    <t t-esc="pb.purpose"/>
+                                                </span>
+                                                <span style="color:#14b8a6;font-weight:700;"><t t-esc="pb.count"/></span>
+                                            </div>
+                                        </t>
+                                    </t>
+                                </div>
+                            </t>
+
+                        </div>
+
+                        <!-- Visitor Trend Chart -->
+                        <div class="had-chart-wrap had-chart-sm">
+                            <t t-if="state.frontdeskData.visitor_trend and state.frontdeskData.visitor_trend.length">
+                                <canvas id="chart_visitor_trend"/>
+                            </t>
+                            <t t-else="">
+                                <div class="had-empty">No visitor data available.</div>
+                            </t>
+                        </div>
+                    </div>
+
+                    <!-- DRINK CARD -->
+                    <div class="had-card">
+                        <div class="had-card-header">
+                            <i class="fa fa-coffee"/> Drink Consumption
+                            <span style="font-size:.75rem;color:#6b7280;margin-left:8px;">This Month</span>
+                        </div>
+
+                        <t t-if="state.frontdeskData.has_drink">
+
+                        
+                            <div style="display:flex;gap:10px;padding:10px 14px 0;">
+
+                                <!-- Total served -->
+                                <div style="flex:1;background:#fdf4ff;border-radius:8px;padding:10px 12px;">
+                                    <div style="font-size:.68rem;color:#6b7280;font-weight:600;">Total Served</div>
+                                    <div style="font-size:1.2rem;font-weight:800;color:#0f172a;">
+                                        <t t-esc="state.frontdeskData.total_drink_qty"/>
+                                    </div>
+                                    <div style="font-size:.65rem;color:#6b7280;">this month</div>
+                                </div>
+
+                          
+                                <div style="flex:1;background:#f8fafc;border-radius:8px;padding:10px 12px;">
+                                    <div style="font-size:.68rem;color:#6b7280;font-weight:600;">This Month</div>
+                                    <div style="font-size:1.2rem;font-weight:800;color:#0f172a;">
+                                        <t t-esc="state.frontdeskData.curr_drink_count"/>
+                                    </div>
+                                    <t t-if="state.frontdeskData.drink_change !== null and state.frontdeskData.drink_change !== undefined">
+                                        <div t-attf-style="font-size:.65rem;font-weight:700;color:{{ state.frontdeskData.drink_change >= 0 ? '#16a34a' : '#dc2626' }};">
+                                            <i t-attf-class="fa fa-arrow-{{ state.frontdeskData.drink_change >= 0 ? 'up' : 'down' }}"/>
+                                            <t t-esc="state.frontdeskData.drink_change"/>%
+                                        </div>
+                                    </t>
+                                </div>
+
+                                <!-- Last month -->
+                                <div style="flex:1;background:#f8fafc;border-radius:8px;padding:10px 12px;">
+                                    <div style="font-size:.68rem;color:#6b7280;font-weight:600;">Last Month</div>
+                                    <div style="font-size:1.2rem;font-weight:800;color:#64748b;">
+                                        <t t-esc="state.frontdeskData.prev_drink_count"/>
+                                    </div>
+                                    <div style="font-size:.65rem;color:#6b7280;">records</div>
+                                </div>
+
+                            </div>
+
+                            <!-- Drink breakdown chart -->
+                            <div class="had-chart-wrap had-chart-sm">
+                                <t t-if="state.frontdeskData.drink_summary and state.frontdeskData.drink_summary.length">
+                                    <canvas id="chart_drink_summary"/>
+                                </t>
+                                <t t-else="">
+                                    <div class="had-empty">No drink data this month.</div>
+                                </t>
+                            </div>
+
+                        </t>
+                        <t t-else="">
+                            <div class="had-empty" style="padding:40px;">
+                                <i class="fa fa-coffee fa-2x" style="color:#e2e8f0;margin-bottom:8px;display:block;"/>
+                                Drink module not available.
+                            </div>
+                        </t>
+                    </div>
+
+                </div>
+                </t>
+                <!-- END FRONTDESK SECTION -->
+
+
+
+
+                <!-- LUNCH SUMMARY SECTION -->
+                <t t-if="state.lunchData and state.lunchData.has_lunch">
+                <div class="had-row-2" style="margin-bottom:16px;">
+
+                    <!-- LUNCH TREND CARD -->
+                    <div class="had-card">
+                        <div class="had-card-header">
+                            <i class="fa fa-cutlery"/> Lunch Orders
+                            <span style="font-size:.75rem;color:#6b7280;margin-left:8px;">Last 6 Months</span>
+                        </div>
+
+                        <!-- KPI mini strip -->
+                        <div style="display:flex;gap:10px;padding:10px 14px 0;">
+
+                            <!-- Today -->
+                            <div style="flex:1;background:#fefce8;border-radius:8px;padding:10px 12px;">
+                                <div style="font-size:.68rem;color:#6b7280;font-weight:600;">Today</div>
+                                <div style="font-size:1.2rem;font-weight:800;color:#0f172a;">
+                                    <t t-esc="state.lunchData.today_count"/>
+                                </div>
+                                <div style="font-size:.65rem;color:#d97706;font-weight:600;">
+                                    $<t t-esc="state.lunchData.today_amount"/>
+                                </div>
+                            </div>
+
+                            <!-- This Month -->
+                            <div style="flex:1;background:#fefce8;border-radius:8px;padding:10px 12px;">
+                                <div style="font-size:.68rem;color:#6b7280;font-weight:600;">This Month</div>
+                                <div style="font-size:1.2rem;font-weight:800;color:#0f172a;">
+                                    <t t-esc="state.lunchData.curr_count"/>
+                                </div>
+                                <t t-if="state.lunchData.order_change !== null and state.lunchData.order_change !== undefined">
+                                    <div t-attf-style="font-size:.65rem;font-weight:700;color:{{ state.lunchData.order_change >= 0 ? '#16a34a' : '#dc2626' }};">
+                                        <i t-attf-class="fa fa-arrow-{{ state.lunchData.order_change >= 0 ? 'up' : 'down' }}"/>
+                                        <t t-esc="state.lunchData.order_change"/>%
+                                    </div>
+                                </t>
+                            </div>
+
+                            <!-- Total Amount -->
+                            <div style="flex:1;background:#f8fafc;border-radius:8px;padding:10px 12px;">
+                                <div style="font-size:.68rem;color:#6b7280;font-weight:600;">Month Amount</div>
+                                <div style="font-size:1.1rem;font-weight:800;color:#0f172a;">
+                                    $<t t-esc="state.lunchData.curr_amount"/>
+                                </div>
+                                <div style="font-size:.65rem;color:#6b7280;">total</div>
+                            </div>
+
+                            <!-- State badges -->
+                            <div style="flex:1.5;background:#f8fafc;border-radius:8px;padding:10px 12px;">
+                                <div style="font-size:.68rem;color:#6b7280;font-weight:600;margin-bottom:4px;">Today Status</div>
+                                <div style="display:flex;flex-wrap:wrap;gap:4px;">
+                                    <t t-if="state.lunchData.today_state.ordered">
+                                        <span style="padding:2px 7px;border-radius:20px;font-size:.63rem;font-weight:700;background:#fef3c7;color:#b45309;">
+                                            Ordered: <t t-esc="state.lunchData.today_state.ordered"/>
+                                        </span>
+                                    </t>
+                                    <t t-if="state.lunchData.today_state.confirmed">
+                                        <span style="padding:2px 7px;border-radius:20px;font-size:.63rem;font-weight:700;background:#dbeafe;color:#1d4ed8;">
+                                            Confirmed: <t t-esc="state.lunchData.today_state.confirmed"/>
+                                        </span>
+                                    </t>
+                                    <t t-if="state.lunchData.today_state.sent">
+                                        <span style="padding:2px 7px;border-radius:20px;font-size:.63rem;font-weight:700;background:#e0e7ff;color:#4338ca;">
+                                            Sent: <t t-esc="state.lunchData.today_state.sent"/>
+                                        </span>
+                                    </t>
+                                    <t t-if="state.lunchData.today_state.received">
+                                        <span style="padding:2px 7px;border-radius:20px;font-size:.63rem;font-weight:700;background:#d1fae5;color:#065f46;">
+                                            Received: <t t-esc="state.lunchData.today_state.received"/>
+                                        </span>
+                                    </t>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Trend Chart -->
+                        <div class="had-chart-wrap had-chart-sm">
+                            <t t-if="state.lunchData.monthly_trend and state.lunchData.monthly_trend.length">
+                                <canvas id="chart_lunch_trend"/>
+                            </t>
+                            <t t-else="">
+                                <div class="had-empty">No lunch order data available.</div>
+                            </t>
+                        </div>
+                    </div>
+
+                    <!-- LOCATION BREAKDOWN CARD -->
+                    <div class="had-card">
+                        <div class="had-card-header">
+                            <i class="fa fa-map-marker"/> Orders by Location
+                            <span style="font-size:.75rem;color:#6b7280;margin-left:8px;">This Month</span>
+                        </div>
+
+                        <!-- Top Products -->
+                        <t t-if="state.lunchData.product_breakdown and state.lunchData.product_breakdown.length">
+                            <div style="padding:8px 14px 4px;">
+                                <div style="font-size:.7rem;font-weight:700;color:#94a3b8;margin-bottom:6px;">
+                                    TOP ITEMS
+                                </div>
+                                <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;">
+                                    <t t-foreach="state.lunchData.product_breakdown" t-as="prod" t-key="prod.name">
+                                        <span style="padding:3px 9px;border-radius:20px;font-size:.65rem;font-weight:700;background:#fef3c7;color:#b45309;">
+                                            <t t-esc="prod.name"/> (<t t-esc="prod.count"/>)
+                                        </span>
+                                    </t>
+                                </div>
+                            </div>
+                        </t>
+
+                        <!-- Location Chart -->
+                        <div class="had-chart-wrap had-chart-sm">
+                            <t t-if="state.lunchData.location_breakdown and state.lunchData.location_breakdown.length">
+                                <canvas id="chart_lunch_location"/>
+                            </t>
+                            <t t-else="">
+                                <div class="had-empty">No location data this month.</div>
+                            </t>
+                        </div>
+                    </div>
+
+                </div>
+                </t>
+                <!-- END LUNCH SECTION -->
+
+
+
+
+                <!-- RECRUITMENT SECTION -->
+                <t t-if="state.recruitmentData and state.recruitmentData.has_recruitment">
+                <div style="margin-bottom:16px;">
+
+                    <!-- TOP KPI STRIP — 5 cards -->
+                    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:14px;">
+
+                        <!-- Total Applied -->
+                        <div style="background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:16px 18px;box-shadow:0 1px 3px rgba(0,0,0,.05);">
+                            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                                <div style="width:38px;height:38px;border-radius:10px;background:#ede9fe;display:flex;align-items:center;justify-content:center;">
+                                    <i class="fa fa-paper-plane" style="color:#6366f1;font-size:15px;"/>
+                                </div>
+                                <div style="font-size:1.6rem;font-weight:800;color:#0f172a;line-height:1;">
+                                    <t t-esc="state.recruitmentData.curr_count"/>
+                                </div>
+                            </div>
+                            <div style="font-size:.72rem;font-weight:600;color:#64748b;">Applied This Month</div>
+                            <t t-if="state.recruitmentData.apply_change !== null and state.recruitmentData.apply_change !== undefined">
+                                <div t-attf-style="font-size:.68rem;font-weight:700;margin-top:4px;color:{{ state.recruitmentData.apply_change >= 0 ? '#16a34a' : '#dc2626' }};">
+                                    <i t-attf-class="fa fa-arrow-{{ state.recruitmentData.apply_change >= 0 ? 'up' : 'down' }}"/>
+                                    <t t-esc="state.recruitmentData.apply_change"/>% vs last month
+                                </div>
+                            </t>
+                        </div>
+
+                        <!-- Hired -->
+                        <div style="background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:16px 18px;box-shadow:0 1px 3px rgba(0,0,0,.05);">
+                            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                                <div style="width:38px;height:38px;border-radius:10px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;">
+                                    <i class="fa fa-user-plus" style="color:#16a34a;font-size:15px;"/>
+                                </div>
+                                <div style="font-size:1.6rem;font-weight:800;color:#0f172a;line-height:1;">
+                                    <t t-esc="state.recruitmentData.hired_count"/>
+                                </div>
+                            </div>
+                            <div style="font-size:.72rem;font-weight:600;color:#64748b;">Hired This Month</div>
+                            <div style="font-size:.68rem;color:#16a34a;font-weight:700;margin-top:4px;">
+                                Conversion: <t t-esc="state.recruitmentData.conversion_rate"/>%
+                            </div>
+                        </div>
+
+                        <!-- In Progress -->
+                        <div style="background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:16px 18px;box-shadow:0 1px 3px rgba(0,0,0,.05);">
+                            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                                <div style="width:38px;height:38px;border-radius:10px;background:#eff6ff;display:flex;align-items:center;justify-content:center;">
+                                    <i class="fa fa-spinner" style="color:#2563eb;font-size:15px;"/>
+                                </div>
+                                <div style="font-size:1.6rem;font-weight:800;color:#0f172a;line-height:1;">
+                                    <t t-esc="state.recruitmentData.progress_count"/>
+                                </div>
+                            </div>
+                            <div style="font-size:.72rem;font-weight:600;color:#64748b;">In Progress</div>
+                            <div style="font-size:.68rem;color:#2563eb;font-weight:700;margin-top:4px;">
+                                This month
+                            </div>
+                        </div>
+
+                        <!-- Refused -->
+                        <div style="background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:16px 18px;box-shadow:0 1px 3px rgba(0,0,0,.05);">
+                            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                                <div style="width:38px;height:38px;border-radius:10px;background:#fef2f2;display:flex;align-items:center;justify-content:center;">
+                                    <i class="fa fa-user-times" style="color:#dc2626;font-size:15px;"/>
+                                </div>
+                                <div style="font-size:1.6rem;font-weight:800;color:#0f172a;line-height:1;">
+                                    <t t-esc="state.recruitmentData.refused_count"/>
+                                </div>
+                            </div>
+                            <div style="font-size:.72rem;font-weight:600;color:#64748b;">Refused</div>
+                            <div style="font-size:.68rem;color:#dc2626;font-weight:700;margin-top:4px;">
+                                This month
+                            </div>
+                        </div>
+
+                        <!-- Avg Days to Hire + Pipeline -->
+                        <div style="background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:16px 18px;box-shadow:0 1px 3px rgba(0,0,0,.05);">
+                            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                                <div style="width:38px;height:38px;border-radius:10px;background:#fefce8;display:flex;align-items:center;justify-content:center;">
+                                    <i class="fa fa-clock-o" style="color:#d97706;font-size:15px;"/>
+                                </div>
+                                <div style="font-size:1.6rem;font-weight:800;color:#0f172a;line-height:1;">
+                                    <t t-if="state.recruitmentData.avg_days_to_hire !== null and state.recruitmentData.avg_days_to_hire !== undefined">
+                                        <t t-esc="state.recruitmentData.avg_days_to_hire"/>
+                                        <span style="font-size:.9rem;font-weight:600;color:#64748b;">d</span>
+                                    </t>
+                                    <t t-else="">—</t>
+                                </div>
+                            </div>
+                            <div style="font-size:.72rem;font-weight:600;color:#64748b;">Avg Days to Hire</div>
+                            <div style="font-size:.68rem;color:#d97706;font-weight:700;margin-top:4px;">
+                                Pipeline: <t t-esc="state.recruitmentData.pipeline_total"/> active
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- CHARTS ROW -->
+                    <div class="had-row-2" style="margin-bottom:12px;">
+
+                        <!-- Trend Chart -->
+                        <div class="had-card">
+                            <div class="had-card-header">
+                                <i class="fa fa-line-chart"/> Recruitment Trend
+                                <span style="font-size:.75rem;color:#6b7280;margin-left:8px;">(Last 6 Months)</span>
+                            </div>
+                            <div class="had-chart-wrap had-chart-sm">
+                                <canvas id="chart_recruitment_trend"/>
+                            </div>
+                        </div>
+
+                        <!-- Stage Pipeline Chart -->
+                        <div class="had-card">
+                            <div class="had-card-header">
+                                <i class="fa fa-filter"/> Active Pipeline by Stage
+                            </div>
+                            <div class="had-chart-wrap had-chart-sm">
+                                <t t-if="state.recruitmentData.stage_breakdown and state.recruitmentData.stage_breakdown.length">
+                                    <canvas id="chart_recruitment_stage"/>
+                                </t>
+                                <t t-else="">
+                                    <div class="had-empty">No pipeline data.</div>
+                                </t>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- BOTTOM ROW: Dept + Job + Source -->
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+
+                        <!-- Department Breakdown -->
+                        <div class="had-card">
+                            <div class="had-card-header">
+                                <i class="fa fa-building"/> By Department
+                                <span style="font-size:.75rem;color:#6b7280;margin-left:6px;">This Month</span>
+                            </div>
+                            <t t-if="state.recruitmentData.dept_breakdown and state.recruitmentData.dept_breakdown.length">
+                                <div style="padding:10px 14px 14px;">
+                                    <t t-foreach="state.recruitmentData.dept_breakdown" t-as="dr" t-key="dr.dept">
+                                        <div style="margin-bottom:8px;">
+                                            <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+                                                <span style="font-size:.72rem;font-weight:600;color:#374151;
+                                                    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:120px;">
+                                                    <t t-esc="dr.dept"/>
+                                                </span>
+                                                <span style="font-size:.7rem;font-weight:700;color:#0f172a;">
+                                                    <t t-esc="dr.applied"/> applied
+                                                </span>
+                                            </div>
+                                            <div style="display:flex;height:12px;border-radius:4px;overflow:hidden;background:#e2e8f0;">
+                                                <t t-if="dr.applied > 0">
+                                                    <div t-attf-style="width:{{ ((dr.applied - dr.hired) / dr.applied * 100) }}%;background:#818cf8;"/>
+                                                    <div t-attf-style="width:{{ (dr.hired / dr.applied * 100) }}%;background:#14b8a6;"/>
+                                                </t>
+                                            </div>
+                                            <div style="display:flex;gap:8px;margin-top:2px;">
+                                                <span style="font-size:.62rem;color:#818cf8;font-weight:600;">
+                                                    In Progress: <t t-esc="dr.applied - dr.hired"/>
+                                                </span>
+                                                <span style="font-size:.62rem;color:#14b8a6;font-weight:600;">
+                                                    Hired: <t t-esc="dr.hired"/>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </t>
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <div class="had-empty">No department data.</div>
+                            </t>
+                        </div>
+
+                        <!-- Job Position Breakdown -->
+                        <div class="had-card">
+                            <div class="had-card-header">
+                                <i class="fa fa-briefcase"/> By Job Position
+                                <span style="font-size:.75rem;color:#6b7280;margin-left:6px;">This Month</span>
+                            </div>
+                            <t t-if="state.recruitmentData.job_breakdown and state.recruitmentData.job_breakdown.length">
+                                <div style="padding:10px 14px 14px;">
+                                    <t t-foreach="state.recruitmentData.job_breakdown" t-as="jr" t-key="jr.job">
+                                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                                            <div style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                                                <span style="font-size:.72rem;font-weight:600;color:#374151;">
+                                                    <t t-esc="jr.job"/>
+                                                </span>
+                                            </div>
+                                            <div style="flex:2;background:#e2e8f0;border-radius:4px;height:16px;overflow:hidden;">
+                                                <div t-attf-style="width:{{ (jr.count / state.recruitmentData.curr_count * 100) }}%;
+                                                    height:100%;background:#6366f1;border-radius:4px;
+                                                    display:flex;align-items:center;justify-content:flex-end;padding-right:5px;min-width:28px;">
+                                                    <span style="color:#fff;font-size:.62rem;font-weight:700;">
+                                                        <t t-esc="jr.count"/>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </t>
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <div class="had-empty">No job data.</div>
+                            </t>
+                        </div>
+
+                        <!-- Source Breakdown -->
+                        <div class="had-card">
+                            <div class="had-card-header">
+                                <i class="fa fa-share-alt"/> By Source
+                                <span style="font-size:.75rem;color:#6b7280;margin-left:6px;">This Month</span>
+                            </div>
+                            <t t-if="state.recruitmentData.source_breakdown and state.recruitmentData.source_breakdown.length">
+                                <div style="padding:10px 14px 14px;">
+                                    <t t-foreach="state.recruitmentData.source_breakdown" t-as="sr" t-key="sr.source">
+                                        <div style="display:flex;align-items:center;justify-content:space-between;
+                                            padding:6px 10px;margin-bottom:6px;background:#f8fafc;border-radius:8px;">
+                                            <div style="display:flex;align-items:center;gap:8px;">
+                                                <div style="width:8px;height:8px;border-radius:50%;background:#6366f1;"/>
+                                                <span style="font-size:.72rem;font-weight:600;color:#374151;
+                                                    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:110px;">
+                                                    <t t-esc="sr.source"/>
+                                                </span>
+                                            </div>
+                                            <span style="font-size:.72rem;font-weight:800;color:#0f172a;">
+                                                <t t-esc="sr.count"/>
+                                            </span>
+                                        </div>
+                                    </t>
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <div class="had-empty">No source data.</div>
+                            </t>
+                        </div>
+
+                    </div>
+
+                </div>
+                </t>
+                <!-- END RECRUITMENT SECTION -->
+
+                            
+
+                <!-- PAYROLL SUMMARY SECTION -->
+                <t t-if="state.payrollData">
+                <div style="margin-bottom:16px;">
+
+                    <!-- TOP KPI STRIP (4 cards) -->
+                    <!-- <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;"> -->
+
+                    <div class="had-payroll-kpi-grid" style="margin-bottom:16px;">
+
+                        <!-- Total Employees -->
+                        <!-- <div style="background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:18px 20px;box-shadow:0 1px 3px rgba(0,0,0,.05);">
+                            <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+                                <div style="width:40px;height:40px;border-radius:10px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;">
+                                    <i class="fa fa-users" style="color:#16a34a;font-size:16px;"/>
+                                </div>
+                                <div style="font-size:1.7rem;font-weight:800;color:#0f172a;line-height:1;"><t t-esc="state.data.total_emp"/></div>
+                            </div>
+                            <div style="font-size:.75rem;font-weight:600;color:#64748b;">Total Employees</div>
+                            <div style="font-size:.7rem;color:#16a34a;margin-top:4px;font-weight:600;">
+                                WFO: <t t-esc="state.data.wfo_count"/> · WFH: <t t-esc="state.data.wfh_count"/>
+                            </div>
+                        </div> -->
+
+                        <!-- Average Salary -->
+                        <div style="background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:18px 20px;box-shadow:0 1px 3px rgba(0,0,0,.05);">
+                            <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+                                <div style="width:40px;height:40px;border-radius:10px;background:#fef2f2;display:flex;align-items:center;justify-content:center;">
+                                    <i class="fa fa-money" style="color:#dc2626;font-size:16px;"/>
+                                </div>
+                                <div style="font-size:1.7rem;font-weight:800;color:#0f172a;line-height:1;">$<t t-esc="state.payrollData.avg_salary"/></div>
+                            </div>
+                            <div style="font-size:.75rem;font-weight:600;color:#64748b;">Average Salary</div>
+                            <t t-if="state.payrollData.gross_change !== null and state.payrollData.gross_change !== undefined">
+                                <div t-attf-style="font-size:.7rem;margin-top:4px;font-weight:600;color:{{ state.payrollData.gross_change >= 0 ? '#dc2626' : '#16a34a' }};">
+                                    <i t-attf-class="fa fa-arrow-{{ state.payrollData.gross_change >= 0 ? 'up' : 'down' }}"/>
+                                    <t t-esc="state.payrollData.gross_change"/>% last month
+                                </div>
+                            </t>
+                        </div>
+
+                        <!-- Total Outstanding -->
+                        <div style="background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:18px 20px;box-shadow:0 1px 3px rgba(0,0,0,.05);">
+                            <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+                                <div style="width:40px;height:40px;border-radius:10px;background:#eff6ff;display:flex;align-items:center;justify-content:center;">
+                                    <i class="fa fa-calculator" style="color:#2563eb;font-size:16px;"/>
+                                </div>
+                                <div style="font-size:1.7rem;font-weight:800;color:#0f172a;line-height:1;">$<t t-esc="state.payrollData.outstanding"/></div>
+                            </div>
+                            <div style="font-size:.75rem;font-weight:600;color:#64748b;">Total Outstanding</div>
+                            <div style="font-size:.7rem;color:#2563eb;margin-top:4px;font-weight:600;">
+                                Unpaid slips: <t t-esc="state.payrollData.status_count.draft"/>
+                            </div>
+                        </div>
+
+                        <!-- Total Requests (Leave) -->
+                        <!-- <div style="background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:18px 20px;box-shadow:0 1px 3px rgba(0,0,0,.05);">
+                            <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+                                <div style="width:40px;height:40px;border-radius:10px;background:#fefce8;display:flex;align-items:center;justify-content:center;">
+                                    <i class="fa fa-calendar-check-o" style="color:#d97706;font-size:16px;"/>
+                                </div>
+                                <div style="font-size:1.7rem;font-weight:800;color:#0f172a;line-height:1;"><t t-esc="state.data.total_leave_req"/></div>
+                            </div>
+                            <div style="font-size:.75rem;font-weight:600;color:#64748b;">Total Leave Requests</div>
+                            <div style="font-size:.7rem;color:#d97706;margin-top:4px;font-weight:600;">
+                                Pending: <t t-esc="state.data.pending_leaves"/>
+                            </div>
+                        </div> -->
+
+                    </div>
+
+                    <!-- MIDDLE ROW: Chart + Summary -->
+                    <!-- <div style="display:grid;grid-template-columns:1fr 260px;gap:12px;margin-bottom:16px;"> -->
+
+                    <div class="had-payroll-chart-grid" style="margin-bottom:16px;">
+
+                        <!-- Payroll History Chart -->
+                        <div style="background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:16px 20px;box-shadow:0 1px 3px rgba(0,0,0,.05);">
+                            <div style="margin-bottom:4px;font-size:.9rem;font-weight:800;color:#0f172a;">Payroll History</div>
+                            <div style="font-size:.72rem;color:#94a3b8;margin-bottom:12px;">Total payout vs net salary per month</div>
+                            <div style="height:200px;position:relative;">
+                                <canvas id="chart_payroll_history"/>
+                            </div>
+                        </div>
+
+                        <!-- Summary side panel -->
+                        <div style="background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.05);display:flex;flex-direction:column;justify-content:center;gap:16px;">
+                            <div>
+                                <div style="font-size:.72rem;color:#94a3b8;font-weight:600;margin-bottom:4px;">Total Payout</div>
+                                <div style="font-size:1.4rem;font-weight:800;color:#0f172a;">$<t t-esc="state.payrollData.curr_gross"/></div>
+                            </div>
+                            <div style="height:1px;background:#f1f5f9;"/>
+                            <div>
+                                <div style="font-size:.72rem;color:#94a3b8;font-weight:600;margin-bottom:4px;">Net Salary</div>
+                                <div style="font-size:1.4rem;font-weight:800;color:#0f172a;">$<t t-esc="state.payrollData.curr_net"/></div>
+                            </div>
+                            <div style="height:1px;background:#f1f5f9;"/>
+                            <div>
+                                <div style="font-size:.72rem;color:#94a3b8;font-weight:600;margin-bottom:4px;">Employer Cost</div>
+                                <div style="font-size:1.4rem;font-weight:800;color:#0f172a;">$<t t-esc="state.payrollData.curr_cost"/></div>
+                            </div>
+                            <div style="height:1px;background:#f1f5f9;"/>
+                            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                                <span style="padding:3px 10px;border-radius:20px;font-size:.68rem;font-weight:700;background:#fef3c7;color:#b45309;">
+                                    Draft: <t t-esc="state.payrollData.status_count.draft"/>
+                                </span>
+                                <span style="padding:3px 10px;border-radius:20px;font-size:.68rem;font-weight:700;background:#d1fae5;color:#065f46;">
+                                    Done: <t t-esc="state.payrollData.status_count.done"/>
+                                </span>
+                                <span style="padding:3px 10px;border-radius:20px;font-size:.68rem;font-weight:700;background:#dbeafe;color:#1d4ed8;">
+                                    Paid: <t t-esc="state.payrollData.status_count.paid"/>
+                                </span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- EMPLOYEE TABLE -->
+                    
+                </div>
+                </t> 
+               
+            </div>
+
+            <!-- RIGHT COLUMN -->
+            <div class="had-col-side" >
+                <div class="had-card" style="margin-bottom:12px;">
+                    <div class="had-card-header">
+                        <i class="fa fa-calendar-check-o"/> Today's Status
+                        <span style="font-size:.72rem;color:#94a3b8;margin-left:6px;">
+                            <t t-esc="state.data.today"/>
+                        </span>
+                    </div>
+
+                    <div style="padding:12px 14px;display:flex;flex-direction:column;gap:8px;">
+
+                           
+                        <div t-on-click="openTodayFilter.bind(this, 'present')"
+                            style="display:flex;align-items:center;justify-content:space-between;
+                                    padding:10px 14px;border-radius:10px;background:#f0fdf4;
+                                    cursor:pointer;transition:all .15s;border:1.5px solid #bbf7d0;"
+                            onmouseover="this.style.background='#dcfce7'"
+                            onmouseout="this.style.background='#f0fdf4'">
+                            <div style="display:flex;align-items:center;gap:10px;">
+                                <div style="width:36px;height:36px;border-radius:10px;background:#16a34a;
+                                            display:flex;align-items:center;justify-content:center;">
+                                    <i class="fa fa-check" style="color:#fff;font-size:14px;"/>
+                                </div>
+                                <div>
+                                    <div style="font-size:.8rem;font-weight:700;color:#15803d;">Present</div>
+                                    <div style="font-size:.65rem;color:#6b7280;">Click to view employees</div>
+                                </div>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:6px;">
+                                <span style="font-size:1.5rem;font-weight:800;color:#15803d;">
+                                    <t t-esc="state.data.today_present"/>
+                                </span>
+                                <i class="fa fa-chevron-right" style="color:#86efac;font-size:12px;"/>
+                            </div>
+                        </div>
+
+                            <!-- On Leave -->
+                        <div t-on-click="openTodayFilter.bind(this, 'leave')"
+                            style="display:flex;align-items:center;justify-content:space-between;
+                                    padding:10px 14px;border-radius:10px;background:#eff6ff;
+                                    cursor:pointer;transition:all .15s;border:1.5px solid #bfdbfe;"
+                            onmouseover="this.style.background='#dbeafe'"
+                            onmouseout="this.style.background='#eff6ff'">
+                            <div style="display:flex;align-items:center;gap:10px;">
+                                <div style="width:36px;height:36px;border-radius:10px;background:#2563eb;
+                                        display:flex;align-items:center;justify-content:center;">
+                                    <i class="fa fa-plane" style="color:#fff;font-size:14px;"/>
+                                </div>
+                                <div>
+                                    <div style="font-size:.8rem;font-weight:700;color:#1d4ed8;">On Leave</div>
+                                    <div style="font-size:.65rem;color:#6b7280;">Click to view employees</div>
+                                </div>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:6px;">
+                                <span style="font-size:1.5rem;font-weight:800;color:#1d4ed8;">
+                                    <t t-esc="state.data.today_on_leave"/>
+                                </span>
+                                <i class="fa fa-chevron-right" style="color:#93c5fd;font-size:12px;"/>
+                            </div>
+                        </div>
+
+                            <!-- Absent -->
+                        <div t-on-click="openTodayFilter.bind(this, 'absent')"
+                            style="display:flex;align-items:center;justify-content:space-between;
+                                    padding:10px 14px;border-radius:10px;background:#fef2f2;
+                                    cursor:pointer;transition:all .15s;border:1.5px solid #fecaca;"
+                            onmouseover="this.style.background='#fee2e2'"
+                            onmouseout="this.style.background='#fef2f2'">
+                            <div style="display:flex;align-items:center;gap:10px;">
+                                <div style="width:36px;height:36px;border-radius:10px;background:#dc2626;
+                                        display:flex;align-items:center;justify-content:center;">
+                                    <i class="fa fa-user-times" style="color:#fff;font-size:14px;"/>
+                                </div>
+                                <div>
+                                    <div style="font-size:.8rem;font-weight:700;color:#dc2626;">Absent</div>
+                                    <div style="font-size:.65rem;color:#6b7280;">Click to view employees</div>
+                                </div>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:6px;">
+                                <span style="font-size:1.5rem;font-weight:800;color:#dc2626;">
+                                    <t t-esc="state.data.today_absent"/>
+                                </span>
+                                <i class="fa fa-chevron-right" style="color:#fca5a5;font-size:12px;"/>
+                            </div>
+                        </div>
+
+                            <!-- Progress bar -->
+                        <t t-if="state.data.total_emp > 0">
+                            <div style="margin-top:4px;">
+                                <div style="display:flex;justify-content:space-between;
+                                        font-size:.65rem;color:#6b7280;margin-bottom:4px;">
+                                    <span>Workforce Status</span>
+                                    <span><t t-esc="state.data.total_emp"/> total</span>
+                                </div>
+                                <div style="display:flex;height:10px;border-radius:6px;overflow:hidden;background:#e2e8f0;">
+                                    <div t-attf-style="width:{{ (state.data.today_present / state.data.total_emp * 100) }}%;
+                                        background:#16a34a;transition:width .5s;"/>
+                                    <div t-attf-style="width:{{ (state.data.today_on_leave / state.data.total_emp * 100) }}%;
+                                        background:#2563eb;transition:width .5s;"/>
+                                    <div t-attf-style="width:{{ (state.data.today_absent / state.data.total_emp * 100) }}%;
+                                        background:#dc2626;transition:width .5s;"/>
+                                </div>
+                                <div style="display:flex;gap:10px;margin-top:5px;flex-wrap:wrap;">
+                                    <span style="font-size:.62rem;color:#15803d;font-weight:600;">
+                                         ● Present <t t-esc="state.data.today_present"/>
+                                    </span>
+                                    <span style="font-size:.62rem;color:#1d4ed8;font-weight:600;">
+                                         ● Leave <t t-esc="state.data.today_on_leave"/>
+                                    </span>
+                                    <span style="font-size:.62rem;color:#dc2626;font-weight:600;">
+                                         ● Absent <t t-esc="state.data.today_absent"/>
+                                    </span>
+                                </div>
+                            </div>
+                        </t>
+
+                    </div>
+                </div>
+                    
+                <!-- Leave Type Distribution -->
+                <div class="had-card">
+                    <div class="had-card-header"><i class="fa fa-tags"/> Leave Type Distribution</div>
+                    <t t-if="state.chartData and state.chartData.lt_labels and state.chartData.lt_labels.length">
+                        <div class="had-lt-legend">
+                            <t t-foreach="state.chartData.lt_labels" t-as="lt_name" t-key="lt_name">
+                                <div class="had-lt-row">
+                                    <span class="had-lt-name"><t t-esc="lt_name"/></span>
+                                    <div class="had-lt-bar-wrap">
+                                        <div class="had-lt-bar" t-attf-style="width:{{ state.chartData.lt_pcts[lt_name_index] }}%"/>
+                                    </div>
+                                    <span class="had-lt-pct"><t t-esc="state.chartData.lt_pcts[lt_name_index]"/>%</span>
+                                </div>
+                            </t>
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <div class="had-empty">No leave data this month.</div>
+                    </t>
+                </div>
+
+                <!-- Attendance Rate by Department -->
+                <div class="had-card">
+                    <div class="had-card-header"><i class="fa fa-building"/> Attendance by Department</div>
+                    <t t-if="state.deptLoading">
+                        <div class="had-empty"><i class="fa fa-spinner fa-spin"/> Loading...</div>
+                    </t>
+                    <t t-elif="state.deptData and state.deptData.length">
+                        <div style="padding:10px 14px 14px;">
+                            <t t-foreach="state.deptData" t-as="dept_row" t-key="dept_row.dept">
+                                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:.78rem;">
+                                    <div style="width:90px;flex-shrink:0;">
+                                        <div style="font-weight:600;color:#374151;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                                            <t t-esc="dept_row.dept"/>
+                                        </div>
+                                        
+                                        <div style="font-size:.68rem;color:#6b7280;">
+                                            <t t-esc="dept_row.attended_count"/>/<t t-esc="dept_row.total_emp"/> emp
+                                        </div>
+                                    </div>
+                                    <div style="flex:1;background:#e2e8f0;border-radius:4px;height:20px;overflow:hidden;">
+                                        <div t-attf-style="width:{{ dept_row.rate }}%;height:100%;background:#3b82f6;border-radius:4px;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;min-width:36px;">
+                                            <span style="color:#fff;font-size:.7rem;font-weight:700;"><t t-esc="dept_row.rate"/>%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </t>
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <div class="had-empty">No department data.</div>
+                    </t>
+                </div>
+
+            </div>
+        </div>
+        </t>
+        <!--  END OVERVIEW  -->
+
+      
+
+    </div>
+    </t>
+
+</div>
+</t>
+</templates>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_hr_attendance_settings" model="ir.ui.view">
+        <field name="name">hr.attendance.settings</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <!-- Simple and guaranteed working approach -->
+            <field name="module_base_import" position="after">
+                <h2>Attendance Settings</h2>
+                
+                <!-- Tolerance Time -->
+                <div class="row mt16 o_setting_container">
+                    <div class="col-12 col-lg-6 o_setting_box">
+                        <div class="o_setting_left_pane">
+                            <i class="fa fa-clock-o"/>
+                        </div>
+                        <div class="o_setting_right_pane">
+                            <label for="tolerance_time"/> 
+                            <div class="text-muted">Minutes allowed for late arrival</div>
+                            <div>
+                                <field name="tolerance_time" class="oe_inline"/>
+                                <span> minutes</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Late Days Per Deduction -->
+                <div class="row mt16 o_setting_container">
+                    <div class="col-12 col-lg-6 o_setting_box">
+                        <div class="o_setting_left_pane">
+                            <i class="fa fa-calendar-times-o"/>
+                        </div>
+                        <div class="o_setting_right_pane">
+                            <label for="lates_per_deduction"/> 
+                            <div class="text-muted">
+                                Number of late days that equal 1 day leave deduction
+                            </div>
+                            <div>
+                                <field name="lates_per_deduction" class="oe_inline"/>
+                                <span> days = 1 day leave</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Deduction Leave Type -->
+                <div class="row mt16 o_setting_container">
+                    <div class="col-12 col-lg-6 o_setting_box">
+                        <div class="o_setting_left_pane">
+                            <i class="fa fa-calendar-minus-o"/>
+                        </div>
+                        <div class="o_setting_right_pane">
+                            <label for="deduction_leave_type"/> 
+                            <div class="text-muted">Type of leave to deduct for late attendance</div>
+                            <field name="deduction_leave_type" widget="radio" options="{'horizontal': true}"/>
+                        </div>
+                    </div>
+                </div>
+            </field>
+        </field>
+    </record>
+</odoo>

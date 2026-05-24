@@ -1,0 +1,36 @@
+<odoo>
+
+    <record id="view_employee_form_inherit_festival_bonus" model="ir.ui.view">
+        <field name="name">hr.employee.form.festival.bonus</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='payroll_information']//group[@name='payroll_group']" position="inside">
+
+                <group name="festival_bonus_group">
+                    <div colspan="2" class="col-lg-6 w-100 mt-4 mb-3 o_horizontal_separator text-uppercase fw-bolder small d-flex">
+                        <span>Festival Bonus Calculation</span>
+                    </div>
+
+                    <group string="Calculation Settings">
+                        <field name="salary_base"/>
+                        <field name="percentage"/>
+                        <field name="festival_bonus" readonly="1"/>
+                    </group>
+
+                    <group string="Bonus Period">
+                        <field name="custom_wage" invisible="salary_base != 'wage'"/>
+                        <field name="gross_salary" invisible="salary_base != 'gross'"/>
+                        <field name="net_salary" invisible="salary_base != 'net'"/>
+                        <!-- <field name="festival_bonus_start_date"/> -->
+                        <!-- <field name="festival_bonus_end_date" readonly="1"/> -->
+                    </group>
+
+
+                </group>
+
+            </xpath>
+        </field>
+    </record>
+    
+</odoo>

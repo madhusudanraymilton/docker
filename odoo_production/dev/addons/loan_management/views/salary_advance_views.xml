@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Salary Advance Form View -->
+    <record id="view_hr_salary_advance_form" model="ir.ui.view">
+        <field name="name">hr.salary.advance.form</field>
+        <field name="model">hr.salary.advance</field>
+        <field name="arch" type="xml">
+            <form string="Salary Advance">
+                <header>
+                    <button name="action_submit" string="Submit" type="object" class="btn-primary" 
+                            invisible="state != 'draft'"/>
+                    <button name="action_approve" string="Approve" type="object" class="btn-primary" 
+                            invisible="state != 'submitted'"/>
+                    <button name="action_reject" string="Reject" type="object" class="btn-danger" 
+                            invisible="state != 'submitted'"/>
+                    <button name="action_pay" string="Pay" type="object" class="btn-primary" 
+                            invisible="state != 'approved'"/>
+                    <button name="action_cancel_payment" string="Cancel Payment" type="object" class="btn-secondary" 
+                            invisible="state != 'paid'"/>
+                    <button name="action_set_to_draft" string="Reset to Draft" type="object" class="btn-secondary" 
+                            invisible="state not in ['submitted', 'rejected']"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,submitted,approved,paid,rejected"/>
+                    <button name="action_print_report" string="Print" type="object" class="btn-secondary" icon="fa-print"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Salary Advance Reference"/>
+                        </h1>
+                    </div>
+                    
+                    <group>
+                        <group>
+                            <field name="employee_id" widget="many2one" required="1"/>
+                            <field name="partner_id" readonly="1" string="Accounting Partner"/>
+                            <field name="date" required="1"/>
+                            <field name="amount" required="1"/>
+                            <field name="currency_id"/>
+                        </group>
+                        <group>
+                            <field name="journal_id" required="1"/>
+                            <field name="account_debit" required="1" string="Debit Account (Expense)"/>
+                            <field name="account_credit" required="1" string="Credit Account (Bank/Cash)"/>
+                            <field name="deduction_month"/>
+                        </group>
+                    </group>
+                    
+                    <group>
+                        <field name="reason" widget="text" placeholder="Reason for salary advance..." colspan="2"/>
+                    </group>
+                    
+                    <group string="Employee Details">
+                        <group>
+                            <field name="department_id" readonly="1"/>
+                            <field name="job_id" readonly="1"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Accounting Entry" invisible="not move_id">
+                        <field name="move_id" widget="many2one" readonly="1" colspan="2"/>
+                    </group>
+                    
+                    <footer>
+                        <field name="notes" widget="text" placeholder="Additional notes..." nolabel="1"/>
+                    </footer>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Salary Advance Tree View -->
+    <record id="view_hr_salary_advance_list" model="ir.ui.view">
+        <field name="name">hr.salary.advance.list</field>
+        <field name="model">hr.salary.advance</field>
+        <field name="arch" type="xml">
+            <list string="Salary Advances">
+                <field name="name"/>
+                <field name="employee_id"/>
+                <field name="date"/>
+                <field name="amount"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'paid'"
+                       decoration-warning="state == 'approved'"
+                       decoration-info="state == 'submitted'"
+                       decoration-danger="state == 'rejected'"/>
+                <field name="move_id" widget="many2one" readonly="1"/>
+            </list>
+        </field>
+    </record>
+    
+    <!-- Salary Advance Search View -->
+    <record id="view_hr_salary_advance_search" model="ir.ui.view">
+        <field name="name">hr.salary.advance.search</field>
+        <field name="model">hr.salary.advance</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="employee_id"/>
+                <field name="partner_id"/>
+                <field name="date"/>
+                <field name="state"/>
+                
+                <filter name="draft" string="Draft" domain="[('state','=','draft')]"/>
+                <filter name="submitted" string="Submitted" domain="[('state','=','submitted')]"/>
+                <filter name="approved" string="Approved" domain="[('state','=','approved')]"/>
+                <filter name="paid" string="Paid" domain="[('state','=','paid')]"/>
+                <filter name="rejected" string="Rejected" domain="[('state','=','rejected')]"/>
+                
+                <!-- Group By filters সরিয়ে দিলাম -->
+                <separator/>
+                <filter name="group_by_employee" string="Employee" context="{'group_by': 'employee_id'}"/>
+                <filter name="group_by_department" string="Department" context="{'group_by': 'department_id'}"/>
+                <filter name="group_by_state" string="Status" context="{'group_by': 'state'}"/>
+                <filter name="group_by_month" string="Month" context="{'group_by': 'date:month'}"/>
+            </search>
+        </field>
+    </record>
+    
+    <!-- Salary Advance Action -->
+    <record id="action_hr_salary_advance" model="ir.actions.act_window">
+        <field name="name">Salary Advances</field>
+        <field name="res_model">hr.salary.advance</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_id" ref="view_hr_salary_advance_list"/>
+        <field name="search_view_id" ref="view_hr_salary_advance_search"/>
+        <field name="context">{'default_state': 'draft'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first salary advance
+            </p>
+            <p>
+                Use this menu to create and manage salary advances for employees.
+            </p>
+        </field>
+    </record>
+</odoo>

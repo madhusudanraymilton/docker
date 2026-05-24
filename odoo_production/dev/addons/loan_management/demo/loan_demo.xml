@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <!-- Demo Data - Only load in demo mode -->
+        <record id="demo_loan_accounting_config" model="loan.accounting.config">
+            <field name="name">Default Loan Accounting Configuration</field>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="loan_account_debit" ref="account.data_account_type_current_liabilities"/>
+            <field name="loan_account_credit" ref="account.data_account_type_current_assets"/>
+            <field name="salary_advance_debit" ref="account.data_account_type_current_liabilities"/>
+            <field name="salary_advance_credit" ref="account.data_account_type_current_assets"/>
+            <field name="loan_journal" ref="account.bank_journal"/>
+            <field name="salary_advance_journal" ref="account.bank_journal"/>
+            <field name="payroll_deduction_code">LOAN</field>
+        </record>
+    </data>
+</odoo>

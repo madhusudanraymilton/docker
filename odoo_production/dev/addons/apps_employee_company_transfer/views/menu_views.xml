@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Transfers Menu under Employees top menu -->
+    <menuitem id="menu_hr_transfers_root"
+              name="Transfers"
+              parent="hr.menu_hr_root"
+              sequence="50"
+              groups="hr.group_hr_user"/>
+
+    <menuitem id="menu_hr_company_transfer"
+              name="Inter Company Transfers"
+              parent="menu_hr_transfers_root"
+              action="action_hr_company_transfer"
+              sequence="10"
+              groups="hr.group_hr_user"/>
+
+    <menuitem id="menu_hr_intra_transfer"
+              name="Intra Company Transfers"
+              parent="menu_hr_transfers_root"
+              action="action_hr_intra_transfer"
+              sequence="20"
+              groups="hr.group_hr_user"/>
+
+</odoo>

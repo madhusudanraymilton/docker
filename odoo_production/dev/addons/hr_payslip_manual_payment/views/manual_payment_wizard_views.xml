@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_hr_payslip_manual_payment_wizard_form" model="ir.ui.view">
+        <field name="name">hr.payslip.manual.payment.wizard.form</field>
+        <field name="model">hr.payslip.manual.payment.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Manual Payment">
+                <sheet>
+                    <div class="oe_title mb-3">
+                        <h2>Manual Payment</h2>
+                        <p class="text-muted">
+                            Post a payment directly to Bank or Cash journal for this employee.
+                        </p>
+                    </div>
+
+                    <group string="Payment Details">
+                        <group>
+                            <field name="employee_id" readonly="1" options='{"no_open": True}'/>
+                            <field name="payslip_id" invisible="1"/>
+                            <field name="currency_id" invisible="1"/>
+                            <!-- Hidden fields used as domain source for account_credit -->
+                            <field name="bank_account_ids" invisible="1"/>
+                            <field name="cash_account_ids" invisible="1"/>
+                            <field name="amount" widget="monetary"/>
+                            <field name="payment_date"/>
+                            <field name="memo"/>
+                        </group>
+                        <group>
+                            <field name="payment_type" widget="radio" options='{"horizontal": True}'/>
+                        </group>
+                    </group>
+
+                    <group string="Journal">
+                        <!--
+                            Salaries Journal — filtered by NAME only, NOT by type.
+                            The Salaries journal in Odoo is often type=Miscellaneous.
+                            Filtering by type='bank' would hide it entirely.
+                        -->
+                        <field name="bank_journal_id"
+                               invisible="payment_type != 'bank'"
+                               required="payment_type == 'bank'"
+                               domain="[('name', 'ilike', 'salar')]"
+                               string="Salaries Journal"
+                               options='{"no_create": True}'/>
+                        <field name="cash_journal_id"
+                               invisible="payment_type != 'cash'"
+                               required="payment_type == 'cash'"
+                               domain="[('name', 'ilike', 'salar')]"
+                               string="Salaries Journal"
+                               options='{"no_create": True}'/>
+                        <field name="partner_bank_id"
+                               invisible="payment_type != 'bank'"
+                               string="Employee Bank Account"
+                               options='{"no_create": True}'/>
+                    </group>
+
+                    <group string="Accounting">
+
+                        <!--
+                            DEBIT ACCOUNT
+                            ─────────────
+                            Mirrors account_debit on hr.salary.rule.
+                            Shows ONLY salary/wage liability accounts from Chart of Accounts.
+                            'payroll' keyword removed — it matches tax/pension liabilities too.
+                        -->
+                        <field name="account_debit"
+                               domain="[
+                                   ('account_type', 'in', ['liability_payable', 'liability_current']),
+                                   '|',
+                                   ('name', 'ilike', 'salary'),
+                                   ('name', 'ilike', 'wage')
+                               ]"
+                               required="1"
+                               string="Debit Account (Salary Payable)"
+                               placeholder="Select Salary / Wage Payable account..."
+                               options='{"no_create": True}'/>
+
+                        <!--
+                            CREDIT ACCOUNT — BANK
+                            ──────────────────────
+                            Shown only when payment_type = bank.
+                            Domain: ('id', 'in', bank_account_ids)
+                            bank_account_ids = default_account_id of all BANK journals.
+
+                            Why not account_type='asset_cash'?
+                            Because bank AND cash accounts BOTH have account_type='asset_cash'.
+                            Using journal-linked IDs is the only correct separator.
+                        -->
+                        <field name="account_credit"
+                               invisible="payment_type != 'bank'"
+                               required="payment_type == 'bank'"
+                               domain="[('id', 'in', bank_account_ids)]"
+                               string="Credit Account (Bank)"
+                               placeholder="Select Bank account..."
+                               options='{"no_create": True}'/>
+
+                        <!--
+                            CREDIT ACCOUNT — CASH
+                            ──────────────────────
+                            Shown only when payment_type = cash.
+                            Domain: ('id', 'in', cash_account_ids)
+                            cash_account_ids = default_account_id of all CASH journals.
+                        -->
+                        <field name="account_credit"
+                               invisible="payment_type != 'cash'"
+                               required="payment_type == 'cash'"
+                               domain="[('id', 'in', cash_account_ids)]"
+                               string="Credit Account (Cash)"
+                               placeholder="Select Cash account..."
+                               options='{"no_create": True}'/>
+
+                    </group>
+
+                    <group string="Payment Amounts">
+                        <field name="deduction" widget="monetary"/>
+                        <field name="net_payable" widget="monetary" readonly="1"
+                               class="fw-bold text-success"/>
+                    </group>
+
+                </sheet>
+                <footer>
+                    <button name="action_confirm_payment"
+                            string="Confirm Payment"
+                            type="object"
+                            class="btn-primary"
+                            data-hotkey="v"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_hr_payslip_manual_payment_wizard" model="ir.actions.act_window">
+        <field name="name">Manual Payment</field>
+        <field name="res_model">hr.payslip.manual.payment.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="view_id" ref="view_hr_payslip_manual_payment_wizard_form"/>
+    </record>
+
+</odoo>

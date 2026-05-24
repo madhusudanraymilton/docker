@@ -1,0 +1,288 @@
+<odoo>
+    <template id="portal_expense_form" name="Portal Expense Form">
+        <t t-call="website.layout">
+            <style>
+                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Sora:wght@600;700&amp;display=swap');
+                :root {
+                    --g50:#f0fdf4;--g100:#dcfce7;--g200:#bbf7d0;--g400:#4ade80;
+                    --g500:#22c55e;--g600:#16a34a;--g700:#15803d;
+                    --s50:#f8fafc;--s100:#f1f5f9;--s200:#e2e8f0;--s300:#cbd5e1;
+                    --s400:#94a3b8;--s500:#64748b;--s600:#475569;--s700:#334155;
+                    --s800:#1e293b;--s900:#0f172a;--white:#ffffff;
+                    --blue:#3b82f6;--blue2:#1d4ed8;--amber:#f59e0b;--amber2:#d97706;
+                    --purple:#8b5cf6;--red:#ef4444;--teal:#14b8a6;
+                    --radius:16px;--radius-sm:10px;
+                    --shadow:0 1px 3px rgba(0,0,0,.05),0 4px 16px rgba(0,0,0,.07);
+                    --shadow-lg:0 8px 32px rgba(0,0,0,.12);
+                }
+                *{box-sizing:border-box;}
+                body{background:var(--s50);font-family:'Inter',sans-serif;color:var(--s800);}
+                .ep-wrap{max-width:960px;margin:0 auto;padding:40px 24px 80px;}
+
+                /* Topbar */
+                .ep-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;animation:fadeUp .5s ease both;}
+                .ep-topbar-left h1{font-family:'Sora',sans-serif;font-size:1.75rem;font-weight:700;background:linear-gradient(135deg,var(--g700),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin:0 0 4px;}
+                .ep-topbar-left p{color:var(--s400);font-size:.9rem;margin:0;}
+                .ep-avatar{width:44px;height:44px;background:linear-gradient(135deg,var(--g600),var(--teal));border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1rem;box-shadow:0 2px 12px rgba(22,163,74,.4);}
+
+                /* Stats */
+                .ep-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px;}
+                @media(max-width:600px){.ep-stats{grid-template-columns:1fr;}}
+                .ep-stat{background:var(--white);border-radius:var(--radius);padding:20px 22px;border:1.5px solid transparent;box-shadow:var(--shadow);display:flex;align-items:center;gap:16px;animation:fadeUp .5s ease both;transition:transform .2s,box-shadow .2s;position:relative;overflow:hidden;}
+                .ep-stat::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+                .ep-stat:nth-child(1)::before{background:linear-gradient(90deg,var(--g500),var(--teal));}
+                .ep-stat:nth-child(2)::before{background:linear-gradient(90deg,var(--blue),var(--purple));}
+                .ep-stat:nth-child(3)::before{background:linear-gradient(90deg,var(--amber),var(--red));}
+                .ep-stat:nth-child(1){animation-delay:.05s;border-color:rgba(34,197,94,.15);}
+                .ep-stat:nth-child(2){animation-delay:.10s;border-color:rgba(59,130,246,.15);}
+                .ep-stat:nth-child(3){animation-delay:.15s;border-color:rgba(245,158,11,.15);}
+                .ep-stat:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);}
+                .ep-stat-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.15rem;flex-shrink:0;}
+                .ep-stat-icon.green{background:linear-gradient(135deg,#d1fae5,#a7f3d0);color:var(--g700);}
+                .ep-stat-icon.blue{background:linear-gradient(135deg,#dbeafe,#bfdbfe);color:var(--blue2);}
+                .ep-stat-icon.amber{background:linear-gradient(135deg,#fef3c7,#fde68a);color:var(--amber2);}
+                .ep-stat-info p{margin:0 0 3px;font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--s400);}
+                .ep-stat-info h3{margin:0;font-size:1.6rem;font-weight:700;color:var(--s900);font-family:'Sora',sans-serif;}
+
+                /* Cards */
+                .ep-card{background:var(--white);border-radius:var(--radius);border:1.5px solid var(--s200);box-shadow:var(--shadow);overflow:hidden;margin-bottom:24px;animation:fadeUp .5s ease both;transition:box-shadow .2s,border-color .2s;}
+                .ep-card:nth-of-type(1){animation-delay:.2s;}
+                .ep-card:nth-of-type(2){animation-delay:.3s;}
+                .ep-card:hover{box-shadow:var(--shadow-lg);border-color:var(--g200);}
+                .ep-card-stripe{height:4px;background:linear-gradient(90deg,var(--g500) 0%,var(--teal) 50%,var(--blue) 100%);}
+                .ep-card-head{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid var(--s100);background:linear-gradient(135deg,#f8fffe 0%,#f0fdf4 100%);}
+                .ep-card-head-left{display:flex;align-items:center;gap:12px;}
+                .ep-card-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--g500),var(--teal));border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.9rem;box-shadow:0 2px 8px rgba(34,197,94,.3);}
+                .ep-card-head h5{margin:0;font-size:1rem;font-weight:700;color:var(--s800);font-family:'Sora',sans-serif;}
+                .ep-card-head span{font-size:.8rem;color:var(--s400);}
+                .ep-card-body{padding:24px;}
+
+                /* Alerts */
+                .ep-alert{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,var(--g50),#ecfdf5);border:1.5px solid var(--g200);border-left:4px solid var(--g500);border-radius:var(--radius-sm);padding:13px 18px;color:var(--g700);font-weight:600;font-size:.92rem;margin-bottom:24px;animation:fadeUp .4s ease both;box-shadow:0 2px 8px rgba(34,197,94,.1);}
+                .ep-warn{display:flex;align-items:center;gap:10px;background:#fffbeb;border:1.5px solid #fde68a;border-left:4px solid var(--amber);border-radius:var(--radius-sm);padding:13px 18px;color:var(--amber2);font-weight:600;font-size:.92rem;margin-bottom:24px;}
+
+                /* Form */
+                .ep-label{display:block;font-size:.76rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--s600);margin-bottom:7px;}
+                .ep-label .req{color:var(--g500);}
+                .ep-input,.ep-select,.ep-textarea{width:100%;border:1.5px solid var(--s200);border-radius:var(--radius-sm);padding:10px 14px;font-family:'Inter',sans-serif;font-size:.93rem;color:var(--s800);background:var(--s50);outline:none;transition:border-color .18s,box-shadow .18s,background .18s;appearance:none;-webkit-appearance:none;}
+                .ep-input:focus,.ep-select:focus,.ep-textarea:focus{border-color:var(--g500);background:var(--white);box-shadow:0 0 0 3px rgba(34,197,94,.15);}
+                .ep-input[readonly]{background:var(--s100);color:var(--s500);cursor:default;}
+                .ep-select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2322c55e' d='M6 8L0 0h12z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:38px;cursor:pointer;}
+                .ep-textarea{resize:vertical;min-height:90px;}
+                .ep-amt{display:flex;border:1.5px solid var(--s200);border-radius:var(--radius-sm);overflow:hidden;background:var(--s50);transition:border-color .18s,box-shadow .18s,background .18s;}
+                .ep-amt:focus-within{border-color:var(--g500);background:var(--white);box-shadow:0 0 0 3px rgba(34,197,94,.15);}
+                .ep-amt-pre{padding:10px 14px;background:linear-gradient(135deg,var(--g100),var(--g50));color:var(--g700);font-weight:800;font-size:.95rem;border-right:1.5px solid var(--g200);}
+                .ep-amt .ep-input{border:none;border-radius:0;background:transparent;box-shadow:none;}
+                .ep-amt .ep-input:focus{box-shadow:none;background:transparent;}
+                .ep-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+                @media(max-width:580px){.ep-grid-2{grid-template-columns:1fr;}}
+                .ep-field{margin-bottom:18px;}
+                .ep-field:last-child{margin-bottom:0;}
+                .ep-sep{height:1px;background:linear-gradient(90deg,var(--g200),var(--s200),transparent);margin:22px 0;}
+
+                /* Buttons */
+                .ep-actions{display:flex;gap:12px;flex-wrap:wrap;}
+                .ep-btn{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:var(--radius-sm);font-family:'Inter',sans-serif;font-size:.88rem;font-weight:700;border:none;cursor:pointer;transition:all .2s;text-decoration:none;letter-spacing:.02em;}
+                .ep-btn-primary{background:linear-gradient(135deg,var(--g700) 0%,var(--g500) 60%,var(--teal) 100%);color:var(--white);box-shadow:0 3px 12px rgba(22,163,74,.35);}
+                .ep-btn-primary:hover{filter:brightness(1.1);box-shadow:0 6px 20px rgba(22,163,74,.45);transform:translateY(-2px);color:var(--white);text-decoration:none;}
+                .ep-btn-ghost{background:var(--white);color:var(--s600);border:1.5px solid var(--s200);box-shadow:0 1px 4px rgba(0,0,0,.06);}
+                .ep-btn-ghost:hover{background:var(--s100);color:var(--s800);border-color:var(--s300);text-decoration:none;}
+
+                /* Table */
+                .ep-tbl{width:100%;border-collapse:collapse;}
+                .ep-tbl thead tr{border-bottom:2px solid var(--g100);}
+                .ep-tbl th{padding:11px 16px;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--g700);text-align:left;background:linear-gradient(135deg,#f0fdf4,#f8fafc);}
+                .ep-tbl td{padding:14px 16px;font-size:.9rem;color:var(--s700);border-bottom:1px solid var(--s100);vertical-align:middle;}
+                .ep-tbl tbody tr{transition:background .15s;}
+                .ep-tbl tbody tr:hover td{background:#f0fdf4;}
+                .ep-tbl tbody tr:last-child td{border-bottom:none;}
+
+                /* Badges */
+                .ep-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:.72rem;font-weight:700;letter-spacing:.04em;}
+                .ep-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.7;}
+                .ep-draft{background:var(--s100);color:var(--s600);}
+                .ep-reported{background:#dbeafe;color:var(--blue2);}
+                .ep-approved{background:var(--g100);color:var(--g700);}
+                .ep-done{background:#ede9fe;color:#6d28d9;}
+                .ep-refused{background:#fee2e2;color:#b91c1c;}
+                .ep-amt-cell{font-weight:700;color:var(--g700);font-size:.95rem;font-variant-numeric:tabular-nums;}
+                .ep-amt-cell::before{content:'$';color:var(--g500);margin-right:1px;}
+                .ep-empty{text-align:center;padding:52px 20px;color:var(--s400);}
+                .ep-empty-icon{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--g50),var(--s100));display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:1.8rem;color:var(--s300);border:2px solid var(--s200);}
+                .ep-empty p{margin:0;font-size:.92rem;}
+                @keyframes fadeUp{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+            </style>
+
+            <div class="ep-wrap">
+
+                <div class="ep-topbar">
+                    <div class="ep-topbar-left">
+                        <h1>Expense Management</h1>
+                        <p>Submit, track and manage your expense requests</p>
+                    </div>
+                    <t t-if="employee">
+                        <div class="ep-avatar"><t t-esc="(employee.name or 'U')[0].upper()"/></div>
+                    </t>
+                </div>
+
+                <t t-if="no_employee">
+                    <div class="ep-warn">
+                        <i class="fa fa-exclamation-triangle"/>
+                        No employee record linked to your account. Please contact HR to set up your profile.
+                    </div>
+                </t>
+
+                <t t-if="request.params.get('success')">
+                    <div class="ep-alert">
+                        <i class="fa fa-check-circle"/>
+                        Expense submitted successfully and synced to backend.
+                    </div>
+                </t>
+
+                <div class="ep-stats">
+                    <div class="ep-stat">
+                        <div class="ep-stat-icon green"><i class="fa fa-list-alt"/></div>
+                        <div class="ep-stat-info"><p>Total Expenses</p><h3><t t-esc="len(expenses)"/></h3></div>
+                    </div>
+                    <div class="ep-stat">
+                        <div class="ep-stat-icon blue"><i class="fa fa-check-circle"/></div>
+                        <div class="ep-stat-info"><p>Approved</p><h3><t t-esc="len(expenses.filtered(lambda e: e.state == 'approved'))"/></h3></div>
+                    </div>
+                    <div class="ep-stat">
+                        <div class="ep-stat-icon amber"><i class="fa fa-clock-o"/></div>
+                        <div class="ep-stat-info"><p>Pending</p><h3><t t-esc="len(expenses.filtered(lambda e: e.state in ('draft','reported')))"/></h3></div>
+                    </div>
+                </div>
+
+                <t t-if="not no_employee">
+                    <div class="ep-card">
+                        <div class="ep-card-stripe"/>
+                        <div class="ep-card-head">
+                            <div class="ep-card-head-left">
+                                <div class="ep-card-icon"><i class="fa fa-plus"/></div>
+                                <h5>New Expense</h5>
+                            </div>
+                        </div>
+                        <div class="ep-card-body">
+                            <form action="/my/expenses/submit" method="post">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <div class="ep-field">
+                                    <label class="ep-label">Description <span class="req">*</span></label>
+                                    <input type="text" name="description" class="ep-input" placeholder="e.g. Lunch with Customer" required="required"/>
+                                </div>
+                                <div class="ep-field">
+                                    <label class="ep-label">Category <span class="req">*</span></label>
+                                    <select name="product_id" class="ep-select" required="required">
+                                        <option value="">-- Select Category --</option>
+                                        <t t-foreach="products" t-as="product">
+                                            <option t-att-value="product.id"><t t-esc="product.name"/></option>
+                                        </t>
+                                    </select>
+                                </div>
+                                <div class="ep-grid-2">
+                                    <div class="ep-field">
+                                        <label class="ep-label">Total <span class="req">*</span></label>
+                                        <div class="ep-amt">
+                                            <span class="ep-amt-pre">$</span>
+                                            <input type="number" name="amount" class="ep-input" step="0.01" min="0" placeholder="0.00" required="required"/>
+                                        </div>
+                                    </div>
+                                    <div class="ep-field">
+                                        <label class="ep-label">Expense Date</label>
+                                        <input type="date" name="expense_date" class="ep-input" t-att-value="today"/>
+                                    </div>
+                                </div>
+                                <div class="ep-grid-2">
+                                    <div class="ep-field">
+                                        <label class="ep-label">Employee</label>
+                                        <select name="employee_id" class="ep-select">
+                                            <t t-foreach="employees" t-as="emp">
+                                                <option t-att-value="emp.id" t-att-selected="'selected' if emp.id == employee.id else None">
+                                                    <t t-esc="emp.name"/>
+                                                </option>
+                                            </t>
+                                        </select>
+                                    </div>
+                                    <div class="ep-field">
+                                        <label class="ep-label">Paid By</label>
+                                        <select name="paid_by" class="ep-select">
+                                            <option value="own_account">Employee (to reimburse)</option>
+                                            <option value="company_account">Company</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="ep-field">
+                                    <label class="ep-label">Manager</label>
+                                    <select name="manager_id" class="ep-select">
+                                        <option value="">-- Select Manager --</option>
+                                        <t t-foreach="managers" t-as="mgr">
+                                            <option t-att-value="mgr.id"><t t-esc="mgr.name"/></option>
+                                        </t>
+                                    </select>
+                                </div>
+                                <div class="ep-field">
+                                    <label class="ep-label">Notes</label>
+                                    <textarea name="notes" class="ep-textarea" placeholder="Additional notes or context..."/>
+                                </div>
+                                <div class="ep-sep"/>
+                                <div class="ep-actions">
+                                    <button type="submit" class="ep-btn ep-btn-primary">
+                                        <i class="fa fa-paper-plane"/> Submit Expense
+                                    </button>
+                                    <a href="/my/employee-dashboard" class="ep-btn ep-btn-ghost">
+                                        <i class="fa fa-arrow-left"/> Back to Dashboard
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </t>
+
+                <div class="ep-card">
+                    <div class="ep-card-stripe"/>
+                    <div class="ep-card-head">
+                        <div class="ep-card-head-left">
+                            <div class="ep-card-icon"><i class="fa fa-history"/></div>
+                            <h5>Expense History</h5>
+                        </div>
+                        <span><t t-esc="len(expenses)"/> records</span>
+                    </div>
+                    <div style="overflow-x:auto;">
+                        <t t-if="expenses">
+                            <table class="ep-tbl">
+                                <thead>
+                                    <tr>
+                                        <th>Description</th><th>Category</th>
+                                        <th>Date</th><th>Amount</th><th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="expenses" t-as="exp">
+                                        <tr>
+                                            <td><t t-esc="exp.name"/></td>
+                                            <td><t t-esc="exp.product_id.name"/></td>
+                                            <td><t t-esc="exp.date"/></td>
+                                            <td><span class="ep-amt-cell"><t t-esc="'%.2f' % exp.total_amount_currency"/></span></td>
+                                            <td>
+                                                <span t-attf-class="ep-badge #{exp.state == 'draft' and 'ep-draft' or exp.state == 'reported' and 'ep-reported' or exp.state == 'approved' and 'ep-approved' or exp.state == 'done' and 'ep-done' or 'ep-refused'}">
+                                                    <t t-esc="exp.state.capitalize()"/>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </t>
+                        <t t-else="">
+                            <div class="ep-empty">
+                                <div class="ep-empty-icon"><i class="fa fa-inbox"/></div>
+                                <p>No expenses submitted yet.</p>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+
+            </div>
+        </t>
+    </template>
+</odoo>

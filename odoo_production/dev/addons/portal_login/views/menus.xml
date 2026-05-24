@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <menuitem id="menu_employee_asset"
+     name="Employee Asset" 
+     parent="hr.menu_hr_root" 
+     action="account_asset.action_account_asset_form" 
+     sequence="25" />
+</odoo>

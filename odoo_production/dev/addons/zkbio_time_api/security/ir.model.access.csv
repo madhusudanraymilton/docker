@@ -1,0 +1,10 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_zkbio_config_user,zkbio.config.user,model_zkbio_config,hr.group_hr_user,1,0,0,0
+access_zkbio_config_manager,zkbio.config.manager,model_zkbio_config,hr.group_hr_manager,1,1,1,1
+access_zkbio_config_admin,zkbio.config.admin,model_zkbio_config,base.group_system,1,1,1,1
+access_zkbio_terminal_user,zkbio.terminal.user,model_zkbio_terminal,hr.group_hr_user,1,0,0,0
+access_zkbio_terminal_manager,zkbio.terminal.manager,model_zkbio_terminal,hr.group_hr_manager,1,1,1,1
+access_zkbio_terminal_admin,zkbio.terminal.admin,model_zkbio_terminal,base.group_system,1,1,1,1
+access_zkbio_transaction_user,zkbio.transaction.user,model_zkbio_transaction,hr.group_hr_user,1,1,1,0
+access_zkbio_transaction_manager,zkbio.transaction.manager,model_zkbio_transaction,hr.group_hr_manager,1,1,1,1
+access_zkbio_transaction_admin,zkbio.transaction.admin,model_zkbio_transaction,base.group_system,1,1,1,1

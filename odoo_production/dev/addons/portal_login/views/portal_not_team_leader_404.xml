@@ -1,0 +1,26 @@
+<odoo>
+    <!-- Stand-alone Team Leader Access Denied Page -->
+    <template id="portal_not_team_leader_page">
+        <t t-call="portal.portal_layout">
+            <div class="container mt-5 text-center">
+                <div class="card shadow-sm p-5">
+                    <h1 class="text-danger" style="font-size: 60px; font-weight: 800;">
+                        404
+                    </h1>
+
+                    <h3 class="mt-3 fw-bold">
+                        You Are Not a Team Leader
+                    </h3>
+
+                    <p class="text-muted mt-2">
+                        Only team leaders can approve leave applications.
+                    </p>
+
+                    <a href="/my/employee-dashboard" class="btn btn-primary mt-4">
+                        Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

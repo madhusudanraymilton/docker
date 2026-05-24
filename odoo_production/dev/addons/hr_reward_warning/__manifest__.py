@@ -1,0 +1,27 @@
+
+{
+    'name': 'BDcalling  Open HRMS Official Announcements and Company Policies',
+    'version': '19.0.1.0.0',
+    'category': 'Human Resources',
+    'summary': """Manages Official Announcements and Company Policies""",
+    'description': 'This module helps you to manage HR official announcements and company policies',
+    'live_test_url': 'https://youtu.be/VPh1A9-jM5Q',
+    'author': 'Sohag Hossain',
+    'depends': ['hr', 'mail'],
+    'data': [
+        'security/hr_announcement_security.xml',
+        'security/ir.model.access.csv',
+        'data/ir_cron_data.xml',
+        'data/ir_sequence_data.xml',
+        # 'views/res_users_views.xml', 
+        'views/company_policy_views.xml',
+        'views/hr_announcement_views.xml',
+        'views/hr_employee_views.xml',
+        'views/hr_reward_warning_menus.xml',
+    ],
+    'images': ['static/description/banner.jpg'],
+    'license': 'LGPL-3',
+    'installable': True,
+    'auto_install': False,
+    'application': True,
+}

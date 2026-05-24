@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+    =======================================================================
+    Inject "Manual Payment" button into the HR Payslip header button bar.
+
+    BUTTON BAR SEEN IN UI:  [Pay] [Create Payment Report] [Cancel] [Print]
+    TARGET POSITION: Between "Create Payment Report" and "Cancel"
+
+    If this xpath fails, see BUTTON_XPATH_README.md for alternatives.
+    =======================================================================
+    -->
+    <record id="view_hr_payslip_form_manual_payment_btn" model="ir.ui.view">
+        <field name="name">hr.payslip.form.manual.payment.button</field>
+        <field name="model">hr.payslip</field>
+        <field name="inherit_id" ref="hr_payroll.view_hr_payslip_form"/>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+
+            <!--
+                PRIMARY XPATH: Insert before the Cancel button.
+                Button is hidden unless payslip is in Validated or Done state.
+            -->
+            <xpath expr="//button[@name='action_payslip_cancel']" position="before">
+                <button name="action_open_manual_payment_wizard"
+                        string="Manual Payment"
+                        type="object"
+                        class="btn-secondary"
+                        icon="fa-money"
+                        data-hotkey="m"/>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

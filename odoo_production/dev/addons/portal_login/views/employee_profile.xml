@@ -1,0 +1,332 @@
+<odoo>
+    <template id="portal_employee_profile" name="Portal Employee Profile">
+        <t t-call="portal.portal_layout">
+
+            <div class="container py-4">
+
+              
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="fw-bold text-primary">My Profile</h3>
+                </div>
+
+               
+                <div class="card shadow-lg border-0 rounded-3">
+                    <div class="card-body p-4">
+
+                       
+                        <div class="text-center mb-5 pb-3 border-bottom">
+                            
+                            <t t-if="employee.image_1920">
+                                <img t-att-src="'data:image/png;base64,%s' % employee.image_1920.decode()"
+                                     class="rounded-circle shadow-lg border border-4 border-white"
+                                     style="width: 140px; height: 140px; object-fit: cover;"/>
+                            </t>
+                            <t t-else="">
+                                <div class="rounded-circle bg-gradient-primary text-white d-flex justify-content-center align-items-center shadow-lg border border-4 border-white"
+                                     style="width: 140px; height: 140px; font-size: 42px;">
+                                    <i class="fa fa-user"></i>
+                                </div>
+                            </t>
+
+                            
+                            <h4 class="fw-bold mt-4 mb-1">
+                                <t t-esc="employee.name"/>
+                            </h4>
+                            <p class="text-muted fs-5">
+                                <t t-esc="employee.job_title or 'Not Specified'"/>
+                            </p>
+                        </div>
+
+                        <div class="section-wrapper mb-4">
+                            <h5 class="section-title">
+                                <i class="fa fa-briefcase me-2"></i>Work Information
+                            </h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="info-field">
+                                        <label class="info-label">Work Email</label>
+                                        <div class="info-value">
+                                            <t t-esc="employee.work_email or 'Not Specified'"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-field">
+                                        <label class="info-label">Department</label>
+                                        <div class="info-value">
+                                            <t t-esc="employee.department_id.name or 'Not Specified'"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                 
+                        <div class="section-wrapper mb-4">
+                            <h5 class="section-title">
+                                <i class="fa fa-phone me-2"></i>Contact Information
+                            </h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="info-field">
+                                        <label class="info-label">Mobile Phone</label>
+                                        <div class="info-value">
+                                            <t t-esc="employee.mobile_phone or 'Not Specified'"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-field">
+                                        <label class="info-label">Private Phone</label>
+                                        <div class="info-value">
+                                            <t t-esc="employee.private_phone or 'Not Specified'"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-field">
+                                        <label class="info-label">Private Email</label>
+                                        <div class="info-value">
+                                            <t t-esc="employee.private_email or 'Not Specified'"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    
+                        <div class="section-wrapper mb-4">
+                            <h5 class="section-title">
+                                <i class="fa fa-home me-2"></i>Address
+                            </h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="info-field">
+                                        <label class="info-label">Street</label>
+                                        <div class="info-value">
+                                            <t t-esc="employee.private_street or 'Not Specified'"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-field">
+                                        <label class="info-label">Street 2</label>
+                                        <div class="info-value">
+                                            <t t-esc="employee.private_street2 or 'Not Specified'"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="info-field">
+                                        <label class="info-label">City</label>
+                                        <div class="info-value">
+                                            <t t-esc="employee.private_city or 'Not Specified'"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="info-field">
+                                        <label class="info-label">ZIP Code</label>
+                                        <div class="info-value">
+                                            <t t-esc="employee.private_zip or 'Not Specified'"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="info-field">
+                                        <label class="info-label">Country</label>
+                                        <div class="info-value">
+                                            <t t-esc="employee.private_country_id.name or 'Not Specified'"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        
+                        <div class="section-wrapper mb-4">
+                            <h5 class="section-title">
+                                <i class="fa fa-user-circle me-2"></i>Personal Details
+                            </h5>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <div class="info-field">
+                                        <label class="info-label">Marital Status</label>
+                                        <div class="info-value">
+                                            <t t-esc="employee.marital or 'Not Specified'"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="info-field">
+                                        <label class="info-label">Children</label>
+                                        <div class="info-value">
+                                            <t t-esc="employee.children or 0"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-field">
+                                        <label class="info-label">Birthday</label>
+                                        <div class="info-value">
+                                            <t t-esc="employee.birthday or 'Not Specified'"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-field">
+                                        <label class="info-label">Place of Birth</label>
+                                        <div class="info-value">
+                                            <t t-esc="employee.place_of_birth or 'Not Specified'"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-field">
+                                        <label class="info-label">Identification No</label>
+                                        <div class="info-value">
+                                            <t t-esc="employee.identification_id or 'Not Specified'"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-field">
+                                        <label class="info-label">Passport No</label>
+                                        <div class="info-value">
+                                            <t t-esc="employee.passport_id or 'Not Specified'"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-field">
+                                        <label class="info-label">Blood Group</label>
+                                        <div class="info-value">
+                                            <t t-esc="employee.blood_group or 'Not Specified'"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-field">
+                                        <label class="info-label">Religion</label>
+                                        <div class="info-value">
+                                            <t t-esc="employee.religion or 'Not Specified'"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                      
+                        <div class="section-wrapper mb-4">
+                            <h5 class="section-title">
+                                <i class="fa fa-graduation-cap me-2"></i>Educational Background
+                            </h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="info-field">
+                                        <label class="info-label">Certificate Level</label>
+                                        <div class="info-value">
+                                            <t t-esc="employee.certificate or 'Not Specified'"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-field">
+                                        <label class="info-label">Field of Study</label>
+                                        <div class="info-value">
+                                            <t t-esc="employee.study_field or 'Not Specified'"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                       
+                        <div class="section-wrapper">
+                            <h5 class="section-title">
+                                <i class="fa fa-exclamation-triangle me-2"></i>Emergency Contact
+                            </h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="info-field">
+                                        <label class="info-label">Contact Name</label>
+                                        <div class="info-value">
+                                            <t t-esc="employee.emergency_contact or 'Not Specified'"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-field">
+                                        <label class="info-label">Contact Phone</label>
+                                        <div class="info-value">
+                                            <t t-esc="employee.emergency_phone or 'Not Specified'"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+           
+            <style>
+                .section-wrapper {
+                    padding: 1.5rem;
+                    background: #f8f9fa;
+                    border-radius: 10px;
+                    margin-bottom: 1.5rem;
+                    border-left: 4px solid #4e73df;
+                }
+                
+                .section-title {
+                    color: #2e3a59;
+                    font-weight: 600;
+                    margin-bottom: 1.2rem;
+                    padding-bottom: 0.5rem;
+                    border-bottom: 2px solid #e9ecef;
+                }
+                
+                .info-field {
+                    margin-bottom: 0.5rem;
+                }
+                
+                .info-label {
+                    color: #6c757d;
+                    font-weight: 500;
+                    font-size: 0.9rem;
+                    margin-bottom: 0.3rem;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                }
+                
+                .info-value {
+                    background: white;
+                    padding: 0.75rem 1rem;
+                    border-radius: 6px;
+                    border: 1px solid #dee2e6;
+                    font-weight: 500;
+                    color: #2e3a59;
+                    min-height: 45px;
+                    display: flex;
+                    align-items: center;
+                }
+                
+                .bg-gradient-primary {
+                    background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+                }
+                
+                .card {
+                    background: linear-gradient(180deg, #ffffff 0%, #f8f9fc 100%);
+                }
+                
+                .text-primary {
+                    color: #4e73df !important;
+                }
+            </style>
+
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Complete list view with custom Late field -->
+    <record id="hr_attendance_custom_list_view" model="ir.ui.view">
+        <field name="name">hr.attendance.custom.full.list</field>
+        <field name="model">hr.attendance</field>
+        <field name="priority">1</field>
+        <field name="arch" type="xml">
+            <list string="Attendances" 
+                  decoration-danger="is_late" 
+                  decoration-warning="is_absent" 
+                  decoration-success="extra_hours > 0">
+                  
+                <!-- Original Odoo fields -->
+                <field name="employee_id"/>
+                <field name="badge_id" string="Badge ID"/> 
+                <field name="check_in"/>
+                <field name="check_out"/>
+                
+
+                <!-- Location fields -->
+                <field name="in_location" string="Check In Location"/>
+                <field name="out_location" string="Check Out Location"/>
+
+                            
+                <!-- Our custom fields -->
+                <field name="emp_code"/>
+                <field name="department_id"/>
+                <field name="shift"/>
+                <field name="working_hours"/>
+                <field name="extra_hours"/>
+                <field name="late_time"/>
+                <field name="early_out"/>
+                
+                <!-- Custom Late field with text display -->
+                <field name="status_badge" widget="html"/>
+                
+                <field name="late_count_monthly"/>
+                <field name="leave_deduction_days"/>
+                <field name="deducted_leave_type"/>
+                <field name="is_absent"/>
+                <field name="leave_type"/>
+            </list>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     ShiftCell
+     Selection is handled at the <td> level in the parent dashboard.
+     The chip itself opens the per-cell dropdown (normal mode) or does nothing
+     (selection mode — td click toggles selection instead).
+════════════════════════════════════════════════════════════════════════════ -->
+<t t-name="hrm_shift_rostering.ShiftCell">
+    <div class="sr-cell-wrap">
+
+        <!-- Past date: readonly chip, no interaction -->
+        <t t-if="props.isPast">
+            <div t-att-class="'sr-chip sr-chip-readonly ' + (props.shiftCode ? getChipColor(props.shiftCode) : 'sr-chip-ns')"
+                 title="Past dates cannot be modified">
+                <span t-esc="props.shiftCode or 'NS'"/>
+                <i class="fa fa-lock sr-lock-icon"/>
+            </div>
+        </t>
+
+        <!-- Present / future -->
+        <t t-else="">
+            <button
+                t-att-class="'sr-chip ' +
+                    (props.isSelected ? 'sr-chip-selected ' : '') +
+                    (props.shiftCode ? getChipColor(props.shiftCode) : 'sr-chip-ns')"
+                t-on-click="onToggleClick"
+            >
+                <t t-if="props.isSelected">
+                    <i class="fa fa-check sr-check-icon"/>
+                </t>
+                <span t-esc="props.shiftCode or 'NS'"/>
+                <t t-if="!props.isSelected and props.selectionSize === 0">
+                    <i class="fa fa-caret-down sr-caret"/>
+                </t>
+            </button>
+
+            <!-- Per-cell dropdown — hidden while in selection mode -->
+            <div t-if="isOpen" class="sr-drop" t-on-click="onDropdownClick">
+                <div class="sr-drop-search">
+                    <input
+                        class="sr-drop-input"
+                        type="text"
+                        placeholder="Search shift…"
+                        t-att-value="props.searchQ"
+                        t-on-input="onSearchInput"
+                    />
+                </div>
+                <div class="sr-drop-list">
+                    <t t-foreach="filtered" t-as="s" t-key="s.id">
+                        <button
+                            t-att-class="'sr-drop-item sr-drop-shift ' + getChipColor(s.shift_code)"
+                            t-att-data-shiftid="s.id"
+                            t-on-click="onPickClick"
+                        ><t t-esc="s.shift_code"/></button>
+                    </t>
+                    <button class="sr-drop-item sr-drop-ns" t-on-click="onClearClick">Not Set</button>
+                </div>
+            </div>
+        </t>
+    </div>
+</t>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     Main Dashboard
+════════════════════════════════════════════════════════════════════════════ -->
+<t t-name="hrm_shift_rostering.Dashboard">
+<div class="sr-root" t-on-click="closeAll">
+
+    <!-- Hidden file input -->
+    <input
+        type="file"
+        id="sr-file-input"
+        accept=".xlsx"
+        style="display:none"
+        t-on-change="onFileChange"
+    />
+
+    <!-- ── Toolbar ──────────────────────────────────────────────────────── -->
+    <div class="sr-toolbar" t-on-click.stop="">
+
+        <!-- Left: gear + title -->
+        <div class="sr-tb-left">
+            <div class="sr-gear-wrap">
+                <button class="sr-btn-icon" title="Import / Export" t-on-click="toggleGear">
+                    <i class="fa fa-cog"/>
+                </button>
+                <div t-if="state.showGear" class="sr-gear-menu" t-on-click.stop="">
+                    <button class="sr-gear-item" t-on-click="doExport">
+                        <i class="fa fa-download"/> Export XLSX
+                    </button>
+                    <button class="sr-gear-item" t-on-click="triggerImport">
+                        <i class="fa fa-upload"/> Import XLSX
+                    </button>
+                </div>
+            </div>
+            <span class="sr-title">Shift Rostering</span>
+        </div>
+
+        <!-- Center: date navigation -->
+        <div class="sr-tb-center">
+            <button class="sr-btn-icon" t-on-click="goBack">
+                <i class="fa fa-chevron-left"/>
+            </button>
+
+            <div class="sr-picker-wrap">
+                <button class="sr-range-btn" t-on-click="togglePicker">
+                    <t t-esc="displayRange"/>
+                </button>
+
+                <div t-if="state.showPicker" class="sr-picker-panel" t-on-click.stop="">
+                    <div class="sr-modes">
+                        <t t-foreach="['day','week','month','quarter','year']" t-as="m" t-key="m">
+                            <button
+                                t-att-class="'sr-mode-pill ' + (state.viewMode === m ? 'active' : '')"
+                                t-att-data-mode="m"
+                                t-on-click="setViewMode"
+                            ><t t-esc="m.charAt(0).toUpperCase() + m.slice(1)"/></button>
+                        </t>
+                    </div>
+                    <div class="sr-custom">
+                        <input type="date" class="sr-date-inp" t-model="state.tempFrom"/>
+                        <span class="sr-arrow">→</span>
+                        <input type="date" class="sr-date-inp" t-model="state.tempTo"/>
+                        <button class="sr-apply-btn" t-on-click="applyRange">Apply</button>
+                    </div>
+                </div>
+            </div>
+
+            <button class="sr-btn-icon" t-on-click="goForward">
+                <i class="fa fa-chevron-right"/>
+            </button>
+            <button class="sr-today-btn" t-on-click="goToday">Today</button>
+        </div>
+
+        <!-- Middle: Selected Shift (multi-select bulk apply) -->
+        <div class="sr-tb-sel-shift" t-on-click.stop="">
+            <label class="sr-sel-shift-label">
+                <i class="fa fa-mouse-pointer"/> Selected Shift
+            </label>
+            <select class="sr-sel-shift-sel" t-model="state.selectionShiftId">
+                <option value="">— Pick shift —</option>
+                <t t-foreach="state.shifts" t-as="s" t-key="s.id">
+                    <option t-att-value="s.id" t-esc="s.shift_code"/>
+                </t>
+            </select>
+            <!-- Apply button — active only when cells are selected AND a shift is chosen -->
+            <button
+                t-att-class="'sr-sel-apply-btn' + (selectionSize > 0 and state.selectionShiftId ? '' : ' sr-sel-apply-btn--disabled')"
+                t-on-click="applySelectionShift"
+                t-att-title="selectionSize > 0 ? selectionSize + ' cell(s) selected' : 'Select cells in the grid first'"
+            >
+                <i class="fa fa-check"/> Apply
+                <t t-if="selectionSize > 0">
+                    <span class="sr-sel-badge"><t t-esc="selectionSize"/></span>
+                </t>
+            </button>
+            <t t-if="selectionSize > 0">
+                <button class="sr-sel-clear-btn" t-on-click="clearSelectionShifts" title="Clear shift from selected cells">
+                    <i class="fa fa-times-circle"/>
+                </button>
+                <button class="sr-sel-cancel-btn" t-on-click="clearSelection" title="Cancel selection">
+                    <i class="fa fa-ban"/> Cancel
+                </button>
+            </t>
+        </div>
+
+        <!-- Middle-right: Default Shift -->
+        <div class="sr-tb-default-shift" t-on-click.stop="">
+            <label class="sr-default-shift-label">
+                <i class="fa fa-calendar-check-o"/> Default Shift
+            </label>
+            <select class="sr-default-shift-sel" t-on-change="setDefaultShift">
+                <option value="">— None —</option>
+                <t t-foreach="state.shifts" t-as="s" t-key="s.id">
+                    <option t-att-value="s.id" t-esc="s.shift_code"/>
+                </t>
+            </select>
+        </div>
+
+        <!-- Right: filters -->
+        <div class="sr-tb-right">
+            <input
+                class="sr-filter-txt"
+                type="text"
+                placeholder="Search by name or ID…"
+                t-model="state.searchEmp"
+            />
+            <select class="sr-filter-sel" t-model="state.filterDept">
+                <option value="">All Departments</option>
+                <t t-foreach="departments" t-as="d" t-key="d">
+                    <option t-att-value="d" t-esc="d"/>
+                </t>
+            </select>
+        </div>
+    </div>
+
+    <!-- Selection hint bar — shown when no cells selected yet but shift is picked -->
+    <div t-if="state.selectionShiftId and selectionSize === 0" class="sr-sel-hint">
+        <i class="fa fa-info-circle"/> Click cells in the grid to select them, then press <strong>Apply</strong>.
+        <button class="sr-sel-hint-dismiss" t-on-click="clearSelectionShiftId">✕</button>
+    </div>
+
+    <!-- Selection active bar — shown when cells are selected -->
+    <div t-if="selectionSize > 0" class="sr-sel-active-bar">
+        <i class="fa fa-check-square-o"/>
+        <strong><t t-esc="selectionSize"/></strong> cell(s) selected.
+        <t t-if="!state.selectionShiftId"> Pick a shift from <strong>Selected Shift</strong> and press Apply.</t>
+        <t t-if="state.selectionShiftId"> Ready to apply. Press <strong>Apply</strong> or click more cells.</t>
+        <button class="sr-sel-hint-dismiss" t-on-click="clearSelection">✕ Cancel</button>
+    </div>
+
+    <!-- Import progress -->
+    <div t-if="state.importing" class="sr-banner sr-banner-info">
+        <i class="fa fa-spinner fa-spin"/> Importing, please wait…
+    </div>
+
+    <!-- Import result banner -->
+    <div
+        t-if="state.importResult and !state.importing"
+        t-att-class="'sr-banner ' + (state.importResult.hasError ? 'sr-banner-warn' : 'sr-banner-success')"
+    >
+        <i t-att-class="'fa ' + (state.importResult.hasError ? 'fa-exclamation-triangle' : 'fa-check-circle')"/>
+        <span>
+            Imported <strong t-esc="state.importResult.imported"/> assignments.
+            <t t-if="state.importResult.skipped">
+                &#160;Skipped: <strong t-esc="state.importResult.skipped"/>.
+            </t>
+            <t t-if="state.importResult.errorText">
+                &#160;<span class="sr-banner-errors" t-esc="state.importResult.errorText"/>
+            </t>
+        </span>
+        <button class="sr-banner-close" t-on-click="clearImportResult" title="Dismiss">&#x2715;</button>
+    </div>
+
+    <!-- ── Grid ─────────────────────────────────────────────────────────── -->
+    <div class="sr-grid-wrap">
+        <t t-if="state.loading">
+            <div class="sr-loading">
+                <div class="sr-spinner"/>
+                <span>Loading…</span>
+            </div>
+        </t>
+        <t t-else="">
+            <table class="sr-table">
+                <thead>
+                    <tr>
+                        <th class="sr-th sr-th-fix sr-th-av"></th>
+                        <th class="sr-th sr-th-fix sr-th-name">Employee</th>
+                        <th class="sr-th sr-th-fix sr-th-id">Employee ID</th>
+                        <th class="sr-th sr-th-fix sr-th-dept">Department</th>
+                        <th class="sr-th sr-th-fix sr-th-job sr-last-fix">Job Position</th>
+                        <t t-foreach="dates" t-as="date" t-key="date">
+                            <th t-att-class="'sr-th sr-th-date' + (isWeekend(date) ? ' weekend' : '') + (isToday(date) ? ' today' : '')">
+                                <div class="sr-th-day" t-esc="dayLabel(date)"/>
+                                <div class="sr-th-num" t-esc="dateNum(date)"/>
+                            </th>
+                        </t>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-if="filteredEmployees.length === 0">
+                        <tr>
+                            <td colspan="100" class="sr-empty">No employees found.</td>
+                        </tr>
+                    </t>
+                    <t t-foreach="filteredEmployees" t-as="emp" t-key="emp.id">
+                        <tr t-att-class="'sr-row ' + (emp_index % 2 === 0 ? 'even' : 'odd')">
+                            <td class="sr-td sr-td-fix sr-td-av">
+                                <div class="sr-avatar">
+                                    <t t-if="emp.image_128">
+                                        <img t-att-src="'data:image/png;base64,' + emp.image_128" alt=""/>
+                                    </t>
+                                    <t t-else="">
+                                        <span t-esc="emp.name[0].toUpperCase()"/>
+                                    </t>
+                                </div>
+                            </td>
+                            <td class="sr-td sr-td-fix sr-td-name">
+                                <div class="sr-emp-name" t-esc="emp.name"/>
+                            </td>
+                            <td class="sr-td sr-td-fix sr-td-id">
+                                <span class="sr-mono" t-esc="emp.barcode or '—'"/>
+                            </td>
+                            <td class="sr-td sr-td-fix sr-td-dept">
+                                <span t-esc="emp.department_id ? emp.department_id[1] : '—'"/>
+                            </td>
+                            <td class="sr-td sr-td-fix sr-td-job sr-last-fix">
+                                <span t-esc="emp.job_id ? emp.job_id[1] : '—'"/>
+                            </td>
+                            <t t-foreach="dates" t-as="date" t-key="date">
+                                <!-- td click = toggle cell selection (past cells ignored) -->
+                                <td
+                                    t-att-class="'sr-td sr-td-date' +
+                                        (isWeekend(date) ? ' weekend' : '') +
+                                        (isToday(date) ? ' today' : '') +
+                                        (isPast(date) ? ' past-date' : '') +
+                                        (isCellSelected(emp.id, date) ? ' sr-td-selected' : '') +
+                                        (!isPast(date) ? ' sr-td-selectable' : '')"
+                                    t-att-data-empid="emp.id"
+                                    t-att-data-date="date"
+                                    t-on-click="onCellTdClick"
+                                >
+                                    <ShiftCell
+                                        empKey="getCellKey(emp.id, date)"
+                                        employeeId="emp.id"
+                                        date="date"
+                                        shiftId="getShiftId(emp.id, date)"
+                                        shiftCode="getShiftCode(emp.id, date)"
+                                        openKey="state.openCellKey"
+                                        searchQ="state.cellSearchQ"
+                                        shifts="state.shifts"
+                                        isPast="isPast(date)"
+                                        isSelected="isCellSelected(emp.id, date)"
+                                        selectionSize="selectionSize"
+                                        onToggle.bind="onCellToggle"
+                                        onSearch.bind="onCellSearch"
+                                        onPick.bind="onCellPick"
+                                        onClear.bind="onCellClear"
+                                    />
+                                </td>
+                            </t>
+                        </tr>
+                    </t>
+                </tbody>
+            </table>
+        </t>
+    </div>
+</div>
+</t>
+
+</templates>

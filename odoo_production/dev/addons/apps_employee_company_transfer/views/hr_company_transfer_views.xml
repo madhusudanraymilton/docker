@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_hr_company_transfer_form" model="ir.ui.view">
+        <field name="name">hr.company.transfer.form</field>
+        <field name="model">hr.company.transfer</field>
+        <field name="arch" type="xml">
+            <form string="Inter-Company Transfer">
+                <header>
+                    <button name="action_submit" string="Submit" type="object"
+                            class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_approve" string="Approve" type="object"
+                            class="btn-success"
+                            data-prevent-multiple-clicks="1"
+                            groups="apps_employee_company_transfer.group_transfer_approver"
+                            invisible="state != 'submitted'"/>
+                    <button name="action_reject" string="Reject" type="object"
+                            class="btn-danger"
+                            groups="apps_employee_company_transfer.group_transfer_approver"
+                            invisible="state not in ('submitted','approved')"/>
+                    <!-- Transfer is automatic on Approve -->
+                    <button name="action_reverse" string="Reverse Transfer" type="object"
+                            class="btn-warning"
+                            groups="hr.group_hr_manager"
+                            invisible="state != 'transferred' or transfer_type != 'temporary'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,submitted,approved,transferred"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box"/>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+
+                    <!-- FROM section: always readonly (auto-filled) -->
+                    <group string="From (Current)">
+                        <group>
+                            <field name="employee_id"       readonly="state != 'draft'"/>
+                            <field name="from_company_id"   readonly="state != 'draft'"/>
+                            <field name="from_department_id" readonly="state != 'draft'"/>
+                            <field name="from_job_id" readonly="state != 'draft'"/>
+                            <field name="from_work_location_id" readonly="state != 'draft'"/>
+                            <field name="from_address_id" readonly="state != 'draft'"/>
+                            <field name="from_contract_name" string="Current Contract" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="grade" readonly="state != 'draft'"/>
+                            <field name="supervisor_id" readonly="state != 'draft'"/>
+                            <field name="reporting_head_id" readonly="state != 'draft'"/>
+                        </group>
+                    </group>
+
+                    <!-- TO section: editable only in draft -->
+                    <group string="To (Destination)">
+                        <group>
+                            <field name="to_company_id"       readonly="state != 'draft'"/>
+                            <field name="to_department_id"    readonly="state != 'draft'"/>
+                            <field name="to_job_id"           readonly="state != 'draft'"/>
+                            <field name="to_work_location_id" readonly="state != 'draft'"/>
+                            <field name="to_address_id"       readonly="state != 'draft'"/>
+                        </group>
+                        <group>
+                            <field name="transfer_type" readonly="state != 'draft'"/>
+                            <field name="start_date"    readonly="state != 'draft'"/>
+                            <field name="end_date"
+                                   invisible="transfer_type != 'temporary'"
+                                   readonly="state != 'draft'"/>
+                            <field name="duration_days"
+                                   invisible="transfer_type != 'temporary'"
+                                   readonly="1"/>
+                        </group>
+                    </group>
+
+                    <group string="Rejection Details" invisible="state != 'rejected'">
+                        <field name="rejection_reason" nolabel="1" readonly="state != 'draft'"/>
+                    </group>
+
+                    <notebook>
+                        <page string="Contract Info" name="contract_info">
+                            <group>
+                                <field name="from_contract_name" string="Current Contract" readonly="1"/>
+                                <field name="new_contract_name"  string="New Contract"     readonly="1"/>
+                            </group>
+                        </page>
+                        <page string="Leave Allocations" name="leave_info">
+                            <field name="leave_ids" readonly="state != 'draft'">
+                                <list>
+                                    <field name="holiday_status_id"/>
+                                    <field name="number_of_days"/>
+                                    <field name="state"/>
+                                    <field name="date_from"/>
+                                    <field name="date_to"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Notes" name="notes">
+                            <field name="note" placeholder="Add any additional notes here..."
+                                   readonly="state != 'draft'"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_hr_company_transfer_list" model="ir.ui.view">
+        <field name="name">hr.company.transfer.list</field>
+        <field name="model">hr.company.transfer</field>
+        <field name="arch" type="xml">
+            <list string="Inter-Company Transfers"
+                  decoration-success="state == 'transferred'"
+                  decoration-info="state in ('submitted','approved')"
+                  decoration-danger="state == 'rejected'"
+                  decoration-muted="state == 'reversed'">
+                <field name="name"/>
+                <field name="employee_id"/>
+                <field name="from_company_id"/>
+                <field name="to_company_id"/>
+                <field name="transfer_type"/>
+                <field name="start_date"/>
+                <field name="end_date" optional="show"/>
+                <field name="from_department_id" optional="hide"/>
+                <field name="to_department_id" optional="hide"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'transferred'"
+                       decoration-info="state in ('submitted','approved')"
+                       decoration-danger="state == 'rejected'"
+                       decoration-warning="state == 'reversed'"
+                       decoration-muted="state == 'draft'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_hr_company_transfer" model="ir.actions.act_window">
+        <field name="name">Inter Company Transfers</field>
+        <field name="res_model">hr.company.transfer</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Create your first inter-company transfer</p>
+            <p>Manage employee transfers between different companies in your group.</p>
+        </field>
+    </record>
+
+</odoo>

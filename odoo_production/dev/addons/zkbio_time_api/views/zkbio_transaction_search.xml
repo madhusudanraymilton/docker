@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_zkbio_transaction_search" model="ir.ui.view">
+        <field name="name">zkbio.transaction.search</field>
+        <field name="model">zkbio.transaction</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="emp_code"/>
+                <field name="employee_id"/>
+                <field name="terminal_id"/>
+                <field name="punch_time"/>
+                <filter string="Not Processed" name="not_processed" domain="[('is_processed', '=', False)]"/>
+                <filter string="Processed" name="processed" domain="[('is_processed', '=', True)]"/>
+                <separator/>
+                <filter string="Employee" name="group_employee" context="{'group_by': 'employee_id'}"/>
+                <filter string="Terminal" name="group_terminal" context="{'group_by': 'terminal_id'}"/>
+                <filter string="Punch Date" name="group_punch_date" context="{'group_by': 'punch_time:day'}"/>
+            </search>
+        </field>
+    </record>
+</odoo>

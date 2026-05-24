@@ -1,0 +1,26 @@
+/* Custom display for boolean fields */
+.o_boolean_cell .fa-check-circle:before {
+    content: "Late" !important;
+    color: #4CAF50 !important;
+    font-weight: bold !important;
+}
+
+.o_boolean_cell .fa-times-circle:before {
+    content: "On Time" !important;
+    color: #757575 !important;
+    font-weight: bold !important;
+}
+
+/* Remove default icons */
+.o_boolean_cell .fa-check-circle,
+.o_boolean_cell .fa-times-circle {
+    background: none !important;
+    font-family: inherit !important;
+}
+
+/* Green background for Late cells */
+.o_boolean_cell .fa-check-circle {
+    background-color: #e8f5e8 !important;
+    padding: 4px 8px !important;
+    border-radius: 4px !important;
+}

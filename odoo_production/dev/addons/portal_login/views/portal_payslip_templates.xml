@@ -1,0 +1,96 @@
+<!-- <odoo>
+    <template id="portal_payslip_list" name="Portal Payslip List">
+        <t t-call="portal.portal_layout">
+            <div class="container py-4">
+
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="fw-bold">My Payslips</h3>
+                </div>
+
+                <!-- Payslip List Card -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-bottom py-3">
+                        <h5 class="mb-0 fw-semibold">
+                            <i class="fa fa-money-bill text-primary me-2"/> Payslips
+                        </h5>
+                    </div>
+
+                    <div class="card-body p-0">
+
+                        <!-- No Payslip -->
+                        <t t-if="not payslips">
+                            <div class="text-center py-5 px-3">
+                                <i class="fa fa-inbox fa-4x text-muted mb-3 d-block"/>
+                                <h5 class="mb-2">No Payslips Found</h5>
+                                <p class="text-muted">Your payslips will appear here once generated.</p>
+                            </div>
+                        </t>
+
+                        <!-- Payslip Table for Desktop -->
+                        <t t-if="payslips">
+                            <div class="table-responsive d-none d-lg-block">
+                                <table class="table table-hover mb-0 align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Payslip Name</th>
+                                            <th>Period</th>
+                                            <th>Status</th>
+                                            <th class="text-center">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="payslips" t-as="sl">
+                                            <tr>
+                                                <td><strong t-esc="sl.name"/></td>
+                                                <td>
+                                                    <i class="fa fa-calendar text-muted me-1"/>
+                                                    <span t-esc="sl.date_from"/> -
+                                                    <span t-esc="sl.date_to"/>
+                                                </td>
+                                                <td>
+                                                    <span t-if="sl.state == 'done'" class="badge bg-success">Done</span>
+                                                    <span t-elif="sl.state == 'verify'" class="badge bg-warning">Waiting</span>
+                                                    <span t-elif="sl.state == 'draft'" class="badge bg-secondary">Draft</span>
+                                                </td>
+                                                <td class="text-center">
+                                                    <a t-att-href="'/my/payslip/print/%s' % sl.id" class="btn btn-sm btn-outline-primary">
+                                                        <i class="fa fa-print me-1"/> Print
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Mobile Cards -->
+                            <div class="d-lg-none p-3">
+                                <t t-foreach="payslips" t-as="sl">
+                                    <div class="card mb-3 border shadow-sm">
+                                        <div class="card-body">
+                                            <h6 class="fw-bold mb-1" t-esc="sl.name"/>
+                                            <p class="text-muted small mb-1">
+                                                <i class="fa fa-calendar me-1"/> 
+                                                <span t-esc="sl.date_from"/> - <span t-esc="sl.date_to"/>
+                                            </p>
+                                            <p class="mb-2">
+                                                <span t-if="sl.state == 'done'" class="badge bg-success">Done</span>
+                                                <span t-elif="sl.state == 'verify'" class="badge bg-warning">Waiting</span>
+                                                <span t-elif="sl.state == 'draft'" class="badge bg-secondary">Draft</span>
+                                            </p>
+                                            <a t-att-href="'/my/payslip/print/%s' % sl.id"
+                                               class="btn btn-sm btn-outline-primary w-100">
+                                                <i class="fa fa-print me-1"/> Print
+                                            </a>
+                                        </div>
+                                    </div>
+                                </t>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo> -->

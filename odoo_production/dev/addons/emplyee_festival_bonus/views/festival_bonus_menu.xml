@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    
+    <record id="view_festival_bonus_wizard_form" model="ir.ui.view">
+        <field name="name">festival.bonus.wizard.form</field>
+        <field name="model">festival.bonus.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Create Festival Bonus">
+                <field name="step" invisible="1"/>
+
+                <!--  STEP 1: Filters  -->
+                <group string="Bonus Details" invisible="step != 'filters'">
+                    <field name="pay_type" required="1"/>
+                    <field name="festival_category" required="pay_type == 'festival_bonus'" invisible="pay_type != 'festival_bonus'"/>
+                    <label for="date_from" string="Period"/>
+                    <div class="o_row">
+                        <field name="date_from" class="oe_inline" required="1"/>
+                        <i class="fa fa-long-arrow-right mx-2"/>
+                        <field name="date_to" class="oe_inline" required="1"/>
+                    </div>
+                    <field name="structure_id" placeholder="Auto-detect Festival structure"/>
+                </group>
+
+                <group string="Target" invisible="step != 'filters'">
+                    <field name="target_type" widget="radio" required="1"/>
+                    <field name="department_ids" widget="many2many_tags" invisible="target_type != 'department'" required="target_type == 'department'" placeholder="Select departments..."/>
+                </group>
+
+                <group string="Employee Filters" invisible="step != 'filters'">
+                    <field name="contract_length" string="Min Contract Length (Months)" placeholder="e.g. 6 (0 = no minimum)"/>
+                    <field name="religion"/>
+                    <field name="gender"/>
+                </group>
+
+                <!--  STEP 2: Select Employees -->
+                <group invisible="step != 'employees'">
+                    <div class="alert alert-info mb-3" style="margin:8px 0 12px 0;">
+                        <i class="fa fa-info-circle me-1"/>
+                        All eligible employees are pre-selected. Deselect any you want to exclude.
+                    </div>
+                    <field name="eligible_employee_ids" widget="many2many_list" nolabel="1" options="{'no_create': True, 'no_open': True}">
+                        <list string="Eligible Employees">
+                            <field name="name"/>
+                            <field name="department_id"/>
+                            <field name="job_id"/>
+                            <field name="sex" optional="show"/>
+                            <field name="religion" optional="show"/>
+                        </list>
+                    </field>
+                </group>
+
+                <footer>
+                    <!-- Step 1 footer -->
+                    <button string="Next: Select Employees" name="action_load_employees" type="object" class="btn-primary" invisible="step != 'filters'"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel" invisible="step != 'filters'"/>
+
+                    <!-- Step 2 footer -->
+                    <button string="Generate Payslips" name="action_generate" type="object" class="btn-primary" invisible="step != 'employees'"/>
+                    <button string="Back" name="action_back" type="object" class="btn-secondary" invisible="step != 'employees'"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Wizard action -->
+    <record id="action_festival_bonus_wizard" model="ir.actions.act_window">
+        <field name="name">Festival Bonus</field>
+        <field name="res_model">festival.bonus.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="view_id" ref="view_festival_bonus_wizard_form"/>
+        <field name="context">{'dialog_size': 'medium'}</field>
+    </record>
+
+    <!--Festival Bonus Kanban Page -->
+    <!-- <record id="view_festival_bonus_run_search" model="ir.ui.view">
+        <field name="name">festival.bonus.run.search</field>
+        <field name="model">hr.payslip.run</field>
+        <field name="arch" type="xml">
+            <search string="Search Festival Bonus">
+                <field name="name"/>
+                <filter string="Ready" name="ready" domain="[('state','=','01_ready')]"/>
+                <filter string="Done" name="done" domain="[('state','=','02_close')]"/>
+                <filter string="Paid" name="paid" domain="[('state','=','03_paid')]"/>
+                <separator/>
+                <filter string="Date" name="date_filter" date="date_start"/>
+                <separator/>
+                <filter string="Archived" name="filter_archived" domain="[('active','=','False')]"/>
+                <group>
+                    <filter string="Status" name="groupby_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record> -->
+
+    <record id="action_festival_bonus_run" model="ir.actions.act_window">
+        <field name="name">Festival Bonus</field>
+        <field name="res_model">festival.bonus.wizard</field>
+        <field name="view_mode">form,kanban</field>
+        <field name="target">new</field>
+        <field name="view_id" ref="view_festival_bonus_wizard_form"/>
+        <field name="context">{'dialog_size': 'medium'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No Festival Bonus Pay Runs yet.</p>
+            <p>
+                <a name="%(action_festival_bonus_wizard)d" type="action" class="btn btn-primary">
+                    Create Festival Bonus
+                </a>
+            </p>
+        </field>
+    </record>
+
+    <!-- Submenu -->
+    <menuitem id="menu_hr_payroll_festival_bonus" name="Festival Bonus" parent="hr_payroll.menu_hr_payroll_payslips" action="action_festival_bonus_run" sequence="90" groups="hr_payroll.group_hr_payroll_user"/>
+
+</odoo>

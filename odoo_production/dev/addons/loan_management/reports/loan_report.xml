@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Loan Report -->
+    <record id="action_report_loan" model="ir.actions.report">
+        <field name="name">Loan Report</field>
+        <field name="model">hr.loan</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">loan_management.loan_report_template</field>
+        <field name="print_report_name">'Loan_' + str(object.name)</field>
+        <field name="binding_model_id" ref="model_hr_loan"/>
+        <field name="binding_type">report</field>
+    </record>
+    
+    <!-- Loan Repayment Report -->
+    <record id="action_report_loan_repayment" model="ir.actions.report">
+        <field name="name">Loan Repayment Report</field>
+        <field name="model">hr.loan.repayment</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">loan_management.loan_repayment_report_template</field>
+        <field name="print_report_name">'Loan_Repayment_' + str(object.name)</field>
+        <field name="binding_model_id" ref="model_hr_loan_repayment"/>
+        <field name="binding_type">report</field>
+    </record>
+    
+    <!-- Salary Advance Report -->
+    <record id="action_report_salary_advance" model="ir.actions.report">
+        <field name="name">Salary Advance Report</field>
+        <field name="model">hr.salary.advance</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">loan_management.salary_advance_report_template</field>
+        <field name="print_report_name">'Salary_Advance_' + str(object.name)</field>
+        <field name="binding_model_id" ref="model_hr_salary_advance"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

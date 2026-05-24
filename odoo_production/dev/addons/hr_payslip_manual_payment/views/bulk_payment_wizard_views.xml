@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── Bulk Payment Wizard Form View ─────────────────────────────────── -->
+    <record id="view_hr_payslip_bulk_payment_wizard_form" model="ir.ui.view">
+        <field name="name">hr.payslip.bulk.payment.wizard.form</field>
+        <field name="model">hr.payslip.bulk.payment.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Bulk Manual Payment">
+                <sheet>
+                    <div class="oe_title mb-3">
+                        <h2>Bulk Manual Payment</h2>
+                        <p class="text-muted">
+                            Post manual payments for multiple employees at once.
+                            Adjust the <strong>Pay Now</strong> amount per employee as needed.
+                        </p>
+                    </div>
+
+                    <!-- Shared Settings -->
+                    <group string="Payment Settings">
+                        <group>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="bank_account_ids" invisible="1"/>
+                            <field name="cash_account_ids" invisible="1"/>
+                            <field name="payment_type" widget="radio" options='{"horizontal": True}'/>
+                            <field name="payment_date"/>
+                            <field name="memo"/>
+                        </group>
+                        <group>
+                            <field name="bank_journal_id"
+                                   invisible="payment_type != 'bank'"
+                                   required="payment_type == 'bank'"
+                                   domain="[('name', 'ilike', 'salar')]"
+                                   string="Salaries Journal"
+                                   options='{"no_create": True}'/>
+                            <field name="cash_journal_id"
+                                   invisible="payment_type != 'cash'"
+                                   required="payment_type == 'cash'"
+                                   domain="[('name', 'ilike', 'salar')]"
+                                   string="Salaries Journal"
+                                   options='{"no_create": True}'/>
+                        </group>
+                    </group>
+
+                    <group string="Accounting">
+                        <field name="account_debit"
+                               domain="[('account_type', 'in', ['liability_payable', 'liability_current']), '|', ('name', 'ilike', 'salary'), ('name', 'ilike', 'wage')]"
+                               string="Debit Account (Salary Payable)"
+                               options='{"no_create": True}'/>
+                        <field name="account_credit"
+                               invisible="payment_type != 'bank'"
+                               required="payment_type == 'bank'"
+                               domain="[('id', 'in', bank_account_ids)]"
+                               string="Credit Account (Bank)"
+                               options='{"no_create": True}'/>
+                        <field name="account_credit"
+                               invisible="payment_type != 'cash'"
+                               required="payment_type == 'cash'"
+                               domain="[('id', 'in', cash_account_ids)]"
+                               string="Credit Account (Cash)"
+                               options='{"no_create": True}'/>
+                    </group>
+
+                    <!-- Per-Employee Payment Lines -->
+                    <field name="line_ids" nolabel="1">
+                        <list editable="bottom" decoration-muted="pay_now == 0">
+                            <field name="employee_id" readonly="1" string="Employee"/>
+                            <field name="total_amount" readonly="1" string="Total Remaining"
+                                   widget="monetary" options='{"currency_field": "currency_id"}'/>
+                            <field name="pay_now" string="Pay Now"
+                                   widget="monetary" options='{"currency_field": "currency_id"}'/>
+                            <field name="net_payable" readonly="1" string="Net Payable After"
+                                   widget="monetary" options='{"currency_field": "currency_id"}'/>
+                            <field name="currency_id" column_invisible="1"/>
+                            <field name="payslip_id" column_invisible="1"/>
+                            <field name="partner_id" column_invisible="1"/>
+                        </list>
+                    </field>
+
+                </sheet>
+                <footer>
+                    <button name="action_confirm_bulk_payment"
+                            string="Confirm All Payments"
+                            type="object"
+                            class="btn-primary"
+                            data-hotkey="v"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- ── Window Action ──────────────────────────────────────────────────── -->
+    <record id="action_hr_payslip_bulk_payment_wizard" model="ir.actions.act_window">
+        <field name="name">Bulk Manual Payment</field>
+        <field name="res_model">hr.payslip.bulk.payment.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="view_id" ref="view_hr_payslip_bulk_payment_wizard_form"/>
+    </record>
+
+    <!-- ── Server Action → appears in Actions menu on payslip list ───────── -->
+    <record id="action_server_bulk_manual_payment" model="ir.actions.server">
+        <field name="name">Manual Payment</field>
+        <field name="model_id" ref="hr_payroll.model_hr_payslip"/>
+        <field name="binding_model_id" ref="hr_payroll.model_hr_payslip"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+action = env['hr.payslip.bulk.payment.wizard'].with_context(
+    active_ids=records.ids,
+    active_model='hr.payslip',
+).create({}).action_open()
+        </field>
+    </record>
+
+</odoo>

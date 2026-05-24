@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_hr_employee_transfer_smart_buttons" model="ir.ui.view">
+        <field name="name">hr.employee.transfer.smart.buttons</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button class="oe_stat_button"
+                        name="action_view_company_transfers"
+                        type="object"
+                        icon="fa-exchange"
+                        invisible="company_transfer_count == 0">
+                    <field name="company_transfer_count" widget="statinfo" string="Inter Transfers"/>
+                </button>
+                <button class="oe_stat_button"
+                        name="action_view_intra_transfers"
+                        type="object"
+                        icon="fa-arrows"
+                        invisible="intra_transfer_count == 0">
+                    <field name="intra_transfer_count" widget="statinfo" string="Intra Transfers"/>
+                </button>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

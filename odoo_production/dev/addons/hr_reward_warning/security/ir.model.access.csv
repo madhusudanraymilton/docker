@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_hr_announcement_admin,access.hr.announcement.admin,model_hr_announcement,,1,1,1,1
+access_hr_announcement_hr_user,access.hr.announcement..hr.user,model_hr_announcement,,1,1,1,1
+access_hr_announcement_user,access.hr.announcement.user,model_hr_announcement,,1,0,0,0
+access_attachment_portal,Portal Read Attachment,base.model_ir_attachment,,1,0,0,0
+access_company_policy_user,access.company.policy.user,model_company_policy,base.group_user,1,1,1,1

@@ -1,0 +1,19 @@
+<odoo>
+    <record id="view_hr_payslip_tree_inherit_festival_bonus" model="ir.ui.view">
+        <field name="name">hr.payslip.tree.inherit.festival.bonus</field>
+        <field name="model">hr.payslip</field>
+        <field name="inherit_id" ref="hr_payroll.view_hr_payslip_tree"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='net_wage']" position="after">
+                <field name="festival_bonus" widget="monetary"
+                       options="{'currency_field': 'currency_id'}"
+                       optional="show"/>
+                <field name="provident_fund_amount" widget="monetary"
+                       options="{'currency_field': 'currency_id'}"
+                       optional="show"/>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

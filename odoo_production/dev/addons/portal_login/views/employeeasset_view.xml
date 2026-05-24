@@ -1,0 +1,36 @@
+<odoo>
+    <record id="hr_employee_form_inherit_assets" model="ir.ui.view">
+        <field name="name">hr.employee.form.inherit.assets</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+      
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Expenses">
+                    <group>
+                        <group>
+                            <field name="issue_date"/>
+                            <field name="team_company_name"/>
+                            <field name ="responsible_person_id"/>
+                            <field name="product_description"/>
+                            <field name="quantity"/>
+                            <field name ="bill_allowance" />
+                            <field name="device_condition"/>
+                        </group>
+                        <group>
+                            <field name="return_date"/>
+                            <field name="returned_status"/>
+                            <field name="return_device_condition"/>
+                            <field name="serial_no"/>
+                            <field name="reason"/>
+                            <field name="issued_by_team"/>
+                        </group>
+                        <group>
+                            <field name="remark"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

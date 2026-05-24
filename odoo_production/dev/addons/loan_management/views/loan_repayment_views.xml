@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Loan Repayment Form View -->
+    <record id="view_hr_loan_repayment_form" model="ir.ui.view">
+        <field name="name">hr.loan.repayment.form</field>
+        <field name="model">hr.loan.repayment</field>
+        <field name="arch" type="xml">
+            <form string="Loan Repayment">
+                <header>
+                    <button name="action_confirm" string="Confirm Payment" type="object" class="btn-primary" 
+                            invisible="state != 'draft'" confirm="Confirm this payment?"/>
+                    <button name="action_cancel" string="Cancel" type="object" class="btn-secondary" 
+                            invisible="state != 'draft'" confirm="Cancel this payment?"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,paid,cancelled"/>
+                    <button name="action_print_report" string="Print" type="object" class="btn-secondary" icon="fa-print"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Repayment Reference"/>
+                        </h1>
+                    </div>
+                    
+                    <group>
+                        <group>
+                            <field name="loan_id" widget="many2one" required="1"/>
+                            <field name="employee_id" readonly="1"/>
+                            <field name="partner_id" required="1"/>
+                            <field name="date" required="1"/>
+                        </group>
+                        <group>
+                            <field name="amount" required="1"/>
+                            <field name="balance_amount" readonly="1"/>
+                            <field name="currency_id" readonly="1"/>
+                            <field name="payment_method" required="1"/>
+                            <field name="journal_id"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Accounting Entries">
+                        <group>
+                            <field name="account_debit" string="Debit Account"/>
+                            <field name="account_credit" string="Credit Account"/>
+                            <field name="move_id" widget="many2one" readonly="1"/>
+                        </group>
+                    </group>
+                    
+                    <group>
+                        <field name="notes" widget="text" placeholder="Additional notes..."/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Loan Repayment Tree View -->
+    <record id="view_hr_loan_repayment_list" model="ir.ui.view">
+        <field name="name">hr.loan.repayment.list</field>
+        <field name="model">hr.loan.repayment</field>
+        <field name="arch" type="xml">
+            <list string="Loan Repayments">
+                <field name="name"/>
+                <field name="loan_id"/>
+                <field name="employee_id"/>
+                <field name="partner_id"/>
+                <field name="date"/>
+                <field name="amount"/>
+                <field name="payment_method"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+    
+    <!-- Loan Repayment Search View -->
+    <record id="view_hr_loan_repayment_search" model="ir.ui.view">
+        <field name="name">hr.loan.repayment.search</field>
+        <field name="model">hr.loan.repayment</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="loan_id"/>
+                <field name="employee_id"/>
+                <field name="partner_id"/>
+                <field name="date"/>
+                <filter name="draft" string="Draft" domain="[('state','=','draft')]"/>
+                <filter name="paid" string="Paid" domain="[('state','=','paid')]"/>
+                <filter name="cancelled" string="Cancelled" domain="[('state','=','cancelled')]"/>
+            </search>
+        </field>
+    </record>
+    
+    <!-- Loan Repayment Action -->
+    <record id="action_hr_loan_repayment" model="ir.actions.act_window">
+        <field name="name">Loan Repayments</field>
+        <field name="res_model">hr.loan.repayment</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_id" ref="view_hr_loan_repayment_list"/>
+        <field name="search_view_id" ref="view_hr_loan_repayment_search"/>
+        <field name="context">{'default_state': 'draft'}</field>
+    </record>
+</odoo>

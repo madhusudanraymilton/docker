@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ZKBio Configuration List View -->
+    <record id="view_zkbio_config_list" model="ir.ui.view">
+        <field name="name">zkbio.config.list</field>
+        <field name="model">zkbio.config</field>
+        <field name="arch" type="xml">
+            <list string="ZKBio Configurations">
+                <field name="name"/>
+                <field name="api_url"/>
+                <field name="connection_status" decoration-success="connection_status == 'connected'" decoration-danger="connection_status == 'failed'"/>
+                <field name="last_sync_date"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ZKBio Configuration Form View -->
+    <record id="view_zkbio_config_form" model="ir.ui.view">
+        <field name="name">zkbio.config.form</field>
+        <field name="model">zkbio.config</field>
+        <field name="arch" type="xml">
+            <form string="ZKBio Configuration">
+                <header>
+                    <button name="action_test_connection" string="Test Connection" type="object" class="btn-primary"/>
+                    <button name="action_sync_terminals" string="Sync Terminals" type="object" class="btn-secondary"/>
+                    <button name="action_sync_attendance" string="Sync Attendance" type="object" class="btn-secondary"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-archive">
+                            <field name="active" widget="boolean_button" options="{'terminology': 'archive'}"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Configuration Name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="API Settings">
+                            <field name="api_url" placeholder="http://103.91.230.83:8088"/>
+                            <field name="api_token" password="True"/>
+                            <field name="device_timezone" widget="selection"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group string="Auto-Sync Settings">
+                            <field name="auto_sync_enabled"/>
+                            <field name="sync_interval" invisible="not auto_sync_enabled" required="auto_sync_enabled"/>
+                            <field name="sync_page_size" invisible="not auto_sync_enabled"
+                                   help="Number of records per API request. Higher = fewer API calls but may timeout"/>
+                            <field name="auto_process_attendance"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Status Information">
+                            <field name="connection_status" readonly="1"
+                                   decoration-success="connection_status == 'connected'"
+                                   decoration-danger="connection_status == 'failed'"
+                                   decoration-info="connection_status == 'not_tested'"/>
+                            <field name="last_sync_date" readonly="1"/>
+                            <field name="status_message" readonly="1" widget="text"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Help">
+                            <group>
+                                <field name="status_message" nolabel="1" readonly="1" widget="html"/>
+                            </group>
+                            <div class="alert alert-info" role="alert">
+                                <h4>Configuration Instructions:</h4>
+                                <ol>
+                                    <li>Enter your ZKBio Time API base URL (e.g., http://100.90.200.83:8088)</li>
+                                    <li>Enter your API authentication token</li>
+                                    <li>Select the timezone of your biometric devices (default: Asia/Dhaka for GMT+6)</li>
+                                    <li>Click "Test Connection" to verify the configuration</li>
+                                    <li>Click "Sync Terminals" to import biometric devices</li>
+                                    <li>Enable "Auto-sync" and set the sync interval (in minutes) for automatic attendance synchronization</li>
+                                    <li>Enable "Auto-process to Attendance Logs" to automatically create HR Attendance records from punches</li>
+                                </ol>
+                                <p><strong>Note:</strong> When auto-sync is enabled, attendance data will be automatically synchronized at the specified interval. You can still manually sync attendance at any time using the "Sync Attendance" button.</p>
+                                <p><strong>Auto-processing Logic (First IN - Last OUT per day):</strong> When enabled, transactions are automatically processed to HR → Attendance Logs using the following rules:</p>
+                                <ul>
+                                    <li>For each employee, per day: <strong>First punch</strong> = Check In, <strong>Last punch</strong> = Check Out</li>
+                                    <li>All middle punches between first and last are <strong>ignored</strong></li>
+                                    <li>Creates <strong>one attendance record per employee per day</strong></li>
+                                    <li>Worked hours = Difference between first and last punch</li>
+                                    <li>Example: 09:02 (In) → 01:05 (Ignored) → 02:00 (Ignored) → 05:18 (Out) = One record (09:02 - 05:18)</li>
+                                </ul>
+                                <p><strong>Pagination Support:</strong> The sync now automatically fetches ALL pages from the API. If you have thousands of transactions, they will all be synced. The "Records Per Page" setting controls how many records are fetched per request (recommended: 500-1000).</p>
+                                <p><strong>Timezone Conversion:</strong> All punch times from the API will be converted from the device timezone to UTC for storage, then displayed in each user's configured timezone.</p>
+                            </div>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ZKBio Configuration Action -->
+    <record id="action_zkbio_config" model="ir.actions.act_window">
+        <field name="name">API Configuration</field>
+        <field name="res_model">zkbio.config</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first ZKBio Time API Configuration
+            </p>
+            <p>
+                Configure the connection to your ZKBio Time API server to start syncing biometric attendance data.
+            </p>
+        </field>
+    </record>
+</odoo>

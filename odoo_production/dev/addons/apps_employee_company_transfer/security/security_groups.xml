@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- Transfer Approver Security Group -->
+        <record id="group_transfer_approver" model="res.groups">
+            <field name="name">Transfer Approver</field>
+            <field name="implied_ids" eval="[(4, ref('hr.group_hr_user'))]"/>
+            <field name="comment">Can approve employee transfer requests.</field>
+        </record>
+
+    </data>
+</odoo>

@@ -1,0 +1,1173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ================================================================== -->
+    <!--  RESIGN APPLY PAGE                                                  -->
+    <!-- ================================================================== -->
+    <template id="portal_resign_apply" name="Portal - Apply for Resignation">
+        <t t-call="website.layout">
+            <t t-set="page_name" t-value="'resign_apply'"/>
+
+            <!-- ── HEAD ASSETS ── -->
+            <t t-set="head">
+                <link rel="stylesheet"
+                      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+                <style>
+                    /* ── CSS variables mirror the existing leave_portal.css palette ── */
+                    :root {
+                        --resign-primary:    #2c3e50;
+                        --resign-accent:     #c0392b;
+                        --resign-accent-lt:  #e74c3c;
+                        --resign-success:    #27ae60;
+                        --resign-warning:    #f39c12;
+                        --resign-info:       #2980b9;
+                        --resign-bg:         #f4f6f9;
+                        --resign-card-bg:    #ffffff;
+                        --resign-border:     #dde3ec;
+                        --resign-text:       #2c3e50;
+                        --resign-muted:      #7f8c8d;
+                        --resign-radius:     12px;
+                        --resign-shadow:     0 4px 20px rgba(0,0,0,0.08);
+                        --resign-shadow-hover: 0 8px 32px rgba(0,0,0,0.14);
+                    }
+
+                    /* ── Page wrapper ── */
+                    .resign-page-wrapper {
+                        background: var(--resign-bg);
+                        min-height: 100vh;
+                        padding: 32px 0 60px;
+                    }
+
+                    /* ── Page header ── */
+                    .resign-page-header {
+                        background: linear-gradient(135deg, var(--resign-primary) 0%, #1a252f 100%);
+                        border-radius: var(--resign-radius);
+                        padding: 32px 36px;
+                        color: #fff;
+                        margin-bottom: 28px;
+                        position: relative;
+                        overflow: hidden;
+                    }
+                    .resign-page-header::before {
+                        content: '';
+                        position: absolute; inset: 0;
+                        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+                    }
+                    .resign-page-header h2 { font-size: 1.75rem; font-weight: 700; margin: 0; }
+                    .resign-page-header p  { opacity: .75; margin: 6px 0 0; font-size: .95rem; }
+                    .resign-header-icon {
+                        width: 60px; height: 60px;
+                        background: rgba(255,255,255,.12);
+                        border-radius: 50%;
+                        display: flex; align-items: center; justify-content: center;
+                        font-size: 1.6rem;
+                    }
+
+                    /* ── Alert banners ── */
+                    .resign-alert {
+                        border-radius: var(--resign-radius);
+                        border: none; padding: 14px 18px;
+                        display: flex; align-items: flex-start; gap: 12px;
+                        margin-bottom: 20px; font-size: .9rem;
+                    }
+                    .resign-alert-danger  { background: #fdf2f2; color: #c0392b; border-left: 4px solid #e74c3c; }
+                    .resign-alert-success { background: #f0faf5; color: #27ae60; border-left: 4px solid #2ecc71; }
+                    .resign-alert-warning { background: #fffbf0; color: #e67e22; border-left: 4px solid #f39c12; }
+                    .resign-alert-info    { background: #f0f7ff; color: #2980b9; border-left: 4px solid #3498db; }
+
+                    /* ── Card ── */
+                    .resign-card {
+                        background: var(--resign-card-bg);
+                        border-radius: var(--resign-radius);
+                        border: 1px solid var(--resign-border);
+                        box-shadow: var(--resign-shadow);
+                        margin-bottom: 24px;
+                        overflow: hidden;
+                        transition: box-shadow .2s;
+                    }
+                    .resign-card:hover { box-shadow: var(--resign-shadow-hover); }
+                    .resign-card-header {
+                        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+                        border-bottom: 2px solid var(--resign-border);
+                        padding: 18px 24px;
+                        display: flex; align-items: center; gap: 12px;
+                    }
+                    .resign-card-header-icon {
+                        width: 40px; height: 40px;
+                        background: linear-gradient(135deg, var(--resign-accent) 0%, var(--resign-accent-lt) 100%);
+                        border-radius: 10px; color: #fff;
+                        display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+                    }
+                    .resign-card-header h5 {
+                        margin: 0; font-weight: 700; font-size: 1rem; color: var(--resign-text);
+                    }
+                    .resign-card-body { padding: 24px; }
+
+                    /* ── Employee info strip ── */
+                    .emp-info-strip {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+                        gap: 14px;
+                        padding: 20px 24px;
+                        background: #f8f9fa;
+                        border-bottom: 1px solid var(--resign-border);
+                    }
+                    .emp-info-item label {
+                        font-size: .72rem; text-transform: uppercase; letter-spacing: .06em;
+                        color: var(--resign-muted); font-weight: 600; display: block; margin-bottom: 3px;
+                    }
+                    .emp-info-item span {
+                        font-size: .9rem; font-weight: 600; color: var(--resign-text);
+                    }
+
+                    /* ── Form elements ── */
+                    .resign-form-group { margin-bottom: 20px; }
+                    .resign-form-group label {
+                        font-size: .82rem; font-weight: 600; color: var(--resign-text);
+                        margin-bottom: 6px; display: block;
+                    }
+                    .resign-form-group label .req { color: var(--resign-accent); margin-left: 2px; }
+                    .resign-form-control {
+                        width: 100%; padding: 10px 14px;
+                        border: 1.5px solid var(--resign-border);
+                        border-radius: 8px; font-size: .9rem; color: var(--resign-text);
+                        background: #fff; outline: none;
+                        transition: border-color .2s, box-shadow .2s;
+                    }
+                    .resign-form-control:focus {
+                        border-color: var(--resign-accent);
+                        box-shadow: 0 0 0 3px rgba(192,57,43,.12);
+                    }
+                    .resign-form-control::placeholder { color: #bbb; }
+                    textarea.resign-form-control { min-height: 110px; resize: vertical; }
+
+                    /* ── Template selector cards ── */
+                    .template-grid {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+                        gap: 14px;
+                    }
+                    .template-option { display: none; }
+                    .template-label {
+                        border: 2px solid var(--resign-border);
+                        border-radius: 10px; padding: 16px 14px;
+                        cursor: pointer; transition: all .2s;
+                        text-align: center; background: #fafbfc;
+                    }
+                    .template-option:checked + .template-label {
+                        border-color: var(--resign-accent);
+                        background: #fff5f5;
+                        box-shadow: 0 0 0 3px rgba(192,57,43,.1);
+                    }
+                    .template-label .template-icon {
+                        font-size: 2rem; margin-bottom: 8px;
+                        color: var(--resign-accent);
+                    }
+                    .template-label h6 { margin: 0 0 4px; font-weight: 700; font-size: .88rem; }
+                    .template-label small { color: var(--resign-muted); font-size: .78rem; }
+
+                    /* ── Submit button ── */
+                    .btn-resign-submit {
+                        background: linear-gradient(135deg, var(--resign-accent) 0%, var(--resign-accent-lt) 100%);
+                        color: #fff; border: none;
+                        border-radius: 10px; padding: 13px 32px;
+                        font-weight: 700; font-size: .95rem;
+                        cursor: pointer; width: 100%;
+                        transition: opacity .2s, transform .15s;
+                        display: flex; align-items: center; justify-content: center; gap: 10px;
+                    }
+                    .btn-resign-submit:hover { opacity: .92; transform: translateY(-1px); }
+
+                    /* ── History table ── */
+                    .resign-history-table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+                    .resign-history-table th {
+                        background: #f4f6f9; padding: 10px 14px;
+                        text-align: left; font-size: .75rem; text-transform: uppercase;
+                        letter-spacing: .06em; color: var(--resign-muted); border-bottom: 2px solid var(--resign-border);
+                    }
+                    .resign-history-table td {
+                        padding: 12px 14px;
+                        border-bottom: 1px solid #f0f2f5; vertical-align: middle;
+                    }
+                    .resign-history-table tr:hover td { background: #fafbfc; }
+
+                    /* ── Status badges ── */
+                    .resign-badge {
+                        display: inline-flex; align-items: center; gap: 5px;
+                        padding: 4px 11px; border-radius: 20px; font-size: .76rem; font-weight: 700;
+                    }
+                    .badge-submitted  { background: #eaf5ff; color: #2980b9; }
+                    .badge-hr_review  { background: #fff8e1; color: #e67e22; }
+                    .badge-approved   { background: #eefaf5; color: #27ae60; }
+                    .badge-rejected   { background: #fdf2f2; color: #c0392b; }
+                    .badge-cancelled  { background: #f4f6f9; color: #7f8c8d; }
+                    .badge-draft      { background: #f4f6f9; color: #95a5a6; }
+
+                    /* ── Separator ── */
+                    .resign-section-divider {
+                        border: none; border-top: 2px dashed var(--resign-border);
+                        margin: 28px 0;
+                    }
+
+                    /* ── Warning notice ── */
+                    .resign-notice-box {
+                        background: #fff8e1;
+                        border: 1.5px solid #ffc107;
+                        border-radius: 10px;
+                        padding: 14px 18px;
+                        display: flex; gap: 12px; align-items: flex-start;
+                        margin-bottom: 22px;
+                    }
+                    .resign-notice-box i { color: #e67e22; font-size: 1.2rem; margin-top: 2px; }
+                    .resign-notice-box p { margin: 0; font-size: .88rem; color: #7d4b00; }
+
+                    @media (max-width: 768px) {
+                        .resign-page-header { padding: 22px 20px; }
+                        .resign-page-header h2 { font-size: 1.35rem; }
+                        .emp-info-strip { grid-template-columns: 1fr 1fr; }
+                        .template-grid { grid-template-columns: 1fr; }
+                        .resign-card-body { padding: 16px; }
+                    }
+                </style>
+            </t>
+
+            <div class="resign-page-wrapper">
+                <div class="container">
+
+                    <!-- ── NAV BREADCRUMB ── -->
+                    <nav aria-label="breadcrumb" class="mb-3">
+                        <ol class="breadcrumb" style="background:transparent;padding:0;font-size:.85rem;">
+                            <li class="breadcrumb-item">
+                                <a href="/my/employee-dashboard">
+                                    <i class="fa fa-home me-1"/>Dashboard
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item active">Apply for Resignation</li>
+                        </ol>
+                    </nav>
+
+                    <!-- ── PAGE HEADER ── -->
+                    <div class="resign-page-header d-flex align-items-center gap-3">
+                        <div class="resign-header-icon">
+                            <i class="fa fa-sign-out-alt"/>
+                        </div>
+                        <div>
+                            <h2>Apply for Resignation</h2>
+                            <p>Submit your resignation request with required details below</p>
+                        </div>
+                    </div>
+
+                    <!-- ── ALERTS ── -->
+                    <t t-if="error">
+                        <div class="resign-alert resign-alert-danger">
+                            <i class="fa fa-exclamation-circle mt-1"/>
+                            <span t-esc="error"/>
+                        </div>
+                    </t>
+                    <t t-if="success">
+                        <div class="resign-alert resign-alert-success">
+                            <i class="fa fa-check-circle mt-1"/>
+                            <span t-esc="success"/>
+                        </div>
+                    </t>
+
+                    <!-- ── ACTIVE RESIGN WARNING ── -->
+                    <t t-if="active_resign">
+                        <div class="resign-alert resign-alert-warning">
+                            <i class="fa fa-exclamation-triangle mt-1"/>
+                            <div>
+                                <strong>You already have an active resignation request.</strong><br/>
+                                Reference: <strong t-esc="active_resign.name"/>
+                                — Status: <strong t-esc="dict([('submitted','Submitted'),('hr_review','Under HR Review'),('approved','Approved')]).get(active_resign.state, active_resign.state)"/>
+                                <br/>
+                                <a t-attf-href="/my/resign/status/#{active_resign.id}"
+                                   class="btn btn-sm btn-warning mt-2">
+                                    <i class="fa fa-eye me-1"/> View Request
+                                </a>
+                            </div>
+                        </div>
+                    </t>
+
+                    <div class="row">
+                        <!-- ════ LEFT: FORM ════════════════════════════════════ -->
+                        <div class="col-lg-8">
+                            <t t-if="not active_resign">
+                                <div class="resign-card">
+                                    <!-- ── Employee Info Strip ── -->
+                                    <!-- Hidden inputs so JS preview can read server-rendered values -->
+                                    <input type="hidden" id="preview_employee_name" t-att-value="employee.name or ''"/>
+                                    <input type="hidden" id="preview_manager_name"  t-att-value="employee.parent_id.name or ''"/>
+                                    <input type="hidden" id="preview_company_name"  t-att-value="employee.company_id.name or ''"/>
+                                    <input type="hidden" id="preview_job_title"     t-att-value="employee.job_id.name or ''"/>
+                                    <input type="hidden" id="preview_department"    t-att-value="employee.department_id.name or ''"/>
+
+                                    <div class="emp-info-strip">
+                                        <div class="emp-info-item">
+                                            <label>Employee</label>
+                                            <span t-esc="employee.name or '—'"/>
+                                        </div>
+                                        <div class="emp-info-item">
+                                            <label>Department</label>
+                                            <span t-esc="employee.department_id.name or '—'"/>
+                                        </div>
+                                        <div class="emp-info-item">
+                                            <label>Job Position</label>
+                                            <span t-esc="employee.job_id.name or '—'"/>
+                                        </div>
+                                        <div class="emp-info-item">
+                                            <label>Reporting Manager</label>
+                                            <span t-esc="employee.parent_id.name or '—'"/>
+                                        </div>
+                                    </div>
+
+                                    <!-- ── Form ── -->
+                                    <div class="resign-card-header">
+                                        <div class="resign-card-header-icon">
+                                            <i class="fa fa-file-signature"/>
+                                        </div>
+                                        <div>
+                                            <h5>Resignation Details</h5>
+                                            <small class="text-muted">Fill all required fields carefully</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="resign-card-body">
+                                        <div class="resign-notice-box">
+                                            <i class="fa fa-info-circle"/>
+                                            <p>
+                                                Please ensure you have read the company's resignation policy
+                                                before submitting. Once submitted, your request will be
+                                                reviewed by HR. You cannot edit a submitted request.
+                                            </p>
+                                        </div>
+
+                                        <form method="post" action="/my/resign/submit"
+                                              id="resignForm">
+                                            <input type="hidden" name="csrf_token"
+                                                   t-att-value="request.csrf_token()"/>
+
+                                            <!-- Row 1 -->
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="resign-form-group">
+                                                        <label>
+                                                            Last Working Date
+                                                            <span class="req">*</span>
+                                                        </label>
+                                                        <input type="date"
+                                                               name="last_working_date"
+                                                               class="resign-form-control"
+                                                               required="required"
+                                                               id="lastWorkingDate"/>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="resign-form-group">
+                                                        <label>Notice Period (Days)</label>
+                                                        <input type="number"
+                                                               name="notice_period_days"
+                                                               class="resign-form-control"
+                                                               value="30" min="0" max="365"/>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Reason -->
+                                            <div class="resign-form-group">
+                                                <label>
+                                                    Reason for Resignation
+                                                    <span class="req">*</span>
+                                                </label>
+                                                <textarea name="reason"
+                                                          class="resign-form-control"
+                                                          placeholder="Please provide your reason for resignation in detail..."
+                                                          required="required"
+                                                          rows="5"/>
+                                            </div>
+
+                                            <!-- Additional Notes -->
+                                            <div class="resign-form-group">
+                                                <label>Handover / Additional Notes</label>
+                                                <textarea name="additional_notes"
+                                                          class="resign-form-control"
+                                                          placeholder="Any pending tasks, handover plan or special instructions for HR..."
+                                                          rows="3"/>
+                                            </div>
+
+                                            <hr class="resign-section-divider"/>
+
+                                            <!-- PDF Template -->
+                                            <div class="resign-form-group">
+                                                <label>
+                                                    <i class="fa fa-file-pdf me-1"/>
+                                                    Select PDF Template
+                                                    <span class="req">*</span>
+                                                </label>
+                                                <div class="template-grid">
+                                                    <!-- New Opportunity -->
+                                                    <div>
+                                                        <input type="radio"
+                                                               name="pdf_template"
+                                                               id="tpl_new_opportunity"
+                                                               class="template-option"
+                                                               value="new_opportunity"
+                                                               checked="checked"/>
+                                                        <label for="tpl_new_opportunity" class="template-label">
+                                                            <div class="template-icon">
+                                                                <i class="fa fa-rocket"/>
+                                                            </div>
+                                                            <h6>New Opportunity</h6>
+                                                            <small>Resigning to pursue a new role or career path</small>
+                                                        </label>
+                                                    </div>
+                                                    <!-- Advance Notice -->
+                                                    <div>
+                                                        <input type="radio"
+                                                               name="pdf_template"
+                                                               id="tpl_advance_notice"
+                                                               class="template-option"
+                                                               value="advance_notice"/>
+                                                        <label for="tpl_advance_notice" class="template-label">
+                                                            <div class="template-icon">
+                                                                <i class="fa fa-calendar-check"/>
+                                                            </div>
+                                                            <h6>Advance Notice</h6>
+                                                            <small>Giving extra lead time for a smooth handover</small>
+                                                        </label>
+                                                    </div>
+                                                    <!-- Not a Good Fit -->
+                                                    <div>
+                                                        <input type="radio"
+                                                               name="pdf_template"
+                                                               id="tpl_not_good_fit"
+                                                               class="template-option"
+                                                               value="not_good_fit"/>
+                                                        <label for="tpl_not_good_fit" class="template-label">
+                                                            <div class="template-icon">
+                                                                <i class="fa fa-exchange-alt"/>
+                                                            </div>
+                                                            <h6>Not a Good Fit</h6>
+                                                            <small>Role scope was not as anticipated</small>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- ── Live Letter Preview ── -->
+                                            <div class="resign-form-group" id="letter-preview-wrap">
+                                                <label>
+                                                    <i class="fa fa-eye me-1"/>
+                                                    Letter Preview
+                                                </label>
+                                                <div id="letter-preview-box" style="
+                                                    background:#fff;
+                                                    border:1.5px solid #d0d7e3;
+                                                    border-radius:10px;
+                                                    padding:28px 32px;
+                                                    font-family:'Helvetica Neue',Arial,sans-serif;
+                                                    font-size:10.5pt;
+                                                    line-height:1.8;
+                                                    color:#222;
+                                                    min-height:220px;
+                                                    position:relative;
+                                                    box-shadow:0 2px 12px rgba(0,0,0,.06);
+                                                ">
+                                                    <div id="preview-content"></div>
+                                                </div>
+                                            </div>
+
+                                            <script type="text/javascript">
+                                            (function(){
+                                                // Read server-rendered hidden inputs (employee data from Odoo)
+                                                function hid(id){ var el=document.getElementById(id); return el ? el.value.trim() : ''; }
+                                                // Read live form inputs by name attribute
+                                                function byName(n){ var el=document.querySelector('[name="'+n+'"]'); return el ? el.value.trim() : ''; }
+                                                function getSel(name){ var el=document.querySelector('[name="'+name+'"]:checked'); return el ? el.value : ''; }
+                                                function esc(s){ return s.replace(/&amp;/g,'&amp;amp;').replace(/&lt;/g,'&amp;lt;').replace(/&gt;/g,'&amp;gt;'); }
+
+                                                // Format date yyyy-mm-dd → DD Month YYYY
+                                                function fmtDate(d){
+                                                    if(!d) return '<span style="color:#bbb;font-style:normal;">[last working date]</span>';
+                                                    var parts = d.split('-');
+                                                    if(parts.length !== 3) return d;
+                                                    var months = ['','January','February','March','April','May','June','July','August','September','October','November','December'];
+                                                    return parts[2]+' '+months[parseInt(parts[1],10)]+' '+parts[0];
+                                                }
+
+                                                function ph(val, placeholder){
+                                                    if(val) return '<strong>'+esc(val)+'</strong>';
+                                                    return '<span style="color:#bbb;font-style:normal;">'+placeholder+'</span>';
+                                                }
+
+                                                var TEMPLATES = {
+                                                    new_opportunity: function(d){
+                                                        return ''
+                                                        +'<p style="margin-bottom:6px;font-size:9pt;color:#888;">To, '+ph(d.manager,'[Manager Name]')+(d.dept?'&amp;nbsp;· '+esc(d.dept):'')+'</p>'
+                                                        +'<hr style="border:none;border-top:1px solid #eee;margin:8px 0 14px;"/>'
+                                                        +'<p>Dear '+ph(d.manager,'[Manager Name]')+',</p>'
+                                                        +'<p style="text-align:justify;">I am writing to formally notify you of my resignation from the position of '
+                                                        +ph(d.job,'[Job Position]')+' with '+ph(d.company,'[Company Name]')
+                                                        +'. In accordance with my notice period of <strong>'+esc(d.notice)+' days</strong>, my final day will be '+fmtDate(d.last_day)+'.</p>'
+                                                        +'<p style="text-align:justify;background:#fafafa;padding:8px 12px;border-radius:4px;">'
+                                                        +(d.reason ? esc(d.reason) : '<span style="color:#bbb;">Your reason will appear here once you fill in the field above.</span>')+'</p>'
+                                                        +'<p style="text-align:justify;">I have thoroughly enjoyed my time at '+ph(d.company,'[Company Name]')+' and would like to thank you for all of the opportunities I have been afforded here.</p>'
+                                                        +'<p style="text-align:justify;">In the coming weeks before '+fmtDate(d.last_day)+', I am fully committed to providing assistance in ensuring a smooth transition.</p>'
+                                                        +'<p style="margin-top:20px;">Sincerely,<br/><strong>'+esc(d.employee)+'</strong><br/><span style="font-size:9pt;color:#555;">'+esc(d.job)+'</span></p>';
+                                                    },
+                                                    advance_notice: function(d){
+                                                        return ''
+                                                        +'<p style="margin-bottom:6px;font-size:9pt;color:#888;">To, '+ph(d.manager,'[Manager Name]')+(d.dept?'&amp;nbsp;· '+esc(d.dept):'')+'</p>'
+                                                        +'<hr style="border:none;border-top:1px solid #eee;margin:8px 0 14px;"/>'
+                                                        +'<p>Dear '+ph(d.manager,'[Manager Name]')+',</p>'
+                                                        +'<p style="text-align:justify;">I am writing to inform you of my decision to resign from '+ph(d.company,'[Company Name]')
+                                                        +', effective '+fmtDate(d.last_day)+'. I understand that transitioning a new person to the role of '
+                                                        +ph(d.job,'[Job Position]')+' will take some time and I would like to provide as much notice as possible — a notice period of <strong>'+esc(d.notice)+' days</strong>.</p>'
+                                                        +'<p style="text-align:justify;background:#fafafa;padding:8px 12px;border-radius:4px;">'
+                                                        +(d.reason ? esc(d.reason) : '<span style="color:#bbb;">Your reason will appear here once you fill in the field above.</span>')+'</p>'
+                                                        +'<p style="text-align:justify;">During my time at '+ph(d.company,'[Company Name]')+', I have learned a lot and grown professionally. Thank you for all of your guidance and support during my employment.</p>'
+                                                        +'<p style="text-align:justify;">Please feel free to contact me with any questions about the projects I have been working on. I am happy to help in any way I can with the transition process.</p>'
+                                                        +'<p style="text-align:justify;">I wish you all the best for your continued success.</p>'
+                                                        +'<p style="margin-top:20px;">Sincerely,<br/><strong>'+esc(d.employee)+'</strong><br/><span style="font-size:9pt;color:#555;">'+esc(d.job)+'</span></p>';
+                                                    },
+                                                    not_good_fit: function(d){
+                                                        return ''
+                                                        +'<p style="margin-bottom:6px;font-size:9pt;color:#888;">To, '+ph(d.manager,'[Manager Name]')+(d.dept?'&amp;nbsp;· '+esc(d.dept):'')+'</p>'
+                                                        +'<hr style="border:none;border-top:1px solid #eee;margin:8px 0 14px;"/>'
+                                                        +'<p>Dear '+ph(d.manager,'[Manager Name]')+',</p>'
+                                                        +'<p style="text-align:justify;">I am writing to formally notify you of my resignation from the position of '
+                                                        +ph(d.job,'[Job Position]')+' at '+ph(d.company,'[Company Name]')
+                                                        +'. My last day with the company will be '+fmtDate(d.last_day)+'.</p>'
+                                                        +'<p style="text-align:justify;background:#fafafa;padding:8px 12px;border-radius:4px;">'
+                                                        +(d.reason ? esc(d.reason) : '<span style="color:#bbb;">Your reason will appear here once you fill in the field above.</span>')+'</p>'
+                                                        +'<p style="text-align:justify;">During my time at '+ph(d.company,'[Company Name]')+', I have come to realise that the scope of the role is unfortunately not what I had anticipated, and as such, I would like to explore other opportunities.</p>'
+                                                        +'<p style="text-align:justify;">Thank you for understanding — I truly appreciate all the support and guidance you have provided in the time I have worked for the business.</p>'
+                                                        +'<p style="text-align:justify;">Please let me know how I can help to support a smooth transition over the next <strong>'+esc(d.notice)+' days</strong>.</p>'
+                                                        +'<p style="margin-top:20px;">Sincerely,<br/><strong>'+esc(d.employee)+'</strong><br/><span style="font-size:9pt;color:#555;">'+esc(d.job)+'</span></p>';
+                                                    }
+                                                };
+
+                                                function getData(){
+                                                    return {
+                                                        // From hidden inputs (server-rendered Odoo data)
+                                                        employee: hid('preview_employee_name') || '[Your Name]',
+                                                        manager:  hid('preview_manager_name')  || '',
+                                                        company:  hid('preview_company_name')  || '',
+                                                        job:      hid('preview_job_title')      || '',
+                                                        dept:     hid('preview_department')     || '',
+                                                        // From live form fields (user-typed)
+                                                        last_day: byName('last_working_date'),
+                                                        notice:   byName('notice_period_days') || '30',
+                                                        reason:   byName('reason'),
+                                                    };
+                                                }
+
+                                                function render(){
+                                                    var tpl = getSel('pdf_template') || 'new_opportunity';
+                                                    var fn  = TEMPLATES[tpl] || TEMPLATES['new_opportunity'];
+                                                    var box = document.getElementById('preview-content');
+                                                    if(box) box.innerHTML = fn(getData());
+                                                }
+
+                                                // Watch template radios
+                                                document.querySelectorAll('.template-option').forEach(function(r){
+                                                    r.addEventListener('change', render);
+                                                });
+
+                                                // Watch live form inputs (by name, not ID)
+                                                ['last_working_date','notice_period_days','reason','additional_notes'].forEach(function(n){
+                                                    var el = document.querySelector('[name="'+n+'"]');
+                                                    if(el) el.addEventListener('input', render);
+                                                });
+
+                                                render();
+
+                                            })();
+                                            </script>
+
+                                            <hr class="resign-section-divider"/>
+
+                                            <!-- Confirm Checkbox -->
+                                            <div class="resign-form-group">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox"
+                                                           id="confirmResign" required="required"/>
+                                                    <label class="form-check-label" for="confirmResign"
+                                                           style="font-size:.88rem;">
+                                                        I confirm that I wish to resign from my position
+                                                        and understand this action will be forwarded to
+                                                        HR for review.
+                                                    </label>
+                                                </div>
+                                            </div>
+
+                                            <button type="submit" class="btn-resign-submit"
+                                                    id="resignSubmitBtn">
+                                                <i class="fa fa-paper-plane"/>
+                                                Submit Resignation Request
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </t>
+
+                            <!-- ── History ── -->
+                            <t t-if="resign_history">
+                                <div class="resign-card">
+                                    <div class="resign-card-header">
+                                        <div class="resign-card-header-icon">
+                                            <i class="fa fa-history"/>
+                                        </div>
+                                        <h5>Resignation History</h5>
+                                    </div>
+                                    <div class="resign-card-body p-0">
+                                        <div class="table-responsive">
+                                            <table class="resign-history-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Reference</th>
+                                                        <th>Applied</th>
+                                                        <th>Last Working Date</th>
+                                                        <th>Status</th>
+                                                        <th>Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <t t-foreach="resign_history" t-as="rh">
+                                                        <tr>
+                                                            <td><strong t-esc="rh.name"/></td>
+                                                            <td t-esc="rh.request_date"/>
+                                                            <td t-esc="rh.last_working_date"/>
+                                                            <td>
+                                                                <t t-set="s" t-value="rh.state"/>
+                                                                <span t-attf-class="resign-badge badge-#{s}">
+                                                                    <t t-if="s == 'submitted'">
+                                                                        <i class="fa fa-clock"/> Submitted
+                                                                    </t>
+                                                                    <t t-elif="s == 'hr_review'">
+                                                                        <i class="fa fa-search"/> Under HR Review
+                                                                    </t>
+                                                                    <t t-elif="s == 'approved'">
+                                                                        <i class="fa fa-check-circle"/> Approved
+                                                                    </t>
+                                                                    <t t-elif="s == 'rejected'">
+                                                                        <i class="fa fa-times-circle"/> Rejected
+                                                                    </t>
+                                                                    <t t-elif="s == 'cancelled'">
+                                                                        <i class="fa fa-ban"/> Cancelled
+                                                                    </t>
+                                                                    <t t-else="">
+                                                                        <i class="fa fa-pencil"/> Draft
+                                                                    </t>
+                                                                </span>
+                                                            </td>
+                                                            <td>
+                                                                <a t-attf-href="/my/resign/status/#{rh.id}"
+                                                                   class="btn btn-sm"
+                                                                   style="background:#f4f6f9;border-radius:7px;font-size:.8rem;color:#2c3e50;font-weight:600;">
+                                                                    <i class="fa fa-eye me-1"/> View
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    </t>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </t>
+                        </div>
+
+                        <!-- ════ RIGHT: INFO SIDEBAR ════════════════════════════ -->
+                        <div class="col-lg-4">
+                            <!-- Quick Tips -->
+                            <div class="resign-card">
+                                <div class="resign-card-header">
+                                    <div class="resign-card-header-icon"
+                                         style="background:linear-gradient(135deg,#2980b9,#3498db);">
+                                        <i class="fa fa-lightbulb"/>
+                                    </div>
+                                    <h5>Quick Guide</h5>
+                                </div>
+                                <div class="resign-card-body">
+                                    <ul style="padding-left:18px;font-size:.88rem;color:#555;line-height:1.9;">
+                                        <li>Submit request at least <strong>30 days</strong> before your last working day</li>
+                                        <li>HR will review and respond within <strong>3–5 business days</strong></li>
+                                        <li>Download your resignation letter after submission</li>
+                                        <li>Contact HR directly for urgent matters</li>
+                                        <li>You cannot edit a request once submitted</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- Process Timeline -->
+                            <div class="resign-card">
+                                <div class="resign-card-header">
+                                    <div class="resign-card-header-icon"
+                                         style="background:linear-gradient(135deg,#27ae60,#2ecc71);">
+                                        <i class="fa fa-stream"/>
+                                    </div>
+                                    <h5>Approval Process</h5>
+                                </div>
+                                <div class="resign-card-body">
+                                    <div style="position:relative;padding-left:26px;">
+                                        <!-- vertical line -->
+                                        <div style="position:absolute;left:9px;top:14px;bottom:14px;width:2px;background:#dee2e6;border-radius:2px;"/>
+
+                                        <t t-foreach="[('fa-edit','#3498db','You Submit'),('fa-search','#e67e22','HR Reviews'),('fa-check-circle','#27ae60','Approved / Rejected'),('fa-file-pdf','#c0392b','Download PDF')]" t-as="step">
+                                            <div class="d-flex align-items-center gap-3 mb-3" style="position:relative;">
+                                                <div style="width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;"
+                                                     t-attf-style="background:#{step[1]};width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                                    <i t-attf-class="fa #{step[0]}" style="font-size:.6rem;color:#fff;"/>
+                                                </div>
+                                                <span style="font-size:.87rem;color:#555;" t-esc="step[2]"/>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Contact HR -->
+                            <div class="resign-card"
+                                 style="border-top:3px solid var(--resign-accent);">
+                                <div class="resign-card-body text-center" style="padding:20px;">
+                                    <i class="fa fa-headset"
+                                       style="font-size:2rem;color:var(--resign-accent);margin-bottom:10px;display:block;"/>
+                                    <h6 style="font-weight:700;margin-bottom:6px;">Need Help?</h6>
+                                    <p style="font-size:.85rem;color:#777;margin-bottom:12px;">
+                                        Contact HR for any queries regarding your resignation process.
+                                    </p>
+                                    <a href="mailto:hr@company.com" class="btn btn-sm"
+                                       style="background:var(--resign-accent);color:#fff;border-radius:8px;font-size:.85rem;font-weight:600;">
+                                        <i class="fa fa-envelope me-1"/> Email HR
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── JS validation ── -->
+            <script type="text/javascript">
+                document.addEventListener('DOMContentLoaded', function () {
+                    // Set min date for last working date
+                    const lwdInput = document.getElementById('lastWorkingDate');
+                    if (lwdInput) {
+                        const tomorrow = new Date();
+                        tomorrow.setDate(tomorrow.getDate() + 1);
+                        lwdInput.min = tomorrow.toISOString().split('T')[0];
+                    }
+
+                    // Auto-calc last working date when notice period changes
+                    const noticeInput = document.querySelector('input[name="notice_period_days"]');
+                    if (noticeInput &amp;&amp; lwdInput) {
+                        noticeInput.addEventListener('change', function () {
+                            const days = parseInt(this.value) || 30;
+                            const d = new Date();
+                            d.setDate(d.getDate() + days);
+                            lwdInput.value = d.toISOString().split('T')[0];
+                        });
+                        // Trigger once on load
+                        noticeInput.dispatchEvent(new Event('change'));
+                    }
+
+                    // Submit button loading state
+                    const form = document.getElementById('resignForm');
+                    const btn  = document.getElementById('resignSubmitBtn');
+                    if (form &amp;&amp; btn) {
+                        form.addEventListener('submit', function () {
+                            btn.disabled = true;
+                            btn.innerHTML = '&lt;i class="fa fa-spinner fa-spin"&gt;&lt;/i&gt; Submitting...';
+                        });
+                    }
+                });
+            </script>
+        </t>
+    </template>
+
+
+    <!-- ================================================================== -->
+    <!--  RESIGN STATUS PAGE                                                 -->
+    <!-- ================================================================== -->
+    <template id="portal_resign_status" name="Portal - Resignation Status">
+        <t t-call="website.layout">
+            <t t-set="head">
+                <link rel="stylesheet"
+                      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+                <style>
+                    :root {
+                        --rs-primary: #2c3e50;
+                        --rs-accent:  #c0392b;
+                        --rs-bg:      #f4f6f9;
+                        --rs-border:  #dde3ec;
+                        --rs-radius:  12px;
+                        --rs-shadow:  0 4px 20px rgba(0,0,0,0.08);
+                    }
+                    .rs-wrapper { background: var(--rs-bg); min-height: 100vh; padding: 32px 0 60px; }
+
+                    /* Header */
+                    .rs-header {
+                        background: linear-gradient(135deg,#2c3e50 0%,#1a252f 100%);
+                        border-radius: var(--rs-radius); padding: 28px 32px; color:#fff; margin-bottom:24px;
+                        display: flex; align-items: center; gap: 16px;
+                    }
+                    .rs-header-icon {
+                        width:56px;height:56px;background:rgba(255,255,255,.12);
+                        border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.4rem;
+                    }
+                    .rs-header h2 { margin:0;font-size:1.6rem;font-weight:700; }
+                    .rs-header p  { margin:4px 0 0;opacity:.75;font-size:.9rem; }
+
+                    /* Card */
+                    .rs-card {
+                        background:#fff;border-radius:var(--rs-radius);border:1px solid var(--rs-border);
+                        box-shadow:var(--rs-shadow);margin-bottom:24px;overflow:hidden;
+                    }
+                    .rs-card-header {
+                        background:linear-gradient(135deg,#f8f9fa,#fff);
+                        border-bottom:2px solid var(--rs-border);padding:16px 22px;
+                        display:flex;align-items:center;gap:12px;
+                    }
+                    .rs-card-header-icon {
+                        width:38px;height:38px;border-radius:9px;
+                        background:linear-gradient(135deg,var(--rs-accent),#e74c3c);
+                        color:#fff;display:flex;align-items:center;justify-content:center;font-size:1rem;
+                    }
+                    .rs-card-header h5 { margin:0;font-weight:700;font-size:.95rem; }
+                    .rs-card-body { padding:22px; }
+
+                    /* Info grid */
+                    .rs-info-grid {
+                        display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;
+                    }
+                    .rs-info-item { border:1px solid var(--rs-border);border-radius:9px;padding:14px 16px;background:#fafbfc; }
+                    .rs-info-item label { font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:#7f8c8d;font-weight:600;display:block;margin-bottom:4px; }
+                    .rs-info-item span  { font-size:.9rem;font-weight:700;color:#2c3e50; }
+
+                    /* Status tracker */
+                    .status-tracker {
+                        display:flex;align-items:center;justify-content:space-between;
+                        padding:24px 16px;position:relative;
+                    }
+                    .status-tracker::before {
+                        content:'';position:absolute;top:50%;left:8%;right:8%;
+                        height:3px;background:#e0e0e0;z-index:0;transform:translateY(-50%);
+                    }
+                    .tracker-step {
+                        display:flex;flex-direction:column;align-items:center;gap:8px;
+                        position:relative;z-index:1;flex:1;
+                    }
+                    .tracker-dot {
+                        width:42px;height:42px;border-radius:50%;
+                        display:flex;align-items:center;justify-content:center;
+                        font-size:1.1rem;border:3px solid #e0e0e0;background:#fff;
+                        transition:all .3s;
+                    }
+                    .tracker-dot.active   { border-color:#c0392b;background:linear-gradient(135deg,#c0392b,#e74c3c);color:#fff; }
+                    .tracker-dot.done     { border-color:#27ae60;background:linear-gradient(135deg,#27ae60,#2ecc71);color:#fff; }
+                    .tracker-dot.rejected { border-color:#e74c3c;background:linear-gradient(135deg,#c0392b,#e74c3c);color:#fff; }
+                    .tracker-label { font-size:.75rem;font-weight:700;color:#777;text-align:center;max-width:80px; }
+                    .tracker-label.active   { color:#c0392b; }
+                    .tracker-label.done     { color:#27ae60; }
+
+                    /* Reason box */
+                    .reason-box {
+                        background:#f8f9fa;
+                        border-radius:9px;padding:14px 18px;font-size:.9rem;color:#555;
+                        white-space:pre-wrap;line-height:1.7;
+                    }
+
+                    /* Action buttons */
+                    .rs-btn {
+                        display:inline-flex;align-items:center;gap:8px;
+                        padding:11px 22px;border-radius:9px;font-weight:700;font-size:.88rem;
+                        border:none;cursor:pointer;text-decoration:none;transition:opacity .2s,transform .15s;
+                    }
+                    .rs-btn:hover { opacity:.88;transform:translateY(-1px);text-decoration:none; }
+                    .rs-btn-pdf    { background:linear-gradient(135deg,#c0392b,#e74c3c);color:#fff; }
+                    .rs-btn-back   { background:#f4f6f9;color:#2c3e50; }
+                    .rs-btn-cancel { background:#fff;border:1.5px solid #e74c3c;color:#c0392b; }
+
+                    /* Status banner */
+                    .status-banner {
+                        border-radius:10px;padding:16px 20px;margin-bottom:20px;
+                        display:flex;align-items:center;gap:14px;
+                    }
+                    .status-banner-icon { font-size:1.8rem; }
+                    .status-banner h5 { margin:0;font-weight:700; }
+                    .status-banner p  { margin:3px 0 0;font-size:.88rem; }
+
+                    .banner-submitted  { background:#eaf5ff;border:1px solid #3498db; color:#2980b9; }
+                    .banner-hr_review  { background:#fff8e1;border:1px solid #f39c12; color:#e67e22; }
+                    .banner-approved   { background:#eefaf5;border:1px solid #2ecc71; color:#27ae60; }
+                    .banner-rejected   { background:#fdf2f2;border:1px solid #e74c3c; color:#c0392b; }
+                    .banner-cancelled  { background:#f4f6f9;border:1px solid #bdc3c7; color:#7f8c8d; }
+
+                    @media(max-width:768px){
+                        .status-tracker { flex-direction:column;gap:16px; }
+                        .status-tracker::before { display:none; }
+                        .rs-info-grid { grid-template-columns:1fr 1fr; }
+                    }
+                </style>
+            </t>
+
+            <div class="rs-wrapper">
+                <div class="container">
+
+                    <!-- Breadcrumb -->
+                    <nav aria-label="breadcrumb" class="mb-3">
+                        <ol class="breadcrumb" style="background:transparent;padding:0;font-size:.85rem;">
+                            <li class="breadcrumb-item"><a href="/my/employee-dashboard"><i class="fa fa-home me-1"/>Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="/my/resign/apply">Resignation</a></li>
+                            <li class="breadcrumb-item active" t-esc="resign.name"/>
+                        </ol>
+                    </nav>
+
+                    <!-- Alerts -->
+                    <t t-if="error">
+                        <div style="background:#fdf2f2;border-left:4px solid #e74c3c;border-radius:10px;padding:13px 18px;display:flex;gap:10px;margin-bottom:16px;color:#c0392b;">
+                            <i class="fa fa-exclamation-circle mt-1"/>
+                            <span t-esc="error"/>
+                        </div>
+                    </t>
+                    <t t-if="success">
+                        <div style="background:#f0faf5;border-left:4px solid #2ecc71;border-radius:10px;padding:13px 18px;display:flex;gap:10px;margin-bottom:16px;color:#27ae60;">
+                            <i class="fa fa-check-circle mt-1"/>
+                            <span t-esc="success"/>
+                        </div>
+                    </t>
+
+                    <!-- Page header -->
+                    <div class="rs-header">
+                        <div class="rs-header-icon"><i class="fa fa-file-signature"/></div>
+                        <div>
+                            <h2>Resignation Request — <span t-esc="resign.name"/></h2>
+                            <p>Submitted on <span t-esc="resign.request_date"/> · <span t-esc="resign.employee_id.name"/></p>
+                        </div>
+                    </div>
+
+                    <!-- Status Banner -->
+                    <t t-set="s" t-value="resign.state"/>
+                    <div t-attf-class="status-banner banner-#{s}">
+                        <div class="status-banner-icon">
+                            <t t-if="s == 'submitted'"><i class="fa fa-clock"/></t>
+                            <t t-elif="s == 'hr_review'"><i class="fa fa-search"/></t>
+                            <t t-elif="s == 'approved'"><i class="fa fa-check-circle"/></t>
+                            <t t-elif="s == 'rejected'"><i class="fa fa-times-circle"/></t>
+                            <t t-elif="s == 'cancelled'"><i class="fa fa-ban"/></t>
+                            <t t-else=""><i class="fa fa-pencil-alt"/></t>
+                        </div>
+                        <div>
+                            <h5>
+                                <t t-if="s == 'submitted'">Submitted — Awaiting HR Review</t>
+                                <t t-elif="s == 'hr_review'">Under HR Review</t>
+                                <t t-elif="s == 'approved'">Resignation Approved</t>
+                                <t t-elif="s == 'rejected'">Resignation Rejected</t>
+                                <t t-elif="s == 'cancelled'">Request Cancelled</t>
+                                <t t-else="">Draft</t>
+                            </h5>
+                            <p>
+                                <t t-if="s == 'submitted'">Your request has been received and is pending HR review.</t>
+                                <t t-elif="s == 'hr_review'">HR is currently reviewing your resignation request.</t>
+                                <t t-elif="s == 'approved'">Your resignation has been approved. Last working date: <strong t-esc="resign.last_working_date"/></t>
+                                <t t-elif="s == 'rejected'">Your request was rejected. See HR notes below.</t>
+                                <t t-elif="s == 'cancelled'">This request was cancelled.</t>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- LEFT -->
+                        <div class="col-lg-8">
+
+                            <!-- Approval Progress Tracker -->
+                            <div class="rs-card">
+                                <div class="rs-card-header">
+                                    <div class="rs-card-header-icon" style="background:linear-gradient(135deg,#3498db,#2980b9);">
+                                        <i class="fa fa-tasks"/>
+                                    </div>
+                                    <h5>Approval Progress</h5>
+                                </div>
+                                <div class="rs-card-body p-0">
+                                    <div class="status-tracker">
+                                        <t t-set="steps" t-value="[('submitted','Submitted','fa-paper-plane'),('hr_review','HR Review','fa-search'),('approved','Approved','fa-check')]"/>
+                                        <t t-foreach="steps" t-as="step">
+                                            <div class="tracker-step">
+                                                <t t-set="state_order" t-value="{'draft':0,'submitted':1,'hr_review':2,'approved':3,'rejected':2,'cancelled':0}"/>
+                                                <t t-set="step_order" t-value="{'submitted':1,'hr_review':2,'approved':3}"/>
+                                                <t t-set="cur_order" t-value="state_order.get(resign.state,0)"/>
+                                                <t t-set="this_order" t-value="step_order.get(step[0],0)"/>
+                                                <div t-attf-class="tracker-dot #{resign.state == 'rejected' and step[0] == 'hr_review' and 'rejected' or (cur_order >= this_order and 'done' or '') }">
+                                                    <i t-attf-class="fa #{step[2]}"/>
+                                                </div>
+                                                <div t-attf-class="tracker-label #{resign.state == step[0] and 'active' or (cur_order > this_order and 'done' or '') }">
+                                                    <t t-esc="step[1]"/>
+                                                </div>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Details Card -->
+                            <div class="rs-card">
+                                <div class="rs-card-header">
+                                    <div class="rs-card-header-icon">
+                                        <i class="fa fa-info-circle"/>
+                                    </div>
+                                    <h5>Resignation Details</h5>
+                                </div>
+                                <div class="rs-card-body">
+                                    <div class="rs-info-grid mb-4">
+                                        <div class="rs-info-item">
+                                            <label>Employee</label>
+                                            <span t-esc="resign.employee_id.name"/>
+                                        </div>
+                                        <div class="rs-info-item">
+                                            <label>Department</label>
+                                            <span t-esc="resign.department_id.name or '—'"/>
+                                        </div>
+                                        <div class="rs-info-item">
+                                            <label>Job Position</label>
+                                            <span t-esc="resign.job_id.name or '—'"/>
+                                        </div>
+                                        <div class="rs-info-item">
+                                            <label>Manager</label>
+                                            <span t-esc="resign.manager_id.name or '—'"/>
+                                        </div>
+                                        <div class="rs-info-item">
+                                            <label>Application Date</label>
+                                            <span t-esc="resign.request_date"/>
+                                        </div>
+                                        <div class="rs-info-item">
+                                            <label>Last Working Date</label>
+                                            <span t-esc="resign.last_working_date"/>
+                                        </div>
+                                        <div class="rs-info-item">
+                                            <label>Notice Period</label>
+                                            <span><t t-esc="resign.notice_period_days"/> days</span>
+                                        </div>
+                                        <div class="rs-info-item">
+                                            <label>PDF Template</label>
+                                            <span t-esc="dict([('new_opportunity','New Opportunity'),('advance_notice','Advance Notice'),('not_good_fit','Not a Good Fit')]).get(resign.pdf_template,'—')"/>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label style="font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:#7f8c8d;font-weight:600;display:block;margin-bottom:8px;">
+                                            Reason for Resignation
+                                        </label>
+                                        <div class="reason-box" t-esc="resign.reason"/>
+                                    </div>
+
+                                    <t t-if="resign.additional_notes">
+                                        <div class="mb-3">
+                                            <label style="font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:#7f8c8d;font-weight:600;display:block;margin-bottom:8px;">
+                                                Handover / Additional Notes
+                                            </label>
+                                            <div class="reason-box"
+                                                 t-esc="resign.additional_notes"/>
+                                        </div>
+                                    </t>
+
+                                    <!-- HR Notes if rejected -->
+                                    <t t-if="resign.rejection_reason">
+                                        <div class="reason-box" style="background:#fdf7f7;">
+                                            <strong style="color:#c0392b;display:block;margin-bottom:6px;">
+                                                <i class="fa fa-comment-alt me-1"/> HR Notes
+                                            </strong>
+                                            <span t-esc="resign.rejection_reason"/>
+                                        </div>
+                                    </t>
+
+                                    <!-- Approved by -->
+                                    <t t-if="resign.approved_by">
+                                        <div style="margin-top:16px;padding:12px 16px;background:#f0faf5;border-radius:9px;display:flex;align-items:center;gap:10px;font-size:.88rem;color:#27ae60;">
+                                            <i class="fa fa-user-check"/>
+                                            Approved by <strong t-esc="resign.approved_by.name"/>
+                                            on <span t-esc="resign.approved_date"/>
+                                        </div>
+                                    </t>
+                                </div>
+                            </div>
+
+                            <!-- Action Row -->
+                            <div class="d-flex flex-wrap gap-3 mb-4">
+                                <a t-attf-href="/my/resign/pdf/#{resign.id}" class="rs-btn rs-btn-pdf">
+                                    <i class="fa fa-file-pdf"/> Download PDF
+                                </a>
+                                <a href="/my/resign/apply" class="rs-btn rs-btn-back">
+                                    <i class="fa fa-arrow-left"/> Back to Resign
+                                </a>
+                                <t t-if="resign.state in ['submitted','hr_review']">
+                                    <a t-attf-href="/my/resign/cancel/#{resign.id}"
+                                       class="rs-btn rs-btn-cancel"
+                                       onclick="return confirm('Are you sure you want to cancel this resignation request?')">
+                                        <i class="fa fa-times"/> Cancel Request
+                                    </a>
+                                </t>
+                            </div>
+                        </div>
+
+                        <!-- RIGHT: SIDEBAR -->
+                        <div class="col-lg-4">
+                            <!-- Timeline -->
+                            <div class="rs-card">
+                                <div class="rs-card-header">
+                                    <div class="rs-card-header-icon" style="background:linear-gradient(135deg,#8e44ad,#9b59b6);">
+                                        <i class="fa fa-history"/>
+                                    </div>
+                                    <h5>What's Next?</h5>
+                                </div>
+                                <div class="rs-card-body">
+                                    <t t-if="resign.state == 'submitted'">
+                                        <ul style="padding-left:18px;font-size:.88rem;color:#555;line-height:2;">
+                                            <li>HR will review your request within <strong>3–5 working days</strong></li>
+                                            <li>You'll receive a notification upon approval</li>
+                                            <li>Download your resignation letter below anytime</li>
+                                            <li>Prepare a handover plan for your responsibilities</li>
+                                        </ul>
+                                    </t>
+                                    <t t-elif="resign.state == 'approved'">
+                                        <ul style="padding-left:18px;font-size:.88rem;color:#555;line-height:2;">
+                                            <li>Your last working day is <strong t-esc="resign.last_working_date"/></li>
+                                            <li>Complete all pending handover tasks</li>
+                                            <li>Return company assets before your last day</li>
+                                            <li>Download your official resignation letter</li>
+                                        </ul>
+                                    </t>
+                                    <t t-elif="resign.state == 'rejected'">
+                                        <ul style="padding-left:18px;font-size:.88rem;color:#555;line-height:2;">
+                                            <li>Contact HR for more information</li>
+                                            <li>Review HR notes in the details section</li>
+                                            <li>You may submit a new resignation request if needed</li>
+                                        </ul>
+                                    </t>
+                                    <t t-else="">
+                                        <p style="font-size:.88rem;color:#777;">Contact HR for further guidance.</p>
+                                    </t>
+                                </div>
+                            </div>
+
+                            <!-- PDF Template info -->
+                            <div class="rs-card" style="border-top:3px solid #c0392b;">
+                                <div class="rs-card-body text-center" style="padding:20px;">
+                                    <i class="fa fa-file-pdf" style="font-size:2.2rem;color:#c0392b;display:block;margin-bottom:10px;"/>
+                                    <h6 style="font-weight:700;margin-bottom:6px;">PDF Template Selected</h6>
+                                    <p style="font-size:.88rem;color:#777;margin-bottom:14px;">
+                                        <strong t-esc="dict([('new_opportunity','Resignation – New Opportunity'),('advance_notice','Resignation – Advance Notice'),('not_good_fit','Resignation – Not a Good Fit')]).get(resign.pdf_template,'Resignation Letter')"/>
+                                    </p>
+                                    <a t-attf-href="/my/resign/pdf/#{resign.id}"
+                                       class="rs-btn rs-btn-pdf d-inline-flex">
+                                        <i class="fa fa-download"/> Download Now
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+</odoo>

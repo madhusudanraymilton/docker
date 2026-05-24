@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="hr_attendance_view_form_punishment" model="ir.ui.view">
+        <field name="name">hr.attendance.view.form.punishment</field>
+        <field name="model">hr.attendance</field>
+        <field name="inherit_id" ref="hr_attendance.hr_attendance_view_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Punishment Hours after Extra Hours (validated_overtime_hours) -->
+            <xpath expr="//field[@name='check_out']" position="after">
+                <field name="punishment_hours"
+                       widget="float_time"
+                       readonly="1"/>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

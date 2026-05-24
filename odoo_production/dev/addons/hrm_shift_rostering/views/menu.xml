@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem
+        id="menu_shift_rostering_root"
+        name="Shift Rostering"
+        sequence="90"
+        web_icon="hrm_shift_rostering,static/description/icon.png"
+    />
+    <menuitem
+        id="menu_shift_rostering_dashboard"
+        name="Dashboard"
+        parent="menu_shift_rostering_root"
+        action="action_shift_rostering_dashboard"
+        sequence="1"
+    />
+</odoo>

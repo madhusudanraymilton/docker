@@ -1,0 +1,6 @@
+<!-- Access rights button show on settings -->
+<odoo>
+    <record id="group_portal_expense_access" model="res.groups">
+        <field name="name">Portal Expense Access</field>
+    </record>
+</odoo>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- Client Action -->
+    <record id="action_hr_attendance_dashboard" model="ir.actions.client">
+        <field name="name">HR Attendance Dashboard</field>
+        <field name="tag">attendance_dashboard.AttendanceDashboard</field>
+        <field name="target">current</field>
+    </record>
+
+    <!-- Top-level Menu -->
+    <menuitem
+        id="menu_hr_attendance_dashboard_root"
+        name="HR Dashboard"
+        sequence="5"
+        web_icon="attendance_dashboard,static/description/icon.png"
+    />
+
+    <!-- Sub Menu -->
+    <menuitem
+        id="menu_hr_attendance_dashboard"
+        name="Attendance Dashboard"
+        parent="menu_hr_attendance_dashboard_root"
+        action="action_hr_attendance_dashboard"
+        sequence="1"
+    />
+
+</odoo>

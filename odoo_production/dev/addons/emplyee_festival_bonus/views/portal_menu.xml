@@ -1,0 +1,109 @@
+<odoo>
+    <template id="employee_portal_menu" inherit_id="website.layout">
+        <xpath expr="//body" position="inside">
+            <script type="text/javascript">
+                <![CDATA[
+                (function () {
+                    'use strict';
+                    let menuAdded = false;
+                    let hasExpenseAccess = false;
+
+                    function checkExpenseAccess() {
+                        return fetch('/my/check-expense-access', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ jsonrpc: '2.0', method: 'call', params: {} })
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            hasExpenseAccess = data.result && data.result.has_access;
+                        })
+                        .catch(() => { hasExpenseAccess = false; });
+                    }
+
+                    function createMenu() {
+                        const expenseItem = hasExpenseAccess ? `
+                            <li><a class="dropdown-item" href="/my/expenses">Expenses</a></li>
+                        ` : '';
+
+                        return `
+                            <li class="nav-item dropdown employee-portal-menu">
+                                <a class="nav-link dropdown-toggle" href="#" role="button"
+                                   data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa fa-user me-1"></i> Employee Dashboard
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="/my/employee-dashboard">Dashboard</a></li>
+                                    <li><hr class="dropdown-divider"/></li>
+                                    <li><a class="dropdown-item" href="/my/leave/apply">Leave Application</a></li>
+                                    <li><a class="dropdown-item" href="/my/leave/team-approvals">Leave Approval</a></li>
+                                    ${expenseItem}
+                                    <li><a class="dropdown-item" href="/my/movement">Movement</a></li>
+                                    <li><a class="dropdown-item" href="/my/profile">Profile</a></li>
+                                </ul>
+                            </li>
+                        `;
+                    }
+
+                    function addMenuToNavbar(navbar, isMobile) {
+                        if (!navbar || navbar.querySelector('.employee-portal-menu')) return;
+                        const temp = document.createElement('div');
+                        temp.innerHTML = createMenu();
+                        const menu = temp.firstElementChild;
+                        navbar.appendChild(menu);
+                        const link = menu.querySelector('.nav-link');
+                        if (!isMobile && window.bootstrap && bootstrap.Dropdown) {
+                            new bootstrap.Dropdown(link);
+                        }
+                        if (isMobile) {
+                            link.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                menu.classList.toggle('open');
+                            });
+                        }
+                    }
+
+                    function tryAddEmployeeMenu() {
+                        const existing = document.querySelector('.employee-portal-menu');
+                        if (existing) existing.remove();
+                        menuAdded = false;
+
+                        const desktopSelectors = [
+                            'header nav ul.navbar-nav:not(.o_menu_systray)',
+                            'nav ul.navbar-nav.me-auto',
+                            'header ul.navbar-nav'
+                        ];
+                        for (const selector of desktopSelectors) {
+                            const navbar = document.querySelector(selector);
+                            if (navbar) { addMenuToNavbar(navbar, false); break; }
+                        }
+                        const mobileSelectors = [
+                            '.navbar-collapse ul.navbar-nav',
+                            '#navbarSupportedContent ul.navbar-nav'
+                        ];
+                        for (const selector of mobileSelectors) {
+                            const mobileNavbar = document.querySelector(selector);
+                            if (mobileNavbar) addMenuToNavbar(mobileNavbar, true);
+                        }
+                        menuAdded = true;
+                    }
+
+                    function init() {
+                        checkExpenseAccess().then(() => {
+                            tryAddEmployeeMenu();
+                            setTimeout(tryAddEmployeeMenu, 500);
+                            setTimeout(tryAddEmployeeMenu, 1500);
+                        });
+                    }
+
+                    if (document.readyState === 'loading') {
+                        document.addEventListener('DOMContentLoaded', init);
+                    } else {
+                        init();
+                    }
+                })();
+                ]]>
+            </script>
+        </xpath>
+    </template>
+</odoo>

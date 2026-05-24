@@ -1,0 +1,495 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Loan Report Template - Single Page -->
+    <template id="loan_report_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.internal_layout">
+                    <div style="font-family: Arial, sans-serif; padding: 15px; font-size: 12px;">
+                        <!-- Header -->
+                        <div style="text-align: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #3498db;">
+                            <h2 style="margin: 0; color: #2c3e50; font-size: 18px;">LOAN DETAILS REPORT</h2>
+                            <p style="margin: 5px 0 0 0; color: #7f8c8d; font-size: 12px;">Loan Management System</p>
+                        </div>
+                        
+                        <!-- Two Column Layout -->
+                        <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                            <!-- Left Column -->
+                            <div style="flex: 1;">
+                                <!-- Basic Information -->
+                                <div style="margin-bottom: 10px;">
+                                    <h4 style="color: #3498db; margin: 0 0 8px 0; font-size: 13px; background: #f8f9fa; padding: 5px 8px; border-left: 3px solid #3498db;">
+                                        📋 Loan Information
+                                    </h4>
+                                    <table style="width: 100%; font-size: 11px;">
+                                        <tr>
+                                            <td style="padding: 3px 0; width: 40%;"><strong>Reference:</strong></td>
+                                            <td style="padding: 3px 0;"><t t-esc="doc.name"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 3px 0;"><strong>Employee:</strong></td>
+                                            <td style="padding: 3px 0;"><t t-esc="doc.employee_id.name"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 3px 0;"><strong>Date:</strong></td>
+                                            <td style="padding: 3px 0;"><t t-esc="doc.date"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 3px 0;"><strong>Department:</strong></td>
+                                            <td style="padding: 3px 0;"><t t-esc="doc.department_id.name or '-'"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 3px 0;"><strong>Job Position:</strong></td>
+                                            <td style="padding: 3px 0;"><t t-esc="doc.job_position_id.name or '-'"/></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                
+                                <!-- Status -->
+                                <div style="margin-bottom: 10px;">
+                                    <h4 style="color: #f39c12; margin: 0 0 8px 0; font-size: 13px; background: #fff9e6; padding: 5px 8px; border-left: 3px solid #f39c12;">
+                                        📊 Status
+                                    </h4>
+                                    <t t-set="status_color" t-value="'#6c757d'"/>
+                                    <t t-set="status_bg" t-value="'#f8f9fa'"/>
+                                    <t t-if="doc.state == 'paid'">
+                                        <t t-set="status_color" t-value="'#155724'"/>
+                                        <t t-set="status_bg" t-value="'#d4edda'"/>
+                                    </t>
+                                    <t t-elif="doc.state == 'approved'">
+                                        <t t-set="status_color" t-value="'#856404'"/>
+                                        <t t-set="status_bg" t-value="'#fff3cd'"/>
+                                    </t>
+                                    <t t-elif="doc.state == 'disbursed'">
+                                        <t t-set="status_color" t-value="'#0c5460'"/>
+                                        <t t-set="status_bg" t-value="'#d1ecf1'"/>
+                                    </t>
+                                    <div style="background: {status_bg}; color: {status_color}; padding: 6px; border-radius: 4px; text-align: center; font-weight: bold; font-size: 12px;">
+                                        <t t-esc="doc.state.upper()"/>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Right Column -->
+                            <div style="flex: 1;">
+                                <!-- Financial Information -->
+                                <div style="margin-bottom: 10px;">
+                                    <h4 style="color: #27ae60; margin: 0 0 8px 0; font-size: 13px; background: #f0f9f0; padding: 5px 8px; border-left: 3px solid #27ae60;">
+                                        💰 Financial Details
+                                    </h4>
+                                    <table style="width: 100%; font-size: 11px;">
+                                        <tr>
+                                            <td style="padding: 3px 0; width: 60%;"><strong>Loan Amount:</strong></td>
+                                            <td style="padding: 3px 0; text-align: right; font-weight: bold; color: #e74c3c;">
+                                                <t t-esc="doc.loan_amount"/> <t t-esc="doc.currency_id.symbol"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 3px 0;"><strong>Installments:</strong></td>
+                                            <td style="padding: 3px 0; text-align: right;">
+                                                <t t-esc="doc.no_of_installments"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 3px 0;"><strong>Installment Amount:</strong></td>
+                                            <td style="padding: 3px 0; text-align: right; font-weight: bold;">
+                                                <t t-esc="doc.installment_amount"/> <t t-esc="doc.currency_id.symbol"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 3px 0;"><strong>Start Date:</strong></td>
+                                            <td style="padding: 3px 0; text-align: right;">
+                                                <t t-esc="doc.payment_start_date"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 3px 0;"><strong>Disbursement Date:</strong></td>
+                                            <td style="padding: 3px 0; text-align: right;">
+                                                <t t-esc="doc.disbursement_date or '-'"/>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                
+                                <!-- Summary -->
+                                <div>
+                                    <h4 style="color: #9b59b6; margin: 0 0 8px 0; font-size: 13px; background: #f5f0f9; padding: 5px 8px; border-left: 3px solid #9b59b6;">
+                                        📈 Summary
+                                    </h4>
+                                    <table style="width: 100%; font-size: 11px;">
+                                        <tr>
+                                            <td style="padding: 3px 0;"><strong>Total Amount:</strong></td>
+                                            <td style="padding: 3px 0; text-align: right; font-weight: bold;">
+                                                <t t-esc="doc.total_amount"/> <t t-esc="doc.currency_id.symbol"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 3px 0;"><strong>Total Paid:</strong></td>
+                                            <td style="padding: 3px 0; text-align: right; font-weight: bold; color: #27ae60;">
+                                                <t t-esc="doc.total_paid"/> <t t-esc="doc.currency_id.symbol"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 3px 0;"><strong>Balance:</strong></td>
+                                            <td style="padding: 3px 0; text-align: right; font-weight: bold; color: #e74c3c;">
+                                                <t t-esc="doc.balance_amount"/> <t t-esc="doc.currency_id.symbol"/>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Purpose of Loan -->
+                        <t t-if="doc.reason">
+                            <div style="margin-bottom: 10px;">
+                                <h4 style="color: #e74c3c; margin: 0 0 8px 0; font-size: 13px; background: #fdf2f2; padding: 5px 8px; border-left: 3px solid #e74c3c;">
+                                    📝 Purpose of Loan
+                                </h4>
+                                <div style="background: #f8f9fa; padding: 8px; border-radius: 4px; font-size: 11px;">
+                                    <t t-esc="doc.reason"/>
+                                </div>
+                            </div>
+                        </t>
+                        
+                        <!-- Footer -->
+                        <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #ddd; text-align: center; color: #7f8c8d; font-size: 10px;">
+                            <table style="width: 100%;">
+                                <tr>
+                                    <td style="text-align: left; width: 33%;">
+                                        Generated: <t t-esc="doc.create_date or 'N/A'"/>
+                                    </td>
+                                    <td style="text-align: center; width: 34%;">
+                                        Loan Management System
+                                    </td>
+                                    <td style="text-align: right; width: 33%;">
+                                        Page 1 of 1
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+    
+    <!-- Loan Repayment Report Template - Single Page -->
+    <template id="loan_repayment_report_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.internal_layout">
+                    <div style="font-family: Arial, sans-serif; padding: 15px; font-size: 12px;">
+                        <!-- Header -->
+                        <div style="text-align: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #2ecc71;">
+                            <h2 style="margin: 0; color: #27ae60; font-size: 18px;">LOAN REPAYMENT REPORT</h2>
+                            <p style="margin: 5px 0 0 0; color: #7f8c8d; font-size: 12px;">Loan Management System</p>
+                        </div>
+                        
+                        <!-- Two Column Layout -->
+                        <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                            <!-- Left Column -->
+                            <div style="flex: 1;">
+                                <!-- Repayment Information -->
+                                <div style="margin-bottom: 10px;">
+                                    <h4 style="color: #2ecc71; margin: 0 0 8px 0; font-size: 13px; background: #f0f9f0; padding: 5px 8px; border-left: 3px solid #2ecc71;">
+                                        📋 Repayment Information
+                                    </h4>
+                                    <table style="width: 100%; font-size: 11px;">
+                                        <tr>
+                                            <td style="padding: 3px 0; width: 40%;"><strong>Reference:</strong></td>
+                                            <td style="padding: 3px 0; font-weight: bold; color: #27ae60;"><t t-esc="doc.name"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 3px 0;"><strong>Date:</strong></td>
+                                            <td style="padding: 3px 0;"><t t-esc="doc.date"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 3px 0;"><strong>Loan Reference:</strong></td>
+                                            <td style="padding: 3px 0; font-weight: bold; color: #3498db;"><t t-esc="doc.loan_id.name"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 3px 0;"><strong>Employee:</strong></td>
+                                            <td style="padding: 3px 0;"><t t-esc="doc.employee_id.name"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 3px 0;"><strong>Method:</strong></td>
+                                            <td style="padding: 3px 0; font-weight: bold;"><t t-esc="doc.payment_method.upper()"/></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                
+                                <!-- Status -->
+                                <div style="margin-bottom: 10px;">
+                                    <h4 style="color: #f39c12; margin: 0 0 8px 0; font-size: 13px; background: #fff9e6; padding: 5px 8px; border-left: 3px solid #f39c12;">
+                                        📊 Status
+                                    </h4>
+                                    <t t-set="status_color" t-value="'#6c757d'"/>
+                                    <t t-set="status_bg" t-value="'#f8f9fa'"/>
+                                    <t t-if="doc.state == 'paid'">
+                                        <t t-set="status_color" t-value="'#155724'"/>
+                                        <t t-set="status_bg" t-value="'#d4edda'"/>
+                                    </t>
+                                    <t t-elif="doc.state == 'draft'">
+                                        <t t-set="status_color" t-value="'#383d41'"/>
+                                        <t t-set="status_bg" t-value="'#e2e3e5'"/>
+                                    </t>
+                                    <t t-elif="doc.state == 'cancelled'">
+                                        <t t-set="status_color" t-value="'#721c24'"/>
+                                        <t t-set="status_bg" t-value="'#f8d7da'"/>
+                                    </t>
+                                    <div style="background: {status_bg}; color: {status_color}; padding: 6px; border-radius: 4px; text-align: center; font-weight: bold; font-size: 12px;">
+                                        <t t-esc="doc.state.upper()"/>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Right Column -->
+                            <div style="flex: 1;">
+                                <!-- Financial Details -->
+                                <div style="margin-bottom: 10px;">
+                                    <h4 style="color: #3498db; margin: 0 0 8px 0; font-size: 13px; background: #f0f8ff; padding: 5px 8px; border-left: 3px solid #3498db;">
+                                        💰 Financial Details
+                                    </h4>
+                                    <table style="width: 100%; font-size: 11px;">
+                                        <tr>
+                                            <td style="padding: 3px 0; width: 60%;"><strong>Repayment Amount:</strong></td>
+                                            <td style="padding: 3px 0; text-align: right; font-weight: bold; color: #27ae60; font-size: 14px;">
+                                                <t t-esc="doc.amount"/> <t t-esc="doc.currency_id.symbol"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 3px 0;"><strong>Original Loan:</strong></td>
+                                            <td style="padding: 3px 0; text-align: right;">
+                                                <t t-esc="doc.loan_id.loan_amount"/> <t t-esc="doc.currency_id.symbol"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 3px 0;"><strong>Journal Entry:</strong></td>
+                                            <td style="padding: 3px 0; text-align: right; font-size: 10px;">
+                                                <t t-esc="doc.move_id.name or '-'"/>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                
+                                <!-- Balance Summary -->
+                                <div>
+                                    <h4 style="color: #9b59b6; margin: 0 0 8px 0; font-size: 13px; background: #f5f0f9; padding: 5px 8px; border-left: 3px solid #9b59b6;">
+                                        📈 Balance Summary
+                                    </h4>
+                                    <table style="width: 100%; font-size: 11px;">
+                                        <tr>
+                                            <td style="padding: 3px 0;"><strong>Before Repayment:</strong></td>
+                                            <td style="padding: 3px 0; text-align: right; font-weight: bold; color: #e74c3c;">
+                                                <t t-set="balance_before" t-value="doc.loan_id.balance_amount + doc.amount"/>
+                                                <t t-esc="balance_before"/> <t t-esc="doc.currency_id.symbol"/>
+                                            </td>
+                                        </tr>
+                                        <tr style="border-bottom: 1px solid #ddd;">
+                                            <td style="padding: 3px 0;"><strong>Repayment:</strong></td>
+                                            <td style="padding: 3px 0; text-align: right; font-weight: bold; color: #27ae60;">→</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 3px 0;"><strong>After Repayment:</strong></td>
+                                            <td style="padding: 3px 0; text-align: right; font-weight: bold; color: #2ecc71;">
+                                                <t t-esc="doc.loan_id.balance_amount"/> <t t-esc="doc.currency_id.symbol"/>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Notes -->
+                        <t t-if="doc.notes">
+                            <div style="margin-bottom: 10px;">
+                                <h4 style="color: #e74c3c; margin: 0 0 8px 0; font-size: 13px; background: #fdf2f2; padding: 5px 8px; border-left: 3px solid #e74c3c;">
+                                    📝 Notes
+                                </h4>
+                                <div style="background: #f8f9fa; padding: 8px; border-radius: 4px; font-size: 11px;">
+                                    <t t-esc="doc.notes"/>
+                                </div>
+                            </div>
+                        </t>
+                        
+                        <!-- Footer -->
+                        <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #ddd; text-align: center; color: #7f8c8d; font-size: 10px;">
+                            <table style="width: 100%;">
+                                <tr>
+                                    <td style="text-align: left; width: 33%;">
+                                        Generated: <t t-esc="doc.create_date or 'N/A'"/>
+                                    </td>
+                                    <td style="text-align: center; width: 34%;">
+                                        Loan Management System
+                                    </td>
+                                    <td style="text-align: right; width: 33%;">
+                                        Page 1 of 1
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+    
+    <!-- Salary Advance Report Template - Single Page -->
+    <template id="salary_advance_report_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.internal_layout">
+                    <div style="font-family: Arial, sans-serif; padding: 15px; font-size: 12px;">
+                        <!-- Header -->
+                        <div style="text-align: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #e74c3c;">
+                            <h2 style="margin: 0; color: #e74c3c; font-size: 18px;">SALARY ADVANCE REPORT</h2>
+                            <p style="margin: 5px 0 0 0; color: #7f8c8d; font-size: 12px;">Loan Management System</p>
+                        </div>
+                        
+                        <!-- Two Column Layout -->
+                        <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                            <!-- Left Column -->
+                            <div style="flex: 1;">
+                                <!-- Advance Information -->
+                                <div style="margin-bottom: 10px;">
+                                    <h4 style="color: #e74c3c; margin: 0 0 8px 0; font-size: 13px; background: #fdf2f2; padding: 5px 8px; border-left: 3px solid #e74c3c;">
+                                        📋 Advance Information
+                                    </h4>
+                                    <table style="width: 100%; font-size: 11px;">
+                                        <tr>
+                                            <td style="padding: 3px 0; width: 40%;"><strong>Reference:</strong></td>
+                                            <td style="padding: 3px 0; font-weight: bold; color: #e74c3c;"><t t-esc="doc.name"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 3px 0;"><strong>Date:</strong></td>
+                                            <td style="padding: 3px 0;"><t t-esc="doc.date"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 3px 0;"><strong>Employee:</strong></td>
+                                            <td style="padding: 3px 0;"><t t-esc="doc.employee_id.name"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 3px 0;"><strong>Department:</strong></td>
+                                            <td style="padding: 3px 0;"><t t-esc="doc.department_id.name or '-'"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 3px 0;"><strong>Job Position:</strong></td>
+                                            <td style="padding: 3px 0;"><t t-esc="doc.job_id.name or '-'"/></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                
+                                <!-- Status -->
+                                <div style="margin-bottom: 10px;">
+                                    <h4 style="color: #f39c12; margin: 0 0 8px 0; font-size: 13px; background: #fff9e6; padding: 5px 8px; border-left: 3px solid #f39c12;">
+                                        📊 Status
+                                    </h4>
+                                    <t t-set="status_color" t-value="'#6c757d'"/>
+                                    <t t-set="status_bg" t-value="'#f8f9fa'"/>
+                                    <t t-if="doc.state == 'paid'">
+                                        <t t-set="status_color" t-value="'#155724'"/>
+                                        <t t-set="status_bg" t-value="'#d4edda'"/>
+                                    </t>
+                                    <t t-elif="doc.state == 'approved'">
+                                        <t t-set="status_color" t-value="'#856404'"/>
+                                        <t t-set="status_bg" t-value="'#fff3cd'"/>
+                                    </t>
+                                    <t t-elif="doc.state == 'submitted'">
+                                        <t t-set="status_color" t-value="'#0c5460'"/>
+                                        <t t-set="status_bg" t-value="'#d1ecf1'"/>
+                                    </t>
+                                    <div style="background: {status_bg}; color: {status_color}; padding: 6px; border-radius: 4px; text-align: center; font-weight: bold; font-size: 12px;">
+                                        <t t-esc="doc.state.upper()"/>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Right Column -->
+                            <div style="flex: 1;">
+                                <!-- Financial Details -->
+                                <div style="margin-bottom: 10px;">
+                                    <h4 style="color: #3498db; margin: 0 0 8px 0; font-size: 13px; background: #f0f8ff; padding: 5px 8px; border-left: 3px solid #3498db;">
+                                        💰 Financial Details
+                                    </h4>
+                                    <table style="width: 100%; font-size: 11px;">
+                                        <tr>
+                                            <td style="padding: 3px 0; width: 60%;"><strong>Advance Amount:</strong></td>
+                                            <td style="padding: 3px 0; text-align: right; font-weight: bold; color: #e74c3c; font-size: 14px;">
+                                                <t t-esc="doc.amount"/> <t t-esc="doc.currency_id.symbol"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 3px 0;"><strong>Journal:</strong></td>
+                                            <td style="padding: 3px 0; text-align: right;">
+                                                <t t-esc="doc.journal_id.name or '-'"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 3px 0;"><strong>Deduction Month:</strong></td>
+                                            <td style="padding: 3px 0; text-align: right;">
+                                                <t t-esc="doc.deduction_month or '-'"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 3px 0;"><strong>Journal Entry:</strong></td>
+                                            <td style="padding: 3px 0; text-align: right; font-size: 10px;">
+                                                <t t-esc="doc.move_id.name or '-'"/>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                
+                                <!-- Accounting Details -->
+                                <div>
+                                    <h4 style="color: #9b59b6; margin: 0 0 8px 0; font-size: 13px; background: #f5f0f9; padding: 5px 8px; border-left: 3px solid #9b59b6;">
+                                        📊 Accounting
+                                    </h4>
+                                    <table style="width: 100%; font-size: 10px;">
+                                        <tr>
+                                            <td style="padding: 2px 0;"><strong>Debit Account:</strong></td>
+                                            <td style="padding: 2px 0;"><t t-esc="doc.account_debit.code"/> - <t t-esc="doc.account_debit.name"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 2px 0;"><strong>Credit Account:</strong></td>
+                                            <td style="padding: 2px 0;"><t t-esc="doc.account_credit.code"/> - <t t-esc="doc.account_credit.name"/></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Reason for Advance -->
+                        <t t-if="doc.reason">
+                            <div style="margin-bottom: 10px;">
+                                <h4 style="color: #27ae60; margin: 0 0 8px 0; font-size: 13px; background: #f0f9f0; padding: 5px 8px; border-left: 3px solid #27ae60;">
+                                    📝 Reason for Advance
+                                </h4>
+                                <div style="background: #f8f9fa; padding: 8px; border-radius: 4px; font-size: 11px;">
+                                    <t t-esc="doc.reason"/>
+                                </div>
+                            </div>
+                        </t>
+                        
+                        <!-- Footer -->
+                        <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #ddd; text-align: center; color: #7f8c8d; font-size: 10px;">
+                            <table style="width: 100%;">
+                                <tr>
+                                    <td style="text-align: left; width: 33%;">
+                                        Generated: <t t-esc="doc.create_date or 'N/A'"/>
+                                    </td>
+                                    <td style="text-align: center; width: 34%;">
+                                        Loan Management System
+                                    </td>
+                                    <td style="text-align: right; width: 33%;">
+                                        Page 1 of 1
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

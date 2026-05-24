@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data noupdate="0">
+
+    <!-- ================================================================== -->
+    <!--  REPORT ACTIONS                                                     -->
+    <!-- ================================================================== -->
+    <record id="action_report_resign_new_opportunity" model="ir.actions.report">
+        <field name="name">Resignation Letter – New Opportunity</field>
+        <field name="model">hr.resign</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">portal_login.report_resign_new_opportunity_doc</field>
+        <field name="report_file">portal_login.report_resign_new_opportunity_doc</field>
+    </record>
+
+    <record id="action_report_resign_advance_notice" model="ir.actions.report">
+        <field name="name">Resignation Letter – Advance Notice</field>
+        <field name="model">hr.resign</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">portal_login.report_resign_advance_notice_doc</field>
+        <field name="report_file">portal_login.report_resign_advance_notice_doc</field>
+    </record>
+
+    <record id="action_report_resign_not_good_fit" model="ir.actions.report">
+        <field name="name">Resignation Letter – Not a Good Fit</field>
+        <field name="model">hr.resign</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">portal_login.report_resign_not_good_fit_doc</field>
+        <field name="report_file">portal_login.report_resign_not_good_fit_doc</field>
+    </record>
+
+    <!-- ================================================================== -->
+    <!--  SHARED PAGE STYLE — compact, guaranteed single page                -->
+    <!-- ================================================================== -->
+
+    <!-- ================================================================== -->
+    <!--  TEMPLATE 1 — NEW OPPORTUNITY                                       -->
+    <!-- ================================================================== -->
+    <template id="report_resign_new_opportunity_doc">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page" style="font-family:'Helvetica Neue',Arial,sans-serif;color:#222;font-size:10pt;line-height:1.55;page-break-inside:avoid;max-height:227mm;overflow:hidden;">
+
+                        <div style="display:flex;justify-content:space-between;margin-bottom:14px;">
+                            <div><span style="font-size:8pt;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Reference No.</span><br/>
+                                <strong style="font-size:11pt;color:#c0392b;" t-esc="o.name"/></div>
+                            <div style="text-align:right;"><span style="font-size:8pt;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Date</span><br/>
+                                <span t-esc="o.request_date"/></div>
+                        </div>
+                        <hr style="border:none;border-top:2px solid #c0392b;margin-bottom:12px;"/>
+
+                        <div style="margin-bottom:10px;font-size:9.5pt;">
+                            <strong>To,</strong>&#160;
+                            <span t-esc="o.manager_id.name or 'The HR Manager'"/>
+                            <t t-if="o.department_id">, <span t-esc="o.department_id.name"/></t>
+                            <t t-if="o.employee_id.company_id.name">, <span t-esc="o.employee_id.company_id.name"/></t>
+                        </div>
+
+                        <p style="margin:0 0 8px;">Dear <strong><t t-esc="o.manager_id.name or 'Manager'"/></strong>,</p>
+
+                        <p style="margin:0 0 8px;text-align:justify;">
+                            I am writing to formally notify you of my resignation from the position of
+                            <strong t-esc="o.job_id.name or 'Employee'"/> with
+                            <strong t-esc="o.employee_id.company_id.name or 'the Company'"/>.
+                            In accordance with my notice period of <strong><t t-esc="o.notice_period_days"/> days</strong>,
+                            my final day will be <strong t-esc="o.last_working_date"/>.
+                        </p>
+
+                        <p style="margin:0 0 8px;text-align:justify;background:#ffffff;padding:7px 0;"><t t-esc="o.reason"/></p>
+
+                        <p style="margin:0 0 8px;text-align:justify;">
+                            I have thoroughly enjoyed my time at <strong t-esc="o.employee_id.company_id.name or 'the Company'"/>
+                            and would like to thank you for all of the opportunities I have been afforded here.
+                        </p>
+                        <p style="margin:0 0 8px;text-align:justify;">
+                            In the coming weeks before <strong t-esc="o.last_working_date"/>,
+                            I am fully committed to providing assistance in ensuring a smooth transition.
+                        </p>
+
+                        <t t-if="o.additional_notes">
+                            <p style="margin:0 0 4px;"><strong>Handover Notes:</strong></p>
+                            <div style="background:#ffffff;padding:6px 0;margin-bottom:8px;font-size:9.5pt;color:#444;">
+                                <t t-esc="o.additional_notes"/>
+                            </div>
+                        </t>
+
+                        <div style="margin-top:18px;">
+                            <p style="margin:0 0 16px;">Sincerely,</p>
+                            <div style="border-top:1.5px solid #888;display:inline-block;min-width:180px;padding-top:5px;">
+                                <strong t-esc="o.employee_id.name"/><br/>
+                                <span style="font-size:9pt;color:#555;" t-esc="o.job_id.name or ''"/>
+                            </div>
+                        </div>
+
+                        <div style="margin-top:16px;padding:7px 12px;background:#ffffff;font-size:8.5pt;color:#888;text-align:center;">
+                            Generated on <span t-esc="o.request_date"/> via
+                            <strong t-esc="o.employee_id.company_id.name or 'Company Portal'"/> Employee Portal ·
+                            Ref: <span t-esc="o.name"/>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- ================================================================== -->
+    <!--  TEMPLATE 2 — ADVANCE NOTICE                                        -->
+    <!-- ================================================================== -->
+    <template id="report_resign_advance_notice_doc">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page" style="font-family:'Helvetica Neue',Arial,sans-serif;color:#222;font-size:10pt;line-height:1.55;page-break-inside:avoid;max-height:227mm;overflow:hidden;">
+
+                        <div style="display:flex;justify-content:space-between;margin-bottom:14px;">
+                            <div><span style="font-size:8pt;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Reference No.</span><br/>
+                                <strong style="font-size:11pt;color:#2c3e50;" t-esc="o.name"/></div>
+                            <div style="text-align:right;"><span style="font-size:8pt;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Date</span><br/>
+                                <span t-esc="o.request_date"/></div>
+                        </div>
+                        <hr style="border:none;border-top:2px solid #2c3e50;margin-bottom:12px;"/>
+
+                        <div style="margin-bottom:10px;font-size:9.5pt;">
+                            <strong>To,</strong>&#160;
+                            <span t-esc="o.manager_id.name or 'The HR Manager'"/>
+                            <t t-if="o.department_id">, <span t-esc="o.department_id.name"/></t>
+                            <t t-if="o.employee_id.company_id.name">, <span t-esc="o.employee_id.company_id.name"/></t>
+                        </div>
+
+                        <p style="margin:0 0 8px;">Dear <strong><t t-esc="o.manager_id.name or 'Manager'"/></strong>,</p>
+
+                        <p style="margin:0 0 8px;text-align:justify;">
+                            I am writing to inform you of my decision to resign from
+                            <strong t-esc="o.employee_id.company_id.name or 'the Company'"/>,
+                            effective <strong t-esc="o.last_working_date"/>.
+                            I understand that transitioning a new person to the role of
+                            <strong t-esc="o.job_id.name or 'my position'"/> will take some time and
+                            I would like to provide as much notice as possible — a notice period of
+                            <strong><t t-esc="o.notice_period_days"/> days</strong>.
+                        </p>
+
+                        <p style="margin:0 0 8px;text-align:justify;background:#ffffff;padding:7px 0;"><t t-esc="o.reason"/></p>
+
+                        <p style="margin:0 0 8px;text-align:justify;">
+                            During my time at <strong t-esc="o.employee_id.company_id.name or 'the Company'"/>,
+                            I have learned a lot and grown professionally. Thank you for all of your guidance and support during my employment.
+                        </p>
+                        <p style="margin:0 0 8px;text-align:justify;">
+                            Please feel free to contact me with any questions about the projects I have been working on.
+                            I am happy to help in any way I can with the transition process.
+                        </p>
+
+                        <t t-if="o.additional_notes">
+                            <p style="margin:0 0 4px;"><strong>Handover / Additional Notes:</strong></p>
+                            <div style="background:#ffffff;padding:6px 0;margin-bottom:8px;font-size:9.5pt;color:#444;">
+                                <t t-esc="o.additional_notes"/>
+                            </div>
+                        </t>
+
+                        <p style="margin:0 0 8px;text-align:justify;">I wish you all the best for your continued success.</p>
+
+                        <div style="margin-top:18px;">
+                            <p style="margin:0 0 16px;">Sincerely,</p>
+                            <div style="border-top:1.5px solid #888;display:inline-block;min-width:180px;padding-top:5px;">
+                                <strong t-esc="o.employee_id.name"/><br/>
+                                <span style="font-size:9pt;color:#555;" t-esc="o.job_id.name or ''"/>
+                            </div>
+                        </div>
+
+                        <div style="margin-top:16px;padding:7px 12px;background:#ffffff;font-size:8.5pt;color:#888;text-align:center;">
+                            Generated on <span t-esc="o.request_date"/> via
+                            <strong t-esc="o.employee_id.company_id.name or 'Company Portal'"/> Employee Portal ·
+                            Ref: <span t-esc="o.name"/>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- ================================================================== -->
+    <!--  TEMPLATE 3 — NOT A GOOD FIT                                        -->
+    <!-- ================================================================== -->
+    <template id="report_resign_not_good_fit_doc">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page" style="font-family:'Helvetica Neue',Arial,sans-serif;color:#222;font-size:10pt;line-height:1.55;page-break-inside:avoid;max-height:227mm;overflow:hidden;">
+
+                        <div style="display:flex;justify-content:space-between;margin-bottom:14px;">
+                            <div><span style="font-size:8pt;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Reference No.</span><br/>
+                                <strong style="font-size:11pt;color:#7f8c8d;" t-esc="o.name"/></div>
+                            <div style="text-align:right;"><span style="font-size:8pt;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Date</span><br/>
+                                <span t-esc="o.request_date"/></div>
+                        </div>
+                        <hr style="border:none;border-top:2px solid #7f8c8d;margin-bottom:12px;"/>
+
+                        <div style="margin-bottom:10px;font-size:9.5pt;">
+                            <strong>To,</strong>&#160;
+                            <span t-esc="o.manager_id.name or 'The HR Manager'"/>
+                            <t t-if="o.department_id">, <span t-esc="o.department_id.name"/></t>
+                            <t t-if="o.employee_id.company_id.name">, <span t-esc="o.employee_id.company_id.name"/></t>
+                        </div>
+
+                        <p style="margin:0 0 8px;">Dear <strong><t t-esc="o.manager_id.name or 'Manager'"/></strong>,</p>
+
+                        <p style="margin:0 0 8px;text-align:justify;">
+                            I am writing to formally notify you of my resignation from the position of
+                            <strong t-esc="o.job_id.name or 'Employee'"/> at
+                            <strong t-esc="o.employee_id.company_id.name or 'the Company'"/>.
+                            My last day with the company will be <strong t-esc="o.last_working_date"/>.
+                        </p>
+
+                        <p style="margin:0 0 8px;text-align:justify;background:#ffffff;padding:7px 0;"><t t-esc="o.reason"/></p>
+
+                        <p style="margin:0 0 8px;text-align:justify;">
+                            During my time at <strong t-esc="o.employee_id.company_id.name or 'the Company'"/>,
+                            I have come to realise that the scope of the role is unfortunately not what I had anticipated,
+                            and as such, I would like to explore other opportunities.
+                        </p>
+                        <p style="margin:0 0 8px;text-align:justify;">
+                            Thank you for understanding — I truly appreciate all the support and guidance
+                            you have provided in the time I have worked for the business.
+                        </p>
+
+                        <t t-if="o.additional_notes">
+                            <p style="margin:0 0 4px;"><strong>Additional Notes / Handover:</strong></p>
+                            <div style="background:#ffffff;padding:6px 0;margin-bottom:8px;font-size:9.5pt;color:#444;">
+                                <t t-esc="o.additional_notes"/>
+                            </div>
+                        </t>
+
+                        <p style="margin:0 0 8px;text-align:justify;">
+                            Please let me know how I can help to support a smooth transition over the
+                            next <strong><t t-esc="o.notice_period_days"/> days</strong>.
+                        </p>
+
+                        <div style="margin-top:18px;">
+                            <p style="margin:0 0 16px;">Sincerely,</p>
+                            <div style="border-top:1.5px solid #888;display:inline-block;min-width:180px;padding-top:5px;">
+                                <strong t-esc="o.employee_id.name"/><br/>
+                                <span style="font-size:9pt;color:#555;" t-esc="o.job_id.name or ''"/>
+                            </div>
+                        </div>
+
+                        <div style="margin-top:16px;padding:7px 12px;background:#ffffff;font-size:8.5pt;color:#888;text-align:center;">
+                            Generated on <span t-esc="o.request_date"/> via
+                            <strong t-esc="o.employee_id.company_id.name or 'Company Portal'"/> Employee Portal ·
+                            Ref: <span t-esc="o.name"/>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</data>
+</odoo>

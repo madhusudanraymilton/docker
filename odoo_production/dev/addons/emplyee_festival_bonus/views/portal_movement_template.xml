@@ -1,0 +1,455 @@
+<odoo>
+    <template id="portal_movement_form" name="Portal Movement Form">
+        <t t-call="website.layout">
+            <style>
+                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Sora:wght@600;700&amp;display=swap');
+                :root {
+                    --g50:#f0fdf4;--g100:#dcfce7;--g200:#bbf7d0;--g400:#4ade80;
+                    --g500:#22c55e;--g600:#16a34a;--g700:#15803d;
+                    --s50:#f8fafc;--s100:#f1f5f9;--s200:#e2e8f0;--s300:#cbd5e1;
+                    --s400:#94a3b8;--s500:#64748b;--s600:#475569;--s700:#334155;
+                    --s800:#1e293b;--s900:#0f172a;--white:#ffffff;
+                    --blue:#3b82f6;--blue2:#1d4ed8;--amber:#f59e0b;--amber2:#d97706;
+                    --purple:#8b5cf6;--red:#ef4444;--teal:#14b8a6;--rose:#e11d48;
+                    --personal:#3b82f6;--personal-lt:#dbeafe;--personal-dk:#1d4ed8;
+                    --company:#8b5cf6;--company-lt:#ede9fe;--company-dk:#6d28d9;
+                    --radius:16px;--radius-sm:10px;
+                    --shadow:0 1px 3px rgba(0,0,0,.05),0 4px 16px rgba(0,0,0,.07);
+                    --shadow-lg:0 8px 32px rgba(0,0,0,.12);
+                }
+                *{box-sizing:border-box;}
+                body{background:var(--s50);font-family:'Inter',sans-serif;color:var(--s800);}
+                .mv-wrap{max-width:960px;margin:0 auto;padding:40px 24px 80px;}
+
+                .mv-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;animation:fadeUp .5s ease both;flex-wrap:wrap;gap:16px;}
+                .mv-topbar-left h1{font-family:'Sora',sans-serif;font-size:1.75rem;font-weight:700;background:linear-gradient(135deg,var(--g700),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin:0 0 4px;}
+                .mv-topbar-left p{color:var(--s400);font-size:.9rem;margin:0;}
+                .mv-avatar-wrap{display:flex;align-items:center;gap:10px;}
+                .mv-avatar{width:44px;height:44px;background:linear-gradient(135deg,var(--g600),var(--teal));border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1rem;box-shadow:0 2px 12px rgba(22,163,74,.4);}
+                .mv-avatar-name{font-weight:600;color:var(--s700);font-size:.9rem;}
+
+                .mv-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px;}
+                @media(max-width:600px){.mv-stats{grid-template-columns:1fr;}}
+                .mv-stat{background:var(--white);border-radius:var(--radius);padding:20px 22px;border:1.5px solid transparent;box-shadow:var(--shadow);display:flex;align-items:center;gap:16px;animation:fadeUp .5s ease both;transition:transform .2s,box-shadow .2s;position:relative;overflow:hidden;}
+                .mv-stat::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+                .mv-stat:nth-child(1)::before{background:linear-gradient(90deg,var(--g500),var(--teal));}
+                .mv-stat:nth-child(2)::before{background:linear-gradient(90deg,var(--blue),var(--purple));}
+                .mv-stat:nth-child(3)::before{background:linear-gradient(90deg,var(--amber),var(--red));}
+                .mv-stat:nth-child(1){animation-delay:.05s;border-color:rgba(34,197,94,.15);}
+                .mv-stat:nth-child(2){animation-delay:.10s;border-color:rgba(59,130,246,.15);}
+                .mv-stat:nth-child(3){animation-delay:.15s;border-color:rgba(245,158,11,.15);}
+                .mv-stat:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);}
+                .mv-stat-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.15rem;flex-shrink:0;}
+                .mv-stat-icon.green{background:linear-gradient(135deg,#d1fae5,#a7f3d0);color:var(--g700);}
+                .mv-stat-icon.blue{background:linear-gradient(135deg,#dbeafe,#bfdbfe);color:var(--blue2);}
+                .mv-stat-icon.amber{background:linear-gradient(135deg,#fef3c7,#fde68a);color:var(--amber2);}
+                .mv-stat-info p{margin:0 0 3px;font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--s400);}
+                .mv-stat-info h3{margin:0;font-size:1.6rem;font-weight:700;color:var(--s900);font-family:'Sora',sans-serif;}
+
+                .mv-alert-success{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,var(--g50),#ecfdf5);border:1.5px solid var(--g200);border-left:4px solid var(--g500);border-radius:var(--radius-sm);padding:13px 18px;color:var(--g700);font-weight:600;font-size:.92rem;margin-bottom:24px;animation:fadeUp .4s ease both;box-shadow:0 2px 8px rgba(34,197,94,.1);}
+                .mv-alert-error{display:flex;align-items:center;gap:10px;background:#fff1f2;border:1.5px solid #fecdd3;border-left:4px solid var(--rose);border-radius:var(--radius-sm);padding:13px 18px;color:#be123c;font-weight:600;font-size:.92rem;margin-bottom:24px;animation:fadeUp .4s ease both;}
+
+                .mv-tabs{display:flex;gap:8px;margin-bottom:28px;background:var(--s100);padding:6px;border-radius:14px;animation:fadeUp .5s ease both;animation-delay:.05s;}
+                .mv-tab{flex:1;padding:11px 16px;border-radius:10px;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:.88rem;font-weight:600;transition:all .2s;background:transparent;color:var(--s500);text-align:center;text-decoration:none;display:block;}
+                .mv-tab.active-personal{background:var(--white);color:var(--personal-dk);box-shadow:0 2px 8px rgba(0,0,0,.08);}
+                .mv-tab.active-company{background:var(--white);color:var(--company-dk);box-shadow:0 2px 8px rgba(0,0,0,.08);}
+                .mv-tab:hover:not(.active-personal):not(.active-company){background:var(--s200);color:var(--s700);text-decoration:none;}
+
+                .mv-card{background:var(--white);border-radius:var(--radius);border:1.5px solid var(--s200);box-shadow:var(--shadow);overflow:hidden;margin-bottom:24px;animation:fadeUp .5s ease both;animation-delay:.2s;transition:box-shadow .2s,border-color .2s;}
+                .mv-card:hover{box-shadow:var(--shadow-lg);border-color:var(--g200);}
+                .mv-card-stripe{height:4px;}
+                .mv-card-stripe.personal{background:linear-gradient(90deg,var(--g500) 0%,var(--teal) 50%,var(--blue) 100%);}
+                .mv-card-stripe.company{background:linear-gradient(90deg,var(--g500) 0%,var(--teal) 40%,var(--purple) 100%);}
+                .mv-card-head{display:flex;align-items:center;gap:12px;padding:18px 24px;border-bottom:1px solid var(--s100);background:linear-gradient(135deg,#f8fffe 0%,#f0fdf4 100%);}
+                .mv-card-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.9rem;box-shadow:0 2px 8px rgba(34,197,94,.3);}
+                .mv-card-icon.personal{background:linear-gradient(135deg,var(--g500),var(--teal));}
+                .mv-card-icon.company{background:linear-gradient(135deg,var(--teal),var(--purple));}
+                .mv-card-head-info h5{margin:0 0 2px;font-size:1rem;font-weight:700;color:var(--s800);font-family:'Sora',sans-serif;}
+                .mv-card-head-info span{font-size:.8rem;color:var(--s400);}
+                .mv-card-body{padding:28px;}
+
+                .mv-label{display:block;font-size:.76rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--s600);margin-bottom:7px;}
+                .mv-label .req{color:var(--g500);}
+                .mv-input,.mv-select,.mv-textarea{width:100%;border:1.5px solid var(--s200);border-radius:var(--radius-sm);padding:10px 14px;font-family:'Inter',sans-serif;font-size:.93rem;color:var(--s800);background:var(--s50);outline:none;transition:border-color .18s,box-shadow .18s,background .18s;appearance:none;-webkit-appearance:none;}
+                .mv-input:focus,.mv-select:focus,.mv-textarea:focus{border-color:var(--g500);background:var(--white);box-shadow:0 0 0 3px rgba(34,197,94,.15);}
+                .mv-select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2322c55e' d='M6 8L0 0h12z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:38px;cursor:pointer;}
+                .mv-textarea{resize:vertical;min-height:100px;}
+                .mv-dt-wrap{position:relative;}
+                .mv-dt-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--g500);font-size:.9rem;pointer-events:none;}
+                .mv-dt-wrap .mv-input{padding-left:36px;}
+                .mv-date-time-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end;}
+                .mv-time-input{width:130px;}
+                .mv-date-time-row .mv-dt-wrap{flex:1;}
+                .mv-file-label{display:flex;align-items:center;gap:12px;border:1.5px dashed var(--s300);border-radius:var(--radius-sm);padding:14px 18px;cursor:pointer;color:var(--s500);font-size:.9rem;font-weight:500;transition:all .18s;background:var(--s50);}
+                .mv-file-label:hover{border-color:var(--g500);color:var(--g700);background:var(--g50);}
+                input[type=file]{display:none;}
+                .mv-file-name{font-size:.82rem;color:var(--g700);margin-top:6px;display:none;font-weight:500;}
+                .mv-file-name.show{display:block;}
+                .mv-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+                @media(max-width:580px){.mv-grid-2{grid-template-columns:1fr;}}
+                .mv-field{margin-bottom:18px;}
+                .mv-field:last-child{margin-bottom:0;}
+                .mv-sep{height:1px;background:linear-gradient(90deg,var(--g200),var(--s200),transparent);margin:22px 0;}
+                #mv_duration_preview{display:none;margin:-8px 0 16px;padding:9px 14px;background:linear-gradient(135deg,var(--g50),#ecfdf5);border:1px solid var(--g200);border-radius:8px;font-size:.83rem;font-weight:600;color:var(--g700);}
+
+                .mv-actions{display:flex;gap:12px;flex-wrap:wrap;}
+                .mv-btn{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:var(--radius-sm);font-family:'Inter',sans-serif;font-size:.88rem;font-weight:700;border:none;cursor:pointer;transition:all .2s;text-decoration:none;letter-spacing:.02em;}
+                .mv-btn-submit{background:linear-gradient(135deg,var(--g700) 0%,var(--g500) 60%,var(--teal) 100%);color:var(--white);box-shadow:0 3px 12px rgba(22,163,74,.35);}
+                .mv-btn-submit:hover{filter:brightness(1.1);box-shadow:0 6px 20px rgba(22,163,74,.45);transform:translateY(-2px);color:var(--white);text-decoration:none;}
+                .mv-btn-ghost{background:var(--white);color:var(--s600);border:1.5px solid var(--s200);box-shadow:0 1px 4px rgba(0,0,0,.06);}
+                .mv-btn-ghost:hover{background:var(--s100);color:var(--s800);border-color:var(--s300);text-decoration:none;}
+
+                .mv-history{background:var(--white);border-radius:var(--radius);border:1.5px solid var(--s200);box-shadow:var(--shadow);overflow:hidden;animation:fadeUp .5s ease both;animation-delay:.3s;transition:box-shadow .2s,border-color .2s;}
+                .mv-history:hover{box-shadow:var(--shadow-lg);border-color:var(--g200);}
+                .mv-history-stripe{height:4px;background:linear-gradient(90deg,var(--g500) 0%,var(--teal) 50%,var(--blue) 100%);}
+                .mv-history.company .mv-history-stripe{background:linear-gradient(90deg,var(--g500) 0%,var(--teal) 40%,var(--purple) 100%);}
+                .mv-history-head{display:flex;align-items:center;gap:12px;padding:18px 24px;border-bottom:1px solid var(--s100);background:linear-gradient(135deg,#f8fffe,#f0fdf4);}
+                .mv-history-head h5{margin:0;font-size:1rem;font-weight:700;color:var(--s800);font-family:'Sora',sans-serif;flex:1;}
+                .mv-hbadge{font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:20px;}
+                .mv-hbadge.personal{background:var(--personal-lt);color:var(--personal-dk);}
+                .mv-hbadge.company{background:var(--company-lt);color:var(--company-dk);}
+                .mv-tbl{width:100%;border-collapse:collapse;}
+                .mv-tbl thead tr{border-bottom:2px solid var(--g100);}
+                .mv-tbl th{padding:11px 16px;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--g700);text-align:left;background:linear-gradient(135deg,#f0fdf4,#f8fafc);}
+                .mv-tbl td{padding:14px 16px;font-size:.9rem;color:var(--s700);border-bottom:1px solid var(--s100);vertical-align:middle;}
+                .mv-tbl tbody tr:hover td{background:#f0fdf4;}
+                .mv-tbl tbody tr:last-child td{border-bottom:none;}
+                .mv-duration{font-size:.82rem;color:var(--s400);font-weight:500;}
+                .mv-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:.72rem;font-weight:700;letter-spacing:.04em;}
+                .mv-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.7;}
+                .mv-badge.state-confirm{background:#fef3c7;color:#92400e;}
+                .mv-badge.state-validate1{background:#dbeafe;color:#1e40af;}
+                .mv-badge.state-validate{background:var(--g100);color:var(--g700);}
+                .mv-badge.state-refuse{background:#fee2e2;color:#991b1b;}
+                .mv-badge.state-draft{background:var(--s100);color:var(--s500);}
+                .mv-empty{text-align:center;padding:52px 20px;color:var(--s400);}
+                .mv-empty-icon{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--g50),var(--s100));display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:1.8rem;color:var(--s300);border:2px solid var(--s200);}
+                .mv-empty p{margin:0;font-size:.92rem;}
+                @keyframes fadeUp{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+            </style>
+
+            <div class="mv-wrap">
+
+                <!-- Topbar -->
+                <div class="mv-topbar">
+                    <div class="mv-topbar-left">
+                        <h1>Movement Application</h1>
+                        <p>Submit personal or company movement requests for approval</p>
+                    </div>
+                    <div class="mv-avatar-wrap">
+                        <div class="mv-avatar"><t t-esc="(employee.name or 'U')[0].upper()"/></div>
+                        <span class="mv-avatar-name"><t t-esc="employee.name or ''"/></span>
+                    </div>
+                </div>
+
+                <!-- Alerts -->
+                <t t-if="request.params.get('success')">
+                    <div class="mv-alert-success">
+                        <i class="fa fa-check-circle fa-lg"/>
+                        Movement application submitted successfully. Awaiting team leader approval.
+                    </div>
+                </t>
+                <t t-if="request.params.get('error')">
+                    <div class="mv-alert-error">
+                        <i class="fa fa-exclamation-circle fa-lg"/>
+                        Failed to submit movement. Please check your dates and try again.
+                    </div>
+                </t>
+
+                <!-- Stats -->
+                <div class="mv-stats">
+                    <div class="mv-stat">
+                        <div class="mv-stat-icon green"><i class="fa fa-exchange"/></div>
+                        <div class="mv-stat-info"><p>Total</p><h3><t t-esc="total_movements"/></h3></div>
+                    </div>
+                    <div class="mv-stat">
+                        <div class="mv-stat-icon blue"><i class="fa fa-user"/></div>
+                        <div class="mv-stat-info"><p>Personal</p><h3><t t-esc="personal_count"/></h3></div>
+                    </div>
+                    <div class="mv-stat">
+                        <div class="mv-stat-icon amber"><i class="fa fa-building"/></div>
+                        <div class="mv-stat-info"><p>Company</p><h3><t t-esc="company_count"/></h3></div>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="mv-tabs">
+                    <a t-attf-href="/my/movement?movement_type=personal"
+                       t-attf-class="mv-tab #{movement_type == 'personal' and 'active-personal' or ''}">
+                        <i class="fa fa-user me-1"/> Personal Movement
+                    </a>
+                    <a t-attf-href="/my/movement?movement_type=company"
+                       t-attf-class="mv-tab #{movement_type == 'company' and 'active-company' or ''}">
+                        <i class="fa fa-building me-1"/> Company Movement
+                    </a>
+                </div>
+
+                <!-- Form Card -->
+                <div class="mv-card">
+                    <div t-attf-class="mv-card-stripe #{movement_type}"/>
+                    <div class="mv-card-head">
+                        <div t-attf-class="mv-card-icon #{movement_type}">
+                            <i t-attf-class="fa #{movement_type == 'personal' and 'fa-user' or 'fa-building'}"/>
+                        </div>
+                        <div class="mv-card-head-info">
+                            <h5>
+                                <t t-if="movement_type == 'personal'">Personal Movement Application</t>
+                                <t t-else="">Company Movement Application</t>
+                            </h5>
+                            <span>
+                                <t t-if="movement_type == 'personal'">For personal travel or out-of-office activities</t>
+                                <t t-else="">For official company business travel</t>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="mv-card-body">
+                        <form action="/my/movement/submit" method="post" enctype="multipart/form-data">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <input type="hidden" name="movement_type" t-att-value="movement_type"/>
+
+                            <input type="hidden" name="tz_offset" id="mv_tz_offset" value="0"/>
+
+                            <div class="mv-grid-2">
+                                <div class="mv-field">
+                                    <label class="mv-label">Request Start Date <span class="req">*</span></label>
+                                    <div class="mv-date-time-row">
+                                        <div class="mv-dt-wrap" style="flex:1;">
+                                            <i class="fa fa-calendar mv-dt-icon"/>
+                                            <input type="date" name="request_date_from" id="mv_date_from"
+                                                   class="mv-input" required="required"/>
+                                        </div>
+                                        <div>
+                                            <input type="time" name="request_hour_from_raw" id="mv_time_from"
+                                                   class="mv-input mv-time-input" required="required"
+                                                   placeholder="HH:MM"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mv-field">
+                                    <label class="mv-label">Request End Date <span class="req">*</span></label>
+                                    <div class="mv-date-time-row">
+                                        <div class="mv-dt-wrap" style="flex:1;">
+                                            <i class="fa fa-calendar mv-dt-icon"/>
+                                            <input type="date" name="request_date_to" id="mv_date_to"
+                                                   class="mv-input" required="required"/>
+                                        </div>
+                                        <div>
+                                            <input type="time" name="request_hour_to_raw" id="mv_time_to"
+                                                   class="mv-input mv-time-input" required="required"
+                                                   placeholder="HH:MM"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Hidden: hour floats computed from time inputs before submit -->
+                            <input type="hidden" name="request_hour_from" id="mv_hour_from"/>
+                            <input type="hidden" name="request_hour_to"   id="mv_hour_to"/>
+
+                            <div id="mv_duration_preview">
+                                <i class="fa fa-clock-o me-1"/> Duration: <span id="mv_duration_text">–</span>
+                            </div>
+
+                            <div class="mv-field">
+                                <label class="mv-label">Reason for Movement <span class="req">*</span></label>
+                                <textarea name="reason" class="mv-textarea"
+                                          placeholder="Please provide a detailed reason for your movement request..."
+                                          required="required"/>
+                            </div>
+
+                            <div class="mv-field">
+                                <label class="mv-label">Delegate Responsibilities To</label>
+                                <select name="delegate_id" class="mv-select">
+                                    <option value="">-- No Delegation --</option>
+                                    <t t-foreach="colleagues" t-as="col">
+                                        <option t-att-value="col.id"><t t-esc="col.name"/></option>
+                                    </t>
+                                </select>
+                            </div>
+
+                            <div class="mv-field">
+                                <label class="mv-label">Supporting Document</label>
+                                <label class="mv-file-label" for="supporting_doc">
+                                    <i class="fa fa-cloud-upload"/>
+                                    <span id="file-name-display">Click to upload (PDF, JPG, PNG)</span>
+                                </label>
+                                <input type="file" id="supporting_doc" name="supporting_document" accept=".pdf,.jpg,.jpeg,.png"/>
+                                <div class="mv-file-name" id="selected-file-name"/>
+                            </div>
+
+                            <div class="mv-sep"/>
+
+                            <div class="mv-actions">
+                                <button type="submit" class="mv-btn mv-btn-submit">
+                                    <i class="fa fa-paper-plane"/> Submit for Approval
+                                </button>
+                                <a href="/my" class="mv-btn mv-btn-ghost">
+                                    <i class="fa fa-times"/> Cancel
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- History filtered by active tab -->
+                <t t-set="filtered_movements" t-value="[m for m in movements_display if m['movement_type'] == movement_type]"/>
+
+                <div t-attf-class="mv-history #{movement_type}">
+                    <div class="mv-history-stripe"/>
+                    <div class="mv-history-head">
+                        <div t-attf-class="mv-card-icon #{movement_type}" style="width:32px;height:32px;border-radius:8px;font-size:.8rem;flex-shrink:0;">
+                            <i t-attf-class="fa #{movement_type == 'personal' and 'fa-user' or 'fa-building'}"/>
+                        </div>
+                        <h5>
+                            <t t-if="movement_type == 'personal'">Personal</t>
+                            <t t-else="">Company</t>
+                            Movement History
+                        </h5>
+                        <span t-attf-class="mv-hbadge #{movement_type}">
+                            <t t-esc="len(filtered_movements)"/> record<t t-if="len(filtered_movements) != 1">s</t>
+                        </span>
+                    </div>
+
+                    <t t-if="filtered_movements">
+                        <table class="mv-tbl">
+                            <thead>
+                                <tr>
+                                    <th>From</th>
+                                    <th>To</th>
+                                    <th>Duration</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="filtered_movements" t-as="mv">
+                                    <tr>
+                                        <td><t t-esc="mv['date_from_fmt']"/></td>
+                                        <td><t t-esc="mv['date_to_fmt']"/></td>
+                                        <td class="mv-duration"><t t-esc="mv['duration']"/></td>
+                                        <td>
+                                            <t t-if="mv['state'] == 'confirm'">
+                                                <span class="mv-badge state-confirm">Pending Team Lead</span>
+                                            </t>
+                                            <t t-elif="mv['state'] == 'validate1'">
+                                                <span class="mv-badge state-validate1">Pending HR</span>
+                                            </t>
+                                            <t t-elif="mv['state'] == 'validate'">
+                                                <span class="mv-badge state-validate">Approved</span>
+                                            </t>
+                                            <t t-elif="mv['state'] == 'refuse'">
+                                                <span class="mv-badge state-refuse">Refused</span>
+                                            </t>
+                                            <t t-else="">
+                                                <span class="mv-badge state-draft">Draft</span>
+                                            </t>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </t>
+                    <t t-else="">
+                        <div class="mv-empty">
+                            <div class="mv-empty-icon">
+                                <i t-attf-class="fa #{movement_type == 'personal' and 'fa-user' or 'fa-building'}"/>
+                            </div>
+                            <p>No <t t-esc="movement_type"/> movement applications yet.</p>
+                        </div>
+                    </t>
+                </div>
+
+            </div>
+
+            <script>
+                <![CDATA[
+                const fileInput   = document.getElementById('supporting_doc');
+                const fileDisplay = document.getElementById('file-name-display');
+                const fileName    = document.getElementById('selected-file-name');
+                if (fileInput) {
+                    fileInput.addEventListener('change', function() {
+                        if (this.files[0]) {
+                            fileDisplay.textContent = 'File selected \u2713';
+                            fileName.textContent = '\ud83d\udcce ' + this.files[0].name;
+                            fileName.classList.add('show');
+                        } else {
+                            fileDisplay.textContent = 'Click to upload (PDF, JPG, PNG)';
+                            fileName.classList.remove('show');
+                        }
+                    });
+                }
+                // Set timezone offset ONCE on page load
+                const tzField = document.getElementById('mv_tz_offset');
+                if (tzField) {
+                    tzField.value = new Date().getTimezoneOffset(); // e.g. -360 for UTC+6
+                }
+
+                // Also re-set on submit to be safe
+                const mvForm = tzField && tzField.closest('form');
+                if (mvForm) {
+                    mvForm.addEventListener('submit', function() {
+                        tzField.value = new Date().getTimezoneOffset();
+                    });
+                }
+
+                // ── Date + Time inputs (matching Odoo Time Off fields) ──────────
+                const dateFromInput = document.getElementById('mv_date_from');
+                const dateToInput   = document.getElementById('mv_date_to');
+                const timeFromInput = document.getElementById('mv_time_from');
+                const timeToInput   = document.getElementById('mv_time_to');
+                const hourFromHid   = document.getElementById('mv_hour_from');
+                const hourToHid     = document.getElementById('mv_hour_to');
+                const preview   = document.getElementById('mv_duration_preview');
+                const durText   = document.getElementById('mv_duration_text');
+
+                function timeToFloat(timeStr) {
+                    // "14:30" → 14.5
+                    if (!timeStr) return null;
+                    const parts = timeStr.split(':');
+                    return parseInt(parts[0]) + parseInt(parts[1] || 0) / 60.0;
+                }
+
+                function updateDuration() {
+                    const df = dateFromInput ? dateFromInput.value : '';
+                    const dt = dateToInput   ? dateToInput.value   : '';
+                    const tf = timeFromInput ? timeFromInput.value : '';
+                    const tt = timeToInput   ? timeToInput.value   : '';
+                    if (!df || !dt || !tf || !tt) { preview.style.display='none'; return; }
+
+                    // Update hidden hour float fields
+                    if (hourFromHid) hourFromHid.value = timeToFloat(tf);
+                    if (hourToHid)   hourToHid.value   = timeToFloat(tt);
+
+                    // Calculate duration
+                    const dtFrom = new Date(df + 'T' + tf);
+                    const dtTo   = new Date(dt + 'T' + tt);
+                    const diffMs = dtTo - dtFrom;
+                    if (diffMs <= 0) { preview.style.display='none'; return; }
+                    const totalMins = Math.round(diffMs / 60000);
+                    const hours = Math.floor(totalMins / 60), mins = totalMins % 60;
+                    let label = '';
+                    if (hours > 0) label += hours + ' hr' + (hours > 1 ? 's' : '');
+                    if (mins > 0)  label += (label ? ' ' : '') + mins + ' min' + (mins > 1 ? 's' : '');
+                    durText.textContent = label || '0 min';
+                    preview.style.display = 'block';
+                }
+
+                // Attach listeners
+                [dateFromInput, dateToInput, timeFromInput, timeToInput].forEach(function(el) {
+                    if (el) el.addEventListener('change', updateDuration);
+                });
+
+                // On submit: ensure hidden hour fields are populated
+                const mvForm2 = document.getElementById('mv_form');
+                if (mvForm2) {
+                    mvForm2.addEventListener('submit', function(e) {
+                        const tf = timeFromInput ? timeFromInput.value : '';
+                        const tt = timeToInput   ? timeToInput.value   : '';
+                        if (hourFromHid) hourFromHid.value = timeToFloat(tf) || 0;
+                        if (hourToHid)   hourToHid.value   = timeToFloat(tt) || 0;
+                    });
+                }
+                ]]>
+            </script>
+        </t>
+    </template>
+</odoo>

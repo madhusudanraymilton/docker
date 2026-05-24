@@ -1,0 +1,77 @@
+<odoo>
+    <record id="view_account_asset_form_inherit_employee" model="ir.ui.view">
+        <field name="name">account.asset.form.inherit.employee</field>
+        <field name="model">account.asset</field>
+        <field name="inherit_id" ref="account_asset.view_account_asset_form"/>
+        <field name="arch" type="xml">
+            <!-- <xpath expr="//field[@name='company_id']" position="after">
+                <field name="employee_id"/>
+            </xpath> -->
+            <xpath expr="//field[@name='original_value']" position="before">
+                <!-- <field name="employee_id"/> -->
+                <field name="product_id"/>
+                <field name="serial_no"/>
+            </xpath>
+            <xpath expr = "//field[@name='serial_no']" position= "after">
+                <field name = "batch_id" />
+                <field name = "effective_date" />
+                <field name = "warranty_expiration_date"/> 
+                <field name = "cost" />
+                <!-- <field name = "assignment_tracking_id" /> -->
+                <!-- <field name = "assignment_history_ids" /> -->
+            </xpath>
+            <xpath expr="//field[@name='prorata_date']" position="after">
+                <field name="appreciation_account_id"/>
+                <field name="income_account_id"/>
+            </xpath>
+            <xpath expr="//field[@name='already_depreciated_amount_import']" position="after">
+                <field name="already_appreciated_amount_import"/>
+            </xpath>
+            <xpath expr ="//field[@name='salvage_value']" position = "before">
+                <field name ="location_id" />
+                <field name = "partner_id" />
+                <field name = "partner_ref" />
+            </xpath>
+            <xpath expr="//sheet/notebook" position="inside">
+                <page string="Assignment History">
+                    <field name="assignment_history_ids">
+                        <list editable="bottom">
+                            <field name="product_id" readonly="1"/>
+                            <field name="employee_id"/>
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                            <field name="duration_days" readonly="1"/>
+                            <field name="state"/>
+                            <field name="returned_condition"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+            <!-- Smart Button (Tracking) -->
+            <!-- <xpath expr="//header" position="inside">
+                <button name="action_view_assignments"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-history">
+                    <field name="assignment_count" widget="statinfo" string="Tracking"/>
+                </button>
+            </xpath> -->
+        </field>
+    </record>
+    <record id="view_account_asset_tree_inherit_employee" model="ir.ui.view">
+        <field name="name">account.asset.tree.inherit.employee</field>
+        <field name="model">account.asset</field>
+        <field name="inherit_id" ref="account_asset.view_account_asset_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="employee_id"/>
+            </xpath>
+            <xpath expr="//field[@name='book_value']" position="replace">
+                <field name="product_id"/>
+                <field name ="serial_no"/>
+            </xpath>
+            <!-- <xpath expr="//field[@name='book_value']" position="after">
+            </xpath> -->
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,689 @@
+/* ══════════════════════════════════════════════════════════════
+   HRM Shift Rostering – stylesheet
+══════════════════════════════════════════════════════════════ */
+
+/* ── Root ─────────────────────────────────────────────────── */
+.sr-root {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: #f8f7ff;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 13px;
+    color: #1e1b4b;
+}
+
+/* ── Toolbar ──────────────────────────────────────────────── */
+.sr-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 14px;
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    flex-wrap: wrap;
+}
+
+.sr-tb-left  { display: flex; align-items: center; gap: 8px; }
+.sr-tb-center{ display: flex; align-items: center; gap: 6px; flex: 1; justify-content: center; }
+.sr-tb-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+
+.sr-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #3730a3;
+    white-space: nowrap;
+}
+
+/* ── Gear ─────────────────────────────────────────────────── */
+.sr-gear-wrap { position: relative; }
+
+.sr-btn-icon {
+    width: 32px; height: 32px;
+    border: 1px solid #d1d5db;
+    background: #fff;
+    border-radius: 7px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: #6b7280;
+    font-size: 14px;
+    transition: background .14s, color .14s;
+}
+.sr-btn-icon:hover { background: #f0edff; color: #4f46e5; border-color: #a5b4fc; }
+
+.sr-gear-menu {
+    position: absolute;
+    top: 38px; left: 0;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 9px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.12);
+    overflow: hidden;
+    min-width: 160px;
+    z-index: 999;
+}
+
+.sr-gear-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 10px 14px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 13px;
+    color: #374151;
+    text-align: left;
+    transition: background .12s;
+}
+.sr-gear-item:hover { background: #f5f3ff; color: #4f46e5; }
+.sr-gear-item i { width: 14px; color: #7c3aed; }
+
+/* ── Date Navigation ──────────────────────────────────────── */
+.sr-picker-wrap { position: relative; }
+
+.sr-range-btn {
+    padding: 6px 16px;
+    border: 1.5px solid #a5b4fc;
+    background: #fff;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #4f46e5;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .14s;
+}
+.sr-range-btn:hover { background: #eef2ff; }
+
+.sr-today-btn {
+    padding: 6px 13px;
+    border: 1px solid #d1d5db;
+    background: #fff;
+    border-radius: 7px;
+    font-size: 12.5px;
+    cursor: pointer;
+    color: #374151;
+    transition: background .14s;
+}
+.sr-today-btn:hover { background: #f0edff; border-color: #a5b4fc; }
+
+/* ── Date Picker panel ────────────────────────────────────── */
+.sr-picker-panel {
+    position: absolute;
+    top: 40px; left: 50%;
+    transform: translateX(-50%);
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.13);
+    padding: 14px 16px;
+    z-index: 999;
+    min-width: 380px;
+}
+
+.sr-modes { display: flex; gap: 6px; margin-bottom: 12px; }
+.sr-mode-pill {
+    padding: 4px 13px;
+    border: 1px solid #d1d5db;
+    background: #fff;
+    border-radius: 20px;
+    font-size: 12px;
+    cursor: pointer;
+    color: #6b7280;
+    transition: all .14s;
+}
+.sr-mode-pill:hover { border-color: #a5b4fc; color: #4f46e5; background: #eef2ff; }
+.sr-mode-pill.active { background: #4f46e5; color: #fff; border-color: #4f46e5; }
+
+.sr-custom { display: flex; align-items: center; gap: 8px; }
+.sr-date-inp {
+    flex: 1;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    padding: 5px 9px;
+    font-size: 12.5px;
+    outline: none;
+}
+.sr-date-inp:focus { border-color: #818cf8; }
+.sr-arrow { color: #9ca3af; }
+.sr-apply-btn {
+    padding: 6px 16px;
+    background: #4f46e5;
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .14s;
+}
+.sr-apply-btn:hover { background: #4338ca; }
+
+/* ── Filters ──────────────────────────────────────────────── */
+.sr-filter-txt, .sr-filter-sel {
+    padding: 6px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    font-size: 12.5px;
+    color: #374151;
+    outline: none;
+    background: #fff;
+    transition: border .14s;
+}
+.sr-filter-txt { width: 170px; }
+.sr-filter-txt:focus, .sr-filter-sel:focus { border-color: #818cf8; }
+
+/* ── Import banner ────────────────────────────────────────── */
+.sr-banner {
+    padding: 9px 16px;
+    font-size: 12.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.sr-banner i { font-size: 14px; }
+.sr-banner-info    { background: #eef2ff; color: #3730a3; border-bottom: 1px solid #c7d2fe; }
+.sr-banner-success { background: #ecfdf5; color: #065f46; border-bottom: 1px solid #a7f3d0; }
+
+/* ── Loading ──────────────────────────────────────────────── */
+.sr-loading {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; padding: 60px; gap: 14px; color: #9ca3af; font-size: 14px;
+}
+.sr-spinner {
+    width: 34px; height: 34px;
+    border: 3px solid #e0e7ff;
+    border-top: 3px solid #4f46e5;
+    border-radius: 50%;
+    animation: sr-spin .7s linear infinite;
+}
+@keyframes sr-spin { to { transform: rotate(360deg); } }
+
+/* ── Grid ─────────────────────────────────────────────────── */
+.sr-grid-wrap { flex: 1; overflow: auto; }
+
+.sr-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: max-content;
+    min-width: 100%;
+}
+
+/* ── Table headers ────────────────────────────────────────── */
+.sr-th {
+    background: #fff;
+    border-bottom: 2px solid #e5e7eb;
+    border-right: 1px solid #f0f0f0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    padding: 6px 6px;
+    white-space: nowrap;
+    font-weight: 600;
+    font-size: 11px;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+/* Fixed left column headers */
+.sr-th-fix {
+    position: sticky;
+    z-index: 20;
+    background: #fff;
+    border-right: 1px solid #e5e7eb;
+}
+.sr-th-av   { left: 0;    width: 44px;  min-width: 44px; }
+.sr-th-name { left: 44px; min-width: 150px; }
+.sr-th-id   { left: 194px; min-width: 100px; }
+.sr-th-dept { left: 294px; min-width: 130px; }
+.sr-th-job  { left: 424px; min-width: 140px; }
+.sr-last-fix { border-right: 2px solid #c7d2fe !important; }
+
+/* Date column headers */
+.sr-th-date {
+    text-align: center;
+    min-width: 58px;
+    padding: 4px 2px;
+    font-weight: 400;
+}
+.sr-th-date.weekend { background: #faf8ff; color: #7c3aed; }
+.sr-th-date.today   { background: #eef2ff; }
+
+.sr-th-day { font-size: 10px; color: #9ca3af; font-weight: 500; }
+.sr-th-num {
+    font-size: 13px;
+    font-weight: 700;
+    color: #111;
+    margin-top: 1px;
+}
+.sr-th-date.today .sr-th-num {
+    background: #4f46e5;
+    color: #fff;
+    border-radius: 50%;
+    width: 22px; height: 22px;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto;
+}
+
+/* ── Table rows ───────────────────────────────────────────── */
+.sr-row { transition: background .08s; }
+.sr-row.even .sr-td { background: #ffffff; }
+.sr-row.odd  .sr-td { background: #faf9ff; }
+.sr-row:hover .sr-td { background: #f0eeff !important; }
+
+.sr-td {
+    padding: 4px 6px;
+    border-bottom: 1px solid #f0f0f0;
+    border-right: 1px solid #f0f0f0;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+/* Fixed data cells */
+.sr-td-fix {
+    position: sticky;
+    z-index: 5;
+    border-right: 1px solid #e5e7eb;
+}
+.sr-td-av   { left: 0;    width: 44px;  }
+.sr-td-name { left: 44px; }
+.sr-td-id   { left: 194px; }
+.sr-td-dept { left: 294px; }
+.sr-td-job  { left: 424px; }
+
+.sr-td-date.weekend { background: #fdf8ff !important; }
+.sr-td-date.today   { background: #eef2ff !important; }
+
+/* Avatar */
+.sr-avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: linear-gradient(135deg, #818cf8, #4f46e5);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 700; font-size: 12px;
+}
+.sr-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.sr-emp-name { font-weight: 600; font-size: 12.5px; color: #111827; }
+.sr-mono { font-family: monospace; font-size: 11.5px; color: #6b7280; }
+
+/* ── Empty state ──────────────────────────────────────────── */
+.sr-empty {
+    text-align: center; padding: 40px;
+    color: #9ca3af; font-size: 14px;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ShiftCell chip + dropdown
+══════════════════════════════════════════════════════════════ */
+.sr-cell-wrap { position: relative; }
+
+.sr-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 3px 7px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 700;
+    min-width: 50px;
+    justify-content: center;
+    height: 24px;
+    white-space: nowrap;
+    transition: opacity .12s, transform .1s;
+    letter-spacing: .02em;
+}
+.sr-chip:hover { opacity: .82; transform: scale(1.04); }
+.sr-chip:active { transform: scale(.96); }
+
+/* Not Set */
+.sr-chip-ns {
+    background: #f3f4f6;
+    color: #9ca3af;
+    border: 1.5px dashed #d1d5db;
+}
+.sr-chip-ns:hover { background: #ede9fe; border-color: #a78bfa; color: #6d28d9; }
+
+.sr-caret { font-size: 8px; opacity: .55; }
+
+/* Colour chips */
+.chip-blue   { background: #dbeafe; color: #1d4ed8; }
+.chip-green  { background: #d1fae5; color: #065f46; }
+.chip-amber  { background: #fef3c7; color: #92400e; }
+.chip-rose   { background: #fee2e2; color: #991b1b; }
+.chip-teal   { background: #ccfbf1; color: #0f766e; }
+.chip-indigo { background: #e0e7ff; color: #3730a3; }
+.chip-orange { background: #ffedd5; color: #9a3412; }
+
+/* Dropdown */
+.sr-drop {
+    position: absolute;
+    top: 28px; left: 0;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 9px;
+    box-shadow: 0 8px 28px rgba(0,0,0,.13);
+    z-index: 500;
+    min-width: 130px;
+    overflow: hidden;
+}
+
+.sr-drop-search { padding: 6px 8px; border-bottom: 1px solid #f0f0f0; }
+.sr-drop-input {
+    width: 100%;
+    border: 1px solid #e5e7eb;
+    border-radius: 5px;
+    padding: 4px 7px;
+    font-size: 12px;
+    outline: none;
+}
+.sr-drop-input:focus { border-color: #818cf8; }
+
+.sr-drop-list {
+    padding: 5px;
+    max-height: 210px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.sr-drop-item {
+    width: 100%;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 700;
+    text-align: left;
+    transition: opacity .1s;
+    letter-spacing: .02em;
+}
+.sr-drop-item:hover { opacity: .78; }
+
+.sr-drop-shift { /* inherits colour from chip classes */ }
+.sr-drop-ns {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* ── Banner close button ──────────────────────────────────── */
+.sr-banner {
+    position: relative;
+}
+.sr-banner-close {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    color: currentColor;
+    opacity: 0.5;
+    padding: 2px 6px;
+    border-radius: 4px;
+    line-height: 1;
+    transition: opacity .12s, background .12s;
+}
+.sr-banner-close:hover { opacity: 1; background: rgba(0,0,0,.08); }
+
+.sr-banner-warn { background: #fffbeb; color: #92400e; border-bottom: 1px solid #fde68a; }
+.sr-banner-errors { font-size: 11.5px; opacity: 0.8; }
+
+/* ── Past (readonly) shift chip ───────────────────────────── */
+.sr-chip-readonly {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .3px;
+    cursor: not-allowed;
+    opacity: 0.65;
+    filter: grayscale(30%);
+    border: none;
+    pointer-events: none;
+    user-select: none;
+}
+
+.sr-lock-icon {
+    font-size: 9px;
+    opacity: 0.7;
+}
+
+/* Mute past-date table cells slightly to signal they are locked */
+.sr-td-date.past-date {
+    background-color: rgba(0, 0, 0, 0.018);
+}
+
+/* ── Default Shift toolbar section ───────────────────────── */
+.sr-tb-default-shift {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 10px;
+    border-left: 1px solid rgba(0,0,0,0.10);
+    border-right: 1px solid rgba(0,0,0,0.10);
+}
+
+.sr-default-shift-label {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #6b7280;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.sr-default-shift-sel {
+    height: 30px;
+    padding: 0 24px 0 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    background: #fff;
+    color: #374151;
+    cursor: pointer;
+    appearance: auto;
+    min-width: 110px;
+}
+
+.sr-default-shift-sel:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 2px rgba(99,102,241,.15);
+}
+
+
+/* ── Selected Shift toolbar section ──────────────────────────
+   Lives left of Default Shift. Contains shift picker + Apply
+   + count badge + Clear/Cancel when cells are selected.
+────────────────────────────────────────────────────────────── */
+.sr-tb-sel-shift {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 10px;
+    border-left: 1px solid rgba(0,0,0,0.10);
+    border-right: 1px solid rgba(0,0,0,0.10);
+}
+
+.sr-sel-shift-label {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #6b7280;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.sr-sel-shift-sel {
+    height: 30px;
+    padding: 0 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    background: #fff;
+    color: #374151;
+    cursor: pointer;
+    min-width: 120px;
+}
+.sr-sel-shift-sel:focus {
+    outline: none;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 2px rgba(79,70,229,.15);
+}
+
+.sr-sel-apply-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 30px;
+    padding: 0 12px;
+    background: #4f46e5;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .14s;
+}
+.sr-sel-apply-btn:hover:not(.sr-sel-apply-btn--disabled) { background: #4338ca; }
+.sr-sel-apply-btn--disabled {
+    background: #c7d2fe;
+    color: #a5b4fc;
+    cursor: not-allowed;
+}
+
+.sr-sel-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.3);
+    color: #fff;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 800;
+    min-width: 17px;
+    height: 17px;
+    padding: 0 4px;
+    margin-left: 2px;
+}
+
+.sr-sel-clear-btn {
+    height: 30px;
+    width: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #fee2e2;
+    color: #dc2626;
+    border: 1px solid #fca5a5;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background .14s;
+}
+.sr-sel-clear-btn:hover { background: #fecaca; }
+
+.sr-sel-cancel-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 30px;
+    padding: 0 10px;
+    background: #f3f4f6;
+    color: #6b7280;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .14s;
+}
+.sr-sel-cancel-btn:hover { background: #e5e7eb; color: #374151; }
+
+/* ── Selection hint / active bars ────────────────────────────  */
+.sr-sel-hint,
+.sr-sel-active-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 16px;
+    font-size: 12.5px;
+}
+.sr-sel-hint {
+    background: #eef2ff;
+    color: #3730a3;
+    border-bottom: 1px solid #c7d2fe;
+}
+.sr-sel-active-bar {
+    background: #f0fdf4;
+    color: #14532d;
+    border-bottom: 1px solid #bbf7d0;
+}
+.sr-sel-hint-dismiss {
+    margin-left: auto;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+    color: inherit;
+    opacity: 0.6;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+.sr-sel-hint-dismiss:hover { opacity: 1; background: rgba(0,0,0,.07); }
+
+/* ── TD-level selection ───────────────────────────────────────
+   Clicking the <td> toggles the cell in/out of selection.
+   .sr-td-selectable shows a subtle cursor hint.
+   .sr-td-selected shows the selection ring.
+────────────────────────────────────────────────────────────── */
+.sr-td-selectable {
+    cursor: cell;
+}
+/* Override cursor back to default when hovering the chip itself
+   so chip → dropdown still feels normal */
+.sr-td-selectable .sr-chip {
+    cursor: pointer;
+}
+
+.sr-td-selected {
+    background: #eef2ff !important;
+    outline: 2px solid #4f46e5;
+    outline-offset: -2px;
+}
+
+/* Selected chip ring (visual only — td handles selection) */
+.sr-chip.sr-chip-selected {
+    outline: 2px solid #4f46e5;
+    outline-offset: 1px;
+    box-shadow: 0 0 0 3px rgba(79,70,229,0.18);
+}
+
+.sr-check-icon {
+    font-size: 9px;
+    margin-right: 1px;
+}

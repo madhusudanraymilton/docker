@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Loan Manager Group -->
+        <record id="group_loan_manager" model="res.groups">
+            <field name="name">Loan Manager</field>
+            <!-- Remove category_id completely - it's not needed in Odoo 19 -->
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+            <field name="comment">Group for managing employee loans</field>
+        </record>
+        
+        <!-- Loan User Group -->
+        <record id="group_loan_user" model="res.groups">
+            <field name="name">Loan User</field>
+            <!-- Remove category_id completely - it's not needed in Odoo 19 -->
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+            <field name="comment">Group for regular loan users</field>
+        </record>
+    </data>
+</odoo>

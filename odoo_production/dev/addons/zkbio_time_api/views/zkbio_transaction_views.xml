@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ZKBio Transaction List View -->
+    <record id="view_zkbio_transaction_list" model="ir.ui.view">
+        <field name="name">zkbio.transaction.list</field>
+        <field name="model">zkbio.transaction</field>
+        <field name="arch" type="xml">
+            <list string="Attendance Transactions" decoration-success="is_processed == True" decoration-warning="is_processed == False and employee_id" decoration-danger="error_message">
+                <field name="emp_code"/>
+                <field name="employee_id"/>
+                <field name="punch_time"/>
+                <field name="punch_state"/>
+                <field name="terminal_alias"/>
+                <field name="terminal_sn"/>
+                <field name="is_processed" widget="boolean_toggle"/>
+                <field name="hr_attendance_id"/>
+                <field name="error_message"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ZKBio Transaction Form View -->
+    <record id="view_zkbio_transaction_form" model="ir.ui.view">
+        <field name="name">zkbio.transaction.form</field>
+        <field name="model">zkbio.transaction</field>
+        <field name="arch" type="xml">
+            <form string="Attendance Transaction">
+                <header>
+                    <button name="action_process_to_attendance" string="Process to HR Attendance" type="object" class="btn-primary" invisible="is_processed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="emp_code"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Employee Information">
+                            <field name="emp_code"/>
+                            <field name="employee_id"/>
+                        </group>
+                        <group string="Transaction Details">
+                            <field name="punch_time"/>
+                            <field name="punch_state"/>
+                            <field name="verify_type"/>
+                            <field name="work_code"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Terminal Information">
+                            <field name="terminal_sn"/>
+                            <field name="terminal_id"/>
+                            <field name="terminal_alias"/>
+                        </group>
+                        <group string="Upload Information">
+                            <field name="upload_time"/>
+                            <field name="config_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Additional Data">
+                            <field name="temperature"/>
+                            <field name="mask_flag"/>
+                        </group>
+                        <group string="Processing Status">
+                            <field name="is_processed" widget="boolean"/>
+                            <field name="hr_attendance_id"/>
+                        </group>
+                    </group>
+                    <group string="Error Message" invisible="not error_message">
+                        <field name="error_message" nolabel="1" readonly="1" class="text-danger"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ZKBio Transaction Action -->
+    <record id="action_zkbio_transaction" model="ir.actions.act_window">
+        <field name="name">Attendance Logs</field>
+        <field name="res_model">zkbio.transaction</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_not_processed': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No attendance transactions found
+            </p>
+            <p>
+                Sync attendance data from your ZKBio Time API configuration to see transactions here.
+            </p>
+        </field>
+    </record>
+
+    <!-- Action to process batch transactions -->
+    <record id="action_zkbio_transaction_process_batch" model="ir.actions.server">
+        <field name="name">Process to HR Attendance</field>
+        <field name="model_id" ref="model_zkbio_transaction"/>
+        <field name="binding_model_id" ref="model_zkbio_transaction"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+if records:
+    action = records.action_process_batch()
+        </field>
+    </record>
+
+    <!-- Action to retry failed transactions -->
+    <record id="action_zkbio_transaction_retry_failed" model="ir.actions.server">
+        <field name="name">Retry Failed Transactions</field>
+        <field name="model_id" ref="model_zkbio_transaction"/>
+        <field name="binding_model_id" ref="model_zkbio_transaction"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+if records:
+    action = records.action_retry_failed()
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,261 @@
+<odoo>
+    <template id="employee_portal_menu" inherit_id="website.layout">
+        <xpath expr="//body" position="inside">
+            <script type="text/javascript">
+                    <![CDATA[
+                (function () {
+                    'use strict';
+
+                    let menuAdded = false;
+
+                    // Links that only portal_login provides (not in festival bonus menu)
+                    function getResignLinks() {
+                        return `
+                                    <li><hr class="dropdown-divider" style="margin:6px 0;"/></li>
+                                    <li>
+                                        <a class="dropdown-item" href="/my/resign/apply">
+                                            Apply for Resign
+                                        </a>
+                                    </li>
+                                    <li id="resignApprovalMenuItem" style="display:none;">
+                                        <a class="dropdown-item" href="/my/resign/approvals"
+                                           style="color:#8e44ad;font-weight:600;">
+                                            <i class="fa fa-user-check me-1" style="color:#8e44ad;"></i>
+                                            Resign Approvals
+                                        </a>
+                                    </li>
+                        `;
+                    }
+
+                    function createMenu() {
+                        return `
+                            <li class="nav-item dropdown employee-portal-menu">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa fa-user me-1"></i> Employee Dashboard
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" href="/my/employee-dashboard">
+                                            Dashboard
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"/></li>
+                                    <li><a class="dropdown-item" href="/my/leave/apply">Leave Application</a></li>
+                                    <li><a class="dropdown-item" href="/my/leave/team-approvals">Leave Approval</a></li>
+                                    <li>
+                                        <a class="dropdown-item" href="/my/expenses">
+                                            <!-- <i class="fa fa-money me-1"></i> --> 
+                                            Expenses 
+                                        </a>
+                                    </li>
+                                    <!-- <li><a class="dropdown-item" href="/my/payslips">Payslip</a></li> -->
+                                    <li><a class="dropdown-item" href="/my/profile">Profile</a></li>
+                                    ${getResignLinks()}
+                                </ul>
+                            </li>
+                        `;
+                    }
+
+                    // Inject resign links into an already-existing .employee-portal-menu
+                    function injectResignLinks(menu) {
+                        const ul = menu.querySelector('.dropdown-menu');
+                        if (!ul) return;
+                        if (ul.querySelector('[href="/my/resign/apply"]')) return; // already there
+                        const temp = document.createElement('ul');
+                        temp.innerHTML = getResignLinks();
+                        while (temp.firstChild) {
+                            ul.appendChild(temp.firstChild);
+                        }
+                    }
+
+                function addMenuToNavbar(navbar, isMobile) {
+                        // If festival bonus already injected the menu, just add resign links into it
+                        const existing = navbar.querySelector('.employee-portal-menu');
+                        if (existing) {
+                            injectResignLinks(existing);
+                            return;
+                        }
+
+                        const temp = document.createElement('div');
+                        temp.innerHTML = createMenu();
+                        const menu = temp.firstElementChild;
+
+                        navbar.appendChild(menu);
+
+                        const link = menu.querySelector('.nav-link');
+
+                        
+                        if (!isMobile && window.bootstrap && bootstrap.Dropdown) {
+                            new bootstrap.Dropdown(link);
+                        }
+
+                        if (isMobile) {
+                            link.addEventListener('click', function (e) {
+                                e.preventDefault();
+                                menu.classList.toggle('open');
+                                console.log('Employee menu toggled:', menu.classList.contains('open'));
+                            });
+                        }
+                    }
+
+                    function tryAddEmployeeMenu() {
+
+                        
+                        const desktopSelectors = [
+                            'header nav ul.navbar-nav:not(.o_menu_systray)',
+                            'nav ul.navbar-nav.me-auto',
+                            'header ul.navbar-nav'
+                        ];
+
+                        for (const selector of desktopSelectors) {
+                            const navbar = document.querySelector(selector);
+                            if (navbar) {
+                                addMenuToNavbar(navbar, false);
+                                break;
+                            }
+                        }
+
+                    
+                        const mobileSelectors = [
+                            '.navbar-collapse ul.navbar-nav',
+                            '#navbarSupportedContent ul.navbar-nav',
+                            '.collapse.navbar-collapse ul.navbar-nav',
+                            'div[id*="navbar"] ul.navbar-nav',
+                            'div[id*="menu"] ul.navbar-nav'
+                        ];
+
+                        for (const selector of mobileSelectors) {
+                            const mobileNavbar = document.querySelector(selector);
+                            if (mobileNavbar) {
+                                addMenuToNavbar(mobileNavbar, true);
+                            }
+                        }
+
+                        menuAdded = true;
+                    }
+
+
+                    
+                    function watchNavbarToggle() {
+                        const toggles = document.querySelectorAll(
+                            '.navbar-toggler, button[data-bs-toggle="collapse"]'
+                        );
+
+                        toggles.forEach(btn => {
+                            btn.addEventListener('click', function () {
+                                setTimeout(tryAddEmployeeMenu, 100);
+                                setTimeout(tryAddEmployeeMenu, 300);
+                                setTimeout(tryAddEmployeeMenu, 600);
+                            });
+                        });
+                    }
+
+        
+                    function watchCollapseEvents() {
+                        document.addEventListener('shown.bs.collapse', function (e) {
+                            if (e.target.classList.contains('navbar-collapse')) {
+                                setTimeout(tryAddEmployeeMenu, 50);
+                            }
+                        });
+                    }
+
+                    function setupMobileMenuToggle() {
+                
+                        document.addEventListener('click', function(e) {
+                            if (window.innerWidth <= 991.98) {
+                                const clickedMenu = e.target.closest('.nav-item.dropdown');
+                                const allMenus = document.querySelectorAll('.nav-item.dropdown');
+                                
+                                allMenus.forEach(menu => {
+                                    if (menu !== clickedMenu) {
+                                        menu.classList.remove('open');
+                                    }
+                                });
+                            }
+                        });
+                        
+                        
+                        document.addEventListener('click', function(e) {
+                            if (window.innerWidth <= 991.98) {
+                                if (e.target.classList.contains('dropdown-item')) {
+                                    const menu = e.target.closest('.nav-item.dropdown');
+                                    setTimeout(() => {
+                                        if (menu) menu.classList.remove('open');
+                                    }, 300);
+                                }
+                            }
+                        });
+                        
+                    
+                        const navbarToggles = document.querySelectorAll('.navbar-toggler');
+                        navbarToggles.forEach(toggle => {
+                            toggle.addEventListener('click', function() {
+                                // Close all open dropdowns when toggling navbar
+                                setTimeout(() => {
+                                    document.querySelectorAll('.nav-item.dropdown.open').forEach(menu => {
+                                        menu.classList.remove('open');
+                                    });
+                                }, 100);
+                            });
+                        });
+                    }
+
+                    function init() {
+                        setTimeout(tryAddEmployeeMenu, 0);
+                        setTimeout(tryAddEmployeeMenu, 500);
+                        setTimeout(tryAddEmployeeMenu, 1000);
+                        setTimeout(tryAddEmployeeMenu, 2000);
+
+                        watchNavbarToggle();
+                        watchCollapseEvents();
+                        setupMobileMenuToggle();
+
+                        // Show "Resign Approvals" only for HR users
+                        // Check via /web/session/get_session_info
+                        fetch('/web/dataset/call_kw', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                jsonrpc: '2.0', method: 'call', id: 1,
+                                params: {
+                                    model: 'res.users',
+                                    method: 'has_group',
+                                    args: ['hr.group_hr_user'],
+                                    kwargs: {}
+                                }
+                            })
+                        })
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.result === true) {
+                                document.querySelectorAll('#resignApprovalMenuItem')
+                                    .forEach(el => el.style.display = '');
+                            }
+                        })
+                        .catch(() => {});
+                        
+                        // DOM observer (theme / late load safe)
+                        const observer = new MutationObserver(function () {
+                            if (!menuAdded) {
+                                tryAddEmployeeMenu();
+                            }
+                        });
+
+                        observer.observe(document.body, {
+                            childList: true,
+                            subtree: true
+                        });
+                    }
+
+                    if (document.readyState === 'loading') {
+                        document.addEventListener('DOMContentLoaded', init);
+                    } else {
+                        init();
+                    }
+
+                })();
+                ]]>
+            </script>
+        </xpath>
+    </template>
+</odoo>

@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_hr_company_transfer_user,hr.company.transfer user,model_hr_company_transfer,hr.group_hr_user,1,0,1,0
+access_hr_company_transfer_manager,hr.company.transfer manager,model_hr_company_transfer,hr.group_hr_manager,1,1,1,1
+access_hr_company_transfer_approver,hr.company.transfer approver,model_hr_company_transfer,apps_employee_company_transfer.group_transfer_approver,1,1,0,0
+access_hr_intra_transfer_user,hr.intra.transfer user,model_hr_intra_transfer,hr.group_hr_user,1,0,1,0
+access_hr_intra_transfer_manager,hr.intra.transfer manager,model_hr_intra_transfer,hr.group_hr_manager,1,1,1,1
+access_hr_intra_transfer_approver,hr.intra.transfer approver,model_hr_intra_transfer,apps_employee_company_transfer.group_transfer_approver,1,1,0,0

@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- ================================================================ -->
+        <!-- INTER-COMPANY TRANSFER EMAIL TEMPLATES                           -->
+        <!-- ================================================================ -->
+
+        <!-- 1. Transfer Request Submitted -->
+        <record id="email_template_transfer_submitted" model="mail.template">
+            <field name="name">Inter-Company Transfer: Request Submitted</field>
+            <field name="model_id" ref="model_hr_company_transfer"/>
+            <field name="subject">Transfer Request Submitted - {{ object.name }}</field>
+            <field name="email_from">{{ (object.env.user.email_formatted or '') }}</field>
+            <field name="email_to">{{ object.env.ref('apps_employee_company_transfer.group_transfer_approver').users | map(attribute='email') | join(',') }}</field>
+            <field name="body_html"><![CDATA[
+<div style="margin: 0px; padding: 0px; font-family: Arial, sans-serif;">
+    <p>Dear Approver,</p>
+    <p>A new inter-company employee transfer request has been submitted and requires your approval.</p>
+    <table style="border-collapse: collapse; width: 100%;">
+        <tr><td style="padding: 6px; border: 1px solid #ddd;"><strong>Reference</strong></td><td style="padding: 6px; border: 1px solid #ddd;">{{ object.name }}</td></tr>
+        <tr><td style="padding: 6px; border: 1px solid #ddd;"><strong>Employee</strong></td><td style="padding: 6px; border: 1px solid #ddd;">{{ object.employee_id.name }}</td></tr>
+        <tr><td style="padding: 6px; border: 1px solid #ddd;"><strong>From Company</strong></td><td style="padding: 6px; border: 1px solid #ddd;">{{ object.from_company_id.name }}</td></tr>
+        <tr><td style="padding: 6px; border: 1px solid #ddd;"><strong>To Company</strong></td><td style="padding: 6px; border: 1px solid #ddd;">{{ object.to_company_id.name }}</td></tr>
+        <tr><td style="padding: 6px; border: 1px solid #ddd;"><strong>Transfer Type</strong></td><td style="padding: 6px; border: 1px solid #ddd;">{{ object.transfer_type | capitalize }}</td></tr>
+        <tr><td style="padding: 6px; border: 1px solid #ddd;"><strong>Start Date</strong></td><td style="padding: 6px; border: 1px solid #ddd;">{{ object.start_date }}</td></tr>
+        {% if object.end_date %}
+        <tr><td style="padding: 6px; border: 1px solid #ddd;"><strong>End Date</strong></td><td style="padding: 6px; border: 1px solid #ddd;">{{ object.end_date }}</td></tr>
+        {% endif %}
+    </table>
+    <p>Please log in to review and take action on this request.</p>
+    <p>Regards,<br/>HR Department</p>
+</div>
+            ]]></field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+
+        <!-- 2. Transfer Approved -->
+        <record id="email_template_transfer_approved" model="mail.template">
+            <field name="name">Inter-Company Transfer: Approved</field>
+            <field name="model_id" ref="model_hr_company_transfer"/>
+            <field name="subject">Transfer Request Approved - {{ object.name }}</field>
+            <field name="email_from">{{ (object.env.user.email_formatted or '') }}</field>
+            <field name="email_to">{{ object.employee_id.work_email }}</field>
+            <field name="body_html"><![CDATA[
+<div style="margin: 0px; padding: 0px; font-family: Arial, sans-serif;">
+    <p>Dear {{ object.employee_id.name }},</p>
+    <p>Your inter-company transfer request <strong>{{ object.name }}</strong> has been <strong style="color: green;">approved</strong>.</p>
+    <table style="border-collapse: collapse; width: 100%;">
+        <tr><td style="padding: 6px; border: 1px solid #ddd;"><strong>From Company</strong></td><td style="padding: 6px; border: 1px solid #ddd;">{{ object.from_company_id.name }}</td></tr>
+        <tr><td style="padding: 6px; border: 1px solid #ddd;"><strong>To Company</strong></td><td style="padding: 6px; border: 1px solid #ddd;">{{ object.to_company_id.name }}</td></tr>
+        <tr><td style="padding: 6px; border: 1px solid #ddd;"><strong>Transfer Date</strong></td><td style="padding: 6px; border: 1px solid #ddd;">{{ object.start_date }}</td></tr>
+    </table>
+    <p>The HR Manager will complete the transfer process shortly.</p>
+    <p>Regards,<br/>HR Department</p>
+</div>
+            ]]></field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+
+        <!-- 3. Transfer Rejected -->
+        <record id="email_template_transfer_rejected" model="mail.template">
+            <field name="name">Inter-Company Transfer: Rejected</field>
+            <field name="model_id" ref="model_hr_company_transfer"/>
+            <field name="subject">Transfer Request Rejected - {{ object.name }}</field>
+            <field name="email_from">{{ (object.env.user.email_formatted or '') }}</field>
+            <field name="email_to">{{ object.employee_id.work_email }}</field>
+            <field name="body_html"><![CDATA[
+<div style="margin: 0px; padding: 0px; font-family: Arial, sans-serif;">
+    <p>Dear {{ object.employee_id.name }},</p>
+    <p>We regret to inform you that your inter-company transfer request <strong>{{ object.name }}</strong> has been <strong style="color: red;">rejected</strong>.</p>
+    {% if object.rejection_reason %}
+    <p><strong>Reason:</strong> {{ object.rejection_reason }}</p>
+    {% endif %}
+    <p>Please contact HR for further information.</p>
+    <p>Regards,<br/>HR Department</p>
+</div>
+            ]]></field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+
+        <!-- 4. Transfer Completed -->
+        <record id="email_template_transfer_completed" model="mail.template">
+            <field name="name">Inter-Company Transfer: Completed</field>
+            <field name="model_id" ref="model_hr_company_transfer"/>
+            <field name="subject">Transfer Completed - {{ object.name }}</field>
+            <field name="email_from">{{ (object.env.user.email_formatted or '') }}</field>
+            <field name="email_to">{{ object.employee_id.work_email }}</field>
+            <field name="body_html"><![CDATA[
+<div style="margin: 0px; padding: 0px; font-family: Arial, sans-serif;">
+    <p>Dear {{ object.employee_id.name }},</p>
+    <p>Your inter-company transfer has been <strong style="color: green;">completed</strong> successfully.</p>
+    <table style="border-collapse: collapse; width: 100%;">
+        <tr><td style="padding: 6px; border: 1px solid #ddd;"><strong>Reference</strong></td><td style="padding: 6px; border: 1px solid #ddd;">{{ object.name }}</td></tr>
+        <tr><td style="padding: 6px; border: 1px solid #ddd;"><strong>From Company</strong></td><td style="padding: 6px; border: 1px solid #ddd;">{{ object.from_company_id.name }}</td></tr>
+        <tr><td style="padding: 6px; border: 1px solid #ddd;"><strong>To Company</strong></td><td style="padding: 6px; border: 1px solid #ddd;">{{ object.to_company_id.name }}</td></tr>
+        <tr><td style="padding: 6px; border: 1px solid #ddd;"><strong>Effective Date</strong></td><td style="padding: 6px; border: 1px solid #ddd;">{{ object.start_date }}</td></tr>
+        {% if object.new_contract_id %}
+        <tr><td style="padding: 6px; border: 1px solid #ddd;"><strong>New Contract</strong></td><td style="padding: 6px; border: 1px solid #ddd;">{{ object.new_contract_id.name }}</td></tr>
+        {% endif %}
+    </table>
+    <p>Your leave allocations have been carried forward to your new company.</p>
+    <p>Welcome to {{ object.to_company_id.name }}!</p>
+    <p>Regards,<br/>HR Department</p>
+</div>
+            ]]></field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+
+        <!-- 5. Temporary Transfer Reversal -->
+        <record id="email_template_transfer_reversal" model="mail.template">
+            <field name="name">Inter-Company Transfer: Reversal Notice</field>
+            <field name="model_id" ref="model_hr_company_transfer"/>
+            <field name="subject">Transfer Reversal Notice - {{ object.name }}</field>
+            <field name="email_from">{{ (object.env.user.email_formatted or '') }}</field>
+            <field name="email_to">{{ object.employee_id.work_email }}</field>
+            <field name="body_html"><![CDATA[
+<div style="margin: 0px; padding: 0px; font-family: Arial, sans-serif;">
+    <p>Dear {{ object.employee_id.name }},</p>
+    <p>Please be informed that your temporary inter-company transfer <strong>{{ object.name }}</strong> has been <strong>reversed</strong>.</p>
+    <p>You have been returned to your original company: <strong>{{ object.original_company_id.name if object.original_company_id else 'N/A' }}</strong>.</p>
+    <p>Your original contract has been reactivated.</p>
+    <p>Regards,<br/>HR Department</p>
+</div>
+            ]]></field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+
+        <!-- ================================================================ -->
+        <!-- INTRA-COMPANY TRANSFER EMAIL TEMPLATES                           -->
+        <!-- ================================================================ -->
+
+        <!-- 1. Intra Transfer Submitted -->
+        <record id="email_template_intra_transfer_submitted" model="mail.template">
+            <field name="name">Intra-Company Transfer: Request Submitted</field>
+            <field name="model_id" ref="model_hr_intra_transfer"/>
+            <field name="subject">Intra Transfer Request Submitted - {{ object.name }}</field>
+            <field name="email_from">{{ (object.env.user.email_formatted or '') }}</field>
+            <field name="email_to">{{ object.env.ref('apps_employee_company_transfer.group_transfer_approver').users | map(attribute='email') | join(',') }}</field>
+            <field name="body_html"><![CDATA[
+<div style="margin: 0px; padding: 0px; font-family: Arial, sans-serif;">
+    <p>Dear Approver,</p>
+    <p>An intra-company transfer request has been submitted and requires your approval.</p>
+    <table style="border-collapse: collapse; width: 100%;">
+        <tr><td style="padding: 6px; border: 1px solid #ddd;"><strong>Reference</strong></td><td style="padding: 6px; border: 1px solid #ddd;">{{ object.name }}</td></tr>
+        <tr><td style="padding: 6px; border: 1px solid #ddd;"><strong>Employee</strong></td><td style="padding: 6px; border: 1px solid #ddd;">{{ object.employee_id.name }}</td></tr>
+        <tr><td style="padding: 6px; border: 1px solid #ddd;"><strong>From Department</strong></td><td style="padding: 6px; border: 1px solid #ddd;">{{ object.from_department_id.name if object.from_department_id else 'N/A' }}</td></tr>
+        <tr><td style="padding: 6px; border: 1px solid #ddd;"><strong>To Department</strong></td><td style="padding: 6px; border: 1px solid #ddd;">{{ object.to_department_id.name if object.to_department_id else 'N/A' }}</td></tr>
+        <tr><td style="padding: 6px; border: 1px solid #ddd;"><strong>Transfer Date</strong></td><td style="padding: 6px; border: 1px solid #ddd;">{{ object.transfer_date }}</td></tr>
+    </table>
+    <p>Regards,<br/>HR Department</p>
+</div>
+            ]]></field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+
+        <!-- 2. Intra Transfer Approved -->
+        <record id="email_template_intra_transfer_approved" model="mail.template">
+            <field name="name">Intra-Company Transfer: Approved</field>
+            <field name="model_id" ref="model_hr_intra_transfer"/>
+            <field name="subject">Intra Transfer Approved - {{ object.name }}</field>
+            <field name="email_from">{{ (object.env.user.email_formatted or '') }}</field>
+            <field name="email_to">{{ object.employee_id.work_email }}</field>
+            <field name="body_html"><![CDATA[
+<div style="margin: 0px; padding: 0px; font-family: Arial, sans-serif;">
+    <p>Dear {{ object.employee_id.name }},</p>
+    <p>Your intra-company transfer request <strong>{{ object.name }}</strong> has been <strong style="color: green;">approved</strong>.</p>
+    <p>Transfer Date: <strong>{{ object.transfer_date }}</strong></p>
+    <p>Regards,<br/>HR Department</p>
+</div>
+            ]]></field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+
+        <!-- 3. Intra Transfer Rejected -->
+        <record id="email_template_intra_transfer_rejected" model="mail.template">
+            <field name="name">Intra-Company Transfer: Rejected</field>
+            <field name="model_id" ref="model_hr_intra_transfer"/>
+            <field name="subject">Intra Transfer Rejected - {{ object.name }}</field>
+            <field name="email_from">{{ (object.env.user.email_formatted or '') }}</field>
+            <field name="email_to">{{ object.employee_id.work_email }}</field>
+            <field name="body_html"><![CDATA[
+<div style="margin: 0px; padding: 0px; font-family: Arial, sans-serif;">
+    <p>Dear {{ object.employee_id.name }},</p>
+    <p>Your intra-company transfer request <strong>{{ object.name }}</strong> has been <strong style="color: red;">rejected</strong>.</p>
+    {% if object.rejection_reason %}
+    <p><strong>Reason:</strong> {{ object.rejection_reason }}</p>
+    {% endif %}
+    <p>Regards,<br/>HR Department</p>
+</div>
+            ]]></field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+
+        <!-- 4. Intra Transfer Completed -->
+        <record id="email_template_intra_transfer_completed" model="mail.template">
+            <field name="name">Intra-Company Transfer: Completed</field>
+            <field name="model_id" ref="model_hr_intra_transfer"/>
+            <field name="subject">Intra Transfer Completed - {{ object.name }}</field>
+            <field name="email_from">{{ (object.env.user.email_formatted or '') }}</field>
+            <field name="email_to">{{ object.employee_id.work_email }}</field>
+            <field name="body_html"><![CDATA[
+<div style="margin: 0px; padding: 0px; font-family: Arial, sans-serif;">
+    <p>Dear {{ object.employee_id.name }},</p>
+    <p>Your intra-company transfer has been <strong style="color: green;">completed</strong>.</p>
+    <table style="border-collapse: collapse; width: 100%;">
+        <tr><td style="padding: 6px; border: 1px solid #ddd;"><strong>From Department</strong></td><td style="padding: 6px; border: 1px solid #ddd;">{{ object.from_department_id.name if object.from_department_id else 'N/A' }}</td></tr>
+        <tr><td style="padding: 6px; border: 1px solid #ddd;"><strong>To Department</strong></td><td style="padding: 6px; border: 1px solid #ddd;">{{ object.to_department_id.name if object.to_department_id else 'N/A' }}</td></tr>
+        {% if object.supervisor_id %}
+        <tr><td style="padding: 6px; border: 1px solid #ddd;"><strong>New Supervisor</strong></td><td style="padding: 6px; border: 1px solid #ddd;">{{ object.supervisor_id.name }}</td></tr>
+        {% endif %}
+    </table>
+    <p>Regards,<br/>HR Department</p>
+</div>
+            ]]></field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+
+    </data>
+</odoo>

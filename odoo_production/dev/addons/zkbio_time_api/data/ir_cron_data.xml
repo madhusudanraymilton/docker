@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="ir_cron_sync_attendance" model="ir.cron">
+        <field name="name">ZKBio Time: Sync Attendance</field>
+        <field name="model_id" ref="model_zkbio_config"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_sync_attendance()</field>
+        <field name="interval_number">20</field>
+        <field name="interval_type">minutes</field>
+    </record>
+</odoo>

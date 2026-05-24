@@ -1,0 +1,458 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ================================================================== -->
+    <!--  PORTAL — HR RESIGN APPROVAL PAGE                                   -->
+    <!-- ================================================================== -->
+    <template id="portal_resign_approvals" name="Portal - HR Resign Approvals">
+        <t t-call="website.layout">
+            <t t-set="head">
+                <link rel="stylesheet"
+                      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+                <style>
+                    :root {
+                        --ra-primary:  #2c3e50;
+                        --ra-accent:   #c0392b;
+                        --ra-success:  #27ae60;
+                        --ra-warning:  #e67e22;
+                        --ra-info:     #2980b9;
+                        --ra-bg:       #f4f6f9;
+                        --ra-border:   #dde3ec;
+                        --ra-radius:   12px;
+                        --ra-shadow:   0 4px 20px rgba(0,0,0,0.08);
+                    }
+
+                    .ra-wrapper { background: var(--ra-bg); min-height: 100vh; padding: 32px 0 60px; }
+
+                    /* Header */
+                    .ra-header {
+                        background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
+                        border-radius: var(--ra-radius); padding: 28px 32px; color: #fff;
+                        margin-bottom: 24px; display: flex; align-items: center; gap: 16px;
+                    }
+                    .ra-header-icon {
+                        width: 56px; height: 56px; background: rgba(255,255,255,.12);
+                        border-radius: 50%; display: flex; align-items: center;
+                        justify-content: center; font-size: 1.5rem;
+                    }
+                    .ra-header h2 { margin: 0; font-size: 1.6rem; font-weight: 700; }
+                    .ra-header p  { margin: 4px 0 0; opacity: .75; font-size: .9rem; }
+
+                    /* Stat cards */
+                    .ra-stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; margin-bottom: 24px; }
+                    .ra-stat-card {
+                        background: #fff; border-radius: var(--ra-radius);
+                        border: 1px solid var(--ra-border); padding: 16px 18px;
+                        text-align: center; box-shadow: var(--ra-shadow);
+                        cursor: pointer; transition: all .2s; text-decoration: none;
+                    }
+                    .ra-stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.12); text-decoration: none; }
+                    .ra-stat-card.active { border-width: 2px; }
+                    .ra-stat-card .stat-num { font-size: 1.8rem; font-weight: 800; line-height: 1; }
+                    .ra-stat-card .stat-lbl { font-size: .75rem; text-transform: uppercase; letter-spacing: .06em; color: #777; margin-top: 4px; }
+                    .stat-submitted  { border-color: #3498db; }
+                    .stat-submitted  .stat-num { color: #2980b9; }
+                    .stat-submitted.active { background: #eaf5ff; }
+                    .stat-review     { border-color: #f39c12; }
+                    .stat-review     .stat-num { color: #e67e22; }
+                    .stat-review.active { background: #fff8e1; }
+                    .stat-approved   { border-color: #2ecc71; }
+                    .stat-approved   .stat-num { color: #27ae60; }
+                    .stat-approved.active { background: #eefaf5; }
+                    .stat-rejected   { border-color: #e74c3c; }
+                    .stat-rejected   .stat-num { color: #c0392b; }
+                    .stat-rejected.active { background: #fdf2f2; }
+                    .stat-all        { border-color: #95a5a6; }
+                    .stat-all        .stat-num { color: #7f8c8d; }
+                    .stat-all.active { background: #f4f6f9; }
+
+                    /* Card */
+                    .ra-card {
+                        background: #fff; border-radius: var(--ra-radius);
+                        border: 1px solid var(--ra-border); box-shadow: var(--ra-shadow);
+                        overflow: hidden; margin-bottom: 24px;
+                    }
+                    .ra-card-header {
+                        background: linear-gradient(135deg, #f8f9fa, #fff);
+                        border-bottom: 2px solid var(--ra-border);
+                        padding: 16px 22px; display: flex; align-items: center;
+                        justify-content: space-between; gap: 12px;
+                    }
+                    .ra-card-header h5 { margin: 0; font-weight: 700; font-size: .95rem; }
+
+                    /* Table */
+                    .ra-table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+                    .ra-table th {
+                        background: #f4f6f9; padding: 11px 14px; text-align: left;
+                        font-size: .74rem; text-transform: uppercase;
+                        letter-spacing: .06em; color: #7f8c8d;
+                        border-bottom: 2px solid var(--ra-border);
+                    }
+                    .ra-table td { padding: 13px 14px; border-bottom: 1px solid #f0f2f5; vertical-align: middle; }
+                    .ra-table tr:hover td { background: #fafbfc; }
+                    .ra-table tr:last-child td { border-bottom: none; }
+
+                    /* Employee avatar */
+                    .emp-avatar {
+                        width: 36px; height: 36px; border-radius: 50%;
+                        background: linear-gradient(135deg, #c0392b, #e74c3c);
+                        color: #fff; display: inline-flex; align-items: center;
+                        justify-content: center; font-weight: 700; font-size: .85rem;
+                        margin-right: 8px; flex-shrink: 0;
+                    }
+                    .emp-name { font-weight: 600; color: #2c3e50; }
+                    .emp-dept { font-size: .78rem; color: #7f8c8d; }
+
+                    /* Badges */
+                    .ra-badge {
+                        display: inline-flex; align-items: center; gap: 5px;
+                        padding: 4px 11px; border-radius: 20px;
+                        font-size: .75rem; font-weight: 700;
+                    }
+                    .badge-submitted { background: #eaf5ff; color: #2980b9; }
+                    .badge-hr_review { background: #fff8e1; color: #e67e22; }
+                    .badge-approved  { background: #eefaf5; color: #27ae60; }
+                    .badge-rejected  { background: #fdf2f2; color: #c0392b; }
+                    .badge-cancelled { background: #f4f6f9; color: #7f8c8d; }
+                    .badge-draft     { background: #f4f6f9; color: #95a5a6; }
+
+                    /* Action buttons */
+                    .btn-approve {
+                        background: linear-gradient(135deg, #27ae60, #2ecc71);
+                        color: #fff; border: none; border-radius: 8px;
+                        padding: 7px 16px; font-size: .82rem; font-weight: 700;
+                        cursor: pointer; display: inline-flex; align-items: center;
+                        gap: 6px; text-decoration: none; transition: opacity .2s;
+                    }
+                    .btn-approve:hover { opacity: .88; color: #fff; text-decoration: none; }
+
+                    .btn-reject {
+                        background: #fff; border: 1.5px solid #e74c3c;
+                        color: #c0392b; border-radius: 8px;
+                        padding: 6px 14px; font-size: .82rem; font-weight: 700;
+                        cursor: pointer; display: inline-flex; align-items: center;
+                        gap: 6px; text-decoration: none; transition: all .2s;
+                    }
+                    .btn-reject:hover { background: #fdf2f2; color: #c0392b; text-decoration: none; }
+
+                    .btn-view {
+                        background: #f4f6f9; color: #2c3e50; border-radius: 8px;
+                        padding: 6px 12px; font-size: .8rem; font-weight: 600;
+                        text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
+                    }
+                    .btn-view:hover { background: #e8ecf0; color: #2c3e50; text-decoration: none; }
+
+                    /* Alerts */
+                    .ra-alert {
+                        border-radius: 10px; padding: 13px 18px;
+                        display: flex; gap: 10px; margin-bottom: 16px; font-size: .9rem;
+                    }
+                    .ra-alert-success { background: #f0faf5; color: #27ae60; border-left: 4px solid #2ecc71; }
+                    .ra-alert-danger  { background: #fdf2f2; color: #c0392b; border-left: 4px solid #e74c3c; }
+
+                    /* Reject modal */
+                    .reject-modal-overlay {
+                        display: none; position: fixed; inset: 0;
+                        background: rgba(0,0,0,.5); z-index: 9999;
+                        align-items: center; justify-content: center;
+                    }
+                    .reject-modal-overlay.open { display: flex; }
+                    .reject-modal {
+                        background: #fff; border-radius: 14px; padding: 28px 32px;
+                        width: 100%; max-width: 480px; box-shadow: 0 20px 60px rgba(0,0,0,.2);
+                    }
+                    .reject-modal h5 { font-weight: 700; margin-bottom: 16px; color: #c0392b; }
+                    .reject-modal textarea {
+                        width: 100%; border: 1.5px solid #dde3ec; border-radius: 8px;
+                        padding: 10px 14px; font-size: .9rem; min-height: 100px;
+                        resize: vertical; outline: none;
+                    }
+                    .reject-modal textarea:focus { border-color: #c0392b; }
+                    .reject-modal-btns { display: flex; gap: 10px; margin-top: 16px; justify-content: flex-end; }
+
+                    /* Empty state */
+                    .ra-empty {
+                        text-align: center; padding: 50px 20px; color: #999;
+                    }
+                    .ra-empty i { font-size: 3rem; margin-bottom: 12px; display: block; opacity: .4; }
+                    .ra-empty h5 { font-weight: 700; color: #bbb; }
+
+                    /* Archive badge */
+                    .archive-note {
+                        background: #fff8e1; border: 1px solid #ffc107;
+                        border-radius: 7px; padding: 4px 10px;
+                        font-size: .75rem; color: #e67e22; font-weight: 600;
+                        display: inline-flex; align-items: center; gap: 4px;
+                    }
+
+                    @media (max-width: 768px) {
+                        .ra-stats { grid-template-columns: repeat(3, 1fr); }
+                        .ra-table td, .ra-table th { padding: 9px 8px; font-size: .8rem; }
+                        .d-hide-sm { display: none; }
+                    }
+                </style>
+            </t>
+
+            <div class="ra-wrapper">
+                <div class="container">
+
+                    <!-- Breadcrumb -->
+                    <nav aria-label="breadcrumb" class="mb-3">
+                        <ol class="breadcrumb" style="background:transparent;padding:0;font-size:.85rem;">
+                            <li class="breadcrumb-item">
+                                <a href="/my/employee-dashboard"><i class="fa fa-home me-1"/>Dashboard</a>
+                            </li>
+                            <li class="breadcrumb-item active">Resign Approvals</li>
+                        </ol>
+                    </nav>
+
+                    <!-- Alerts -->
+                    <t t-if="success">
+                        <div class="ra-alert ra-alert-success">
+                            <i class="fa fa-check-circle mt-1"/><span t-esc="success"/>
+                        </div>
+                    </t>
+                    <t t-if="error">
+                        <div class="ra-alert ra-alert-danger">
+                            <i class="fa fa-exclamation-circle mt-1"/><span t-esc="error"/>
+                        </div>
+                    </t>
+
+                    <!-- Page Header -->
+                    <div class="ra-header">
+                        <div class="ra-header-icon"><i class="fa fa-user-check"/></div>
+                        <div>
+                            <h2>Resignation Approvals</h2>
+                            <p>Review and approve employee resignation requests</p>
+                        </div>
+                    </div>
+
+                    <!-- Stat Cards (clickable filters) -->
+                    <div class="ra-stats">
+                        <a href="/my/resign/approvals?status=submitted"
+                           t-attf-class="ra-stat-card stat-submitted #{status_filter == 'submitted' and 'active' or ''}">
+                            <div class="stat-num" t-esc="stats['submitted']"/>
+                            <div class="stat-lbl">Pending</div>
+                        </a>
+                        <a href="/my/resign/approvals?status=hr_review"
+                           t-attf-class="ra-stat-card stat-review #{status_filter == 'hr_review' and 'active' or ''}">
+                            <div class="stat-num" t-esc="stats['hr_review']"/>
+                            <div class="stat-lbl">Under Review</div>
+                        </a>
+                        <a href="/my/resign/approvals?status=approved"
+                           t-attf-class="ra-stat-card stat-approved #{status_filter == 'approved' and 'active' or ''}">
+                            <div class="stat-num" t-esc="stats['approved']"/>
+                            <div class="stat-lbl">Approved</div>
+                        </a>
+                        <a href="/my/resign/approvals?status=rejected"
+                           t-attf-class="ra-stat-card stat-rejected #{status_filter == 'rejected' and 'active' or ''}">
+                            <div class="stat-num" t-esc="stats['rejected']"/>
+                            <div class="stat-lbl">Rejected</div>
+                        </a>
+                        <a href="/my/resign/approvals?status=all"
+                           t-attf-class="ra-stat-card stat-all #{status_filter == 'all' and 'active' or ''}">
+                            <div class="stat-num" t-esc="stats['total']"/>
+                            <div class="stat-lbl">All</div>
+                        </a>
+                    </div>
+
+                    <!-- Table Card -->
+                    <div class="ra-card">
+                        <div class="ra-card-header">
+                            <h5>
+                                <i class="fa fa-list me-2" style="color:var(--ra-accent);"/>
+                                <t t-if="status_filter == 'submitted'">Pending Resignations</t>
+                                <t t-elif="status_filter == 'hr_review'">Under HR Review</t>
+                                <t t-elif="status_filter == 'approved'">Approved Resignations</t>
+                                <t t-elif="status_filter == 'rejected'">Rejected Resignations</t>
+                                <t t-else="">All Resignation Requests</t>
+                            </h5>
+                            <span style="font-size:.82rem;color:#999;">
+                                <t t-esc="len(resignations)"/> record(s)
+                            </span>
+                        </div>
+
+                        <t t-if="resignations">
+                            <div class="table-responsive">
+                                <table class="ra-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Employee</th>
+                                            <th class="d-hide-sm">Ref</th>
+                                            <th class="d-hide-sm">Applied</th>
+                                            <th>Last Day</th>
+                                            <th>Notice</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="resignations" t-as="r">
+                                            <tr>
+                                                <!-- Employee -->
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="emp-avatar">
+                                                            <t t-esc="(r.employee_id.name or 'E')[0].upper()"/>
+                                                        </div>
+                                                        <div>
+                                                            <div class="emp-name" t-esc="r.employee_id.name"/>
+                                                            <div class="emp-dept" t-esc="r.department_id.name or '—'"/>
+                                                        </div>
+                                                    </div>
+                                                </td>
+
+                                                <!-- Ref -->
+                                                <td class="d-hide-sm">
+                                                    <span style="font-family:monospace;font-size:.82rem;color:#c0392b;font-weight:700;"
+                                                          t-esc="r.name"/>
+                                                </td>
+
+                                                <!-- Applied -->
+                                                <td class="d-hide-sm" t-esc="r.request_date"/>
+
+                                                <!-- Last Day -->
+                                                <td>
+                                                    <strong style="color:#c0392b;" t-esc="r.last_working_date"/>
+                                                </td>
+
+                                                <!-- Notice -->
+                                                <td><t t-esc="r.notice_period_days"/> days</td>
+
+                                                <!-- Status -->
+                                                <td>
+                                                    <t t-set="s" t-value="r.state"/>
+                                                    <span t-attf-class="ra-badge badge-#{s}">
+                                                        <t t-if="s == 'submitted'"><i class="fa fa-clock"/> Pending</t>
+                                                        <t t-elif="s == 'hr_review'"><i class="fa fa-search"/> Reviewing</t>
+                                                        <t t-elif="s == 'approved'"><i class="fa fa-check-circle"/> Approved</t>
+                                                        <t t-elif="s == 'rejected'"><i class="fa fa-times-circle"/> Rejected</t>
+                                                        <t t-else=""><i class="fa fa-ban"/> <t t-esc="s.title()"/></t>
+                                                    </span>
+                                                    <t t-if="s == 'approved'">
+                                                        <br/>
+                                                        <span class="archive-note mt-1">
+                                                            <i class="fa fa-archive"/> Archived
+                                                        </span>
+                                                    </t>
+                                                </td>
+
+                                                <!-- Actions -->
+                                                <td>
+                                                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                                                        <!-- View -->
+                                                        <a t-attf-href="/my/resign/status/#{r.id}"
+                                                           class="btn-view">
+                                                            <i class="fa fa-eye"/> View
+                                                        </a>
+
+                                                        <!-- Approve (only for submitted/review) -->
+                                                        <t t-if="r.state in ['submitted', 'hr_review']">
+                                                            <a t-attf-href="/my/resign/hr/approve/#{r.id}"
+                                                               class="btn-approve"
+                                                               t-attf-onclick="return confirm('Approve resignation of #{r.employee_id.name}? The employee will be automatically archived.')">
+                                                                <i class="fa fa-check"/> Approve
+                                                            </a>
+
+                                                            <!-- Reject trigger -->
+                                                            <button class="btn-reject"
+                                                                    t-attf-onclick="openRejectModal(#{r.id}, '#{r.employee_id.name}')">
+                                                                <i class="fa fa-times"/> Reject
+                                                            </button>
+                                                        </t>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </t>
+
+                        <t t-else="">
+                            <div class="ra-empty">
+                                <i class="fa fa-inbox"/>
+                                <h5>No resignation requests found</h5>
+                                <p style="font-size:.88rem;">
+                                    <t t-if="status_filter == 'submitted'">No pending requests at this time.</t>
+                                    <t t-else="">No records match the selected filter.</t>
+                                </p>
+                            </div>
+                        </t>
+                    </div>
+
+                    <!-- Info Note -->
+                    <div style="background:#fff8e1;border:1px solid #ffc107;border-radius:10px;padding:14px 18px;display:flex;gap:10px;font-size:.87rem;color:#7d4b00;">
+                        <i class="fa fa-info-circle mt-1" style="color:#e67e22;"/>
+                        <span>
+                            <strong>Note:</strong> When you approve a resignation,
+                            the employee's account will be <strong>automatically archived</strong>
+                            in the system. This action cannot be undone from this portal —
+                            contact the system administrator to restore if needed.
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ── REJECT MODAL ── -->
+            <div class="reject-modal-overlay" id="rejectModalOverlay">
+                <div class="reject-modal">
+                    <h5><i class="fa fa-times-circle me-2"/>Reject Resignation</h5>
+                    <p style="font-size:.88rem;color:#666;margin-bottom:14px;">
+                        You are rejecting the resignation of
+                        <strong id="rejectEmpName">this employee</strong>.
+                        Please provide a reason:
+                    </p>
+                    <form id="rejectForm" method="post">
+                        <input type="hidden" name="csrf_token"
+                               t-att-value="request.csrf_token()"/>
+                        <textarea name="rejection_reason"
+                                  id="rejectReason"
+                                  placeholder="Enter rejection reason / HR notes..."
+                                  required="required"/>
+                        <div class="reject-modal-btns">
+                            <button type="button" class="btn btn-sm btn-secondary"
+                                    onclick="closeRejectModal()">
+                                Cancel
+                            </button>
+                            <button type="submit" class="btn-reject" style="padding:8px 20px;">
+                                <i class="fa fa-times me-1"/> Confirm Reject
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <script type="text/javascript">
+                function openRejectModal(resignId, empName) {
+                    document.getElementById('rejectEmpName').textContent = empName;
+                    document.getElementById('rejectForm').action =
+                        '/my/resign/hr/reject/' + resignId;
+                    document.getElementById('rejectReason').value = '';
+                    document.getElementById('rejectModalOverlay').classList.add('open');
+                }
+                function closeRejectModal() {
+                    document.getElementById('rejectModalOverlay').classList.remove('open');
+                }
+                // Close on overlay click
+                document.getElementById('rejectModalOverlay').addEventListener('click', function(e) {
+                    if (e.target === this) closeRejectModal();
+                });
+            </script>
+        </t>
+    </template>
+
+    <!-- Access Denied page (reusable) -->
+    <template id="portal_access_denied" name="Portal - Access Denied">
+        <t t-call="website.layout">
+            <div class="container" style="padding:60px 20px;text-align:center;">
+                <i class="fa fa-lock" style="font-size:4rem;color:#c0392b;margin-bottom:20px;display:block;"/>
+                <h3 style="font-weight:700;">Access Denied</h3>
+                <p style="color:#777;" t-esc="message or 'You do not have permission to view this page.'"/>
+                <a href="/my/employee-dashboard" class="btn btn-primary mt-3">Back to Dashboard</a>
+            </div>
+        </t>
+    </template>
+
+</odoo>
