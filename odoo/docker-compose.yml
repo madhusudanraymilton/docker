@@ -1,40 +1,110 @@
 services:
-  web:
-    image: odoo:19.0
-    depends_on:
-      - db
+  odoo:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    image: odoo19-custom:latest
+    container_name: odoo_dev
+
     ports:
-      - "10319:8069"
-      - "30372:8072"  # For longpolling
-    volumes:
-      - odoo-web-data:/var/lib/odoo
-      - ./config:/etc/odoo
-      - ./addons:/mnt/extra-addons
+      - "${ODOO_HTTP_PORT}:8069"
+      - "${ODOO_GEVENT_PORT}:8072"
+
     environment:
-      - HOST=db
-      - USER=odoo
-      - PASSWORD_FILE=/run/secrets/postgresql_password
-    secrets:
-      - postgresql_password
-    restart: always
+      HOST: db
+      USER: ${POSTGRES_USER}
+      PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+
+      # Database Odoo will create on first boot.
+      # Must match db_name / dbfilter in odoo.conf.
+      ODOO_DB_NAME: ${ODOO_DB_NAME}
+
+      # Core modules to install on first boot. Custom addons are discovered
+      # from /mnt/extra-addons and whitelisted by the entrypoint.
+      ODOO_BOOTSTRAP_MODULES: >-
+        base,web,base_setup
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+    restart: unless-stopped
+
+    mem_limit: 1200m
+    mem_reservation: 256m
+    cpus: "1.0"
+
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sfo /dev/null http://localhost:8069/web/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "2"
+
+    volumes:
+      - odoo_data:/var/lib/odoo
+      - logs:/var/log/odoo
+      - ./config:/etc/odoo:ro
+      - ./addons:/mnt/extra-addons
+
+    networks:
+      - odoo_dev_net
 
   db:
-    image: postgres:17
+    image: postgres:17-alpine
+    container_name: db_dev
+
     environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_PASSWORD_FILE=/run/secrets/postgresql_password
-      - POSTGRES_USER=odoo
-      - PGDATA=/var/lib/postgresql/data/pgdata
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+      PGDATA: /var/lib/postgresql/data/pgdata
+
+    command: >
+      postgres
+        -c shared_buffers=128MB
+        -c work_mem=8MB
+        -c max_connections=50
+        -c autovacuum=on
+
+    restart: unless-stopped
+
+    mem_limit: 512m
+    mem_reservation: 128m
+    cpus: "0.5"
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "2"
+
     volumes:
-      - odoo-db-data:/var/lib/postgresql/data/pgdata
-    secrets:
-      - postgresql_password
-    restart: always
+      - db_data:/var/lib/postgresql/data
+
+    networks:
+      - odoo_dev_net
 
 volumes:
-  odoo-web-data:
-  odoo-db-data:
+  odoo_data:
+  db_data:
+  logs:
 
-secrets:
-  postgresql_password:
-    file: odoo_pg_pass
+networks:
+  odoo_dev_net:
+    driver: bridge

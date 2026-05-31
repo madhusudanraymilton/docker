@@ -1,0 +1,117 @@
+--progress is a global compose flag, better use `docker compose --progress xx build ...
+ Image odoo19-custom:latest Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 531B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 1.39kB done
+#2 DONE 0.0s
+
+#3 resolve image config for docker-image://docker.io/docker/dockerfile:1.6
+#3 DONE 0.9s
+
+#4 docker-image://docker.io/docker/dockerfile:1.6@sha256:ac85f380a63b13dfcefa89046420e1781752bab202122f8f50032edf31be0021
+#4 resolve docker.io/docker/dockerfile:1.6@sha256:ac85f380a63b13dfcefa89046420e1781752bab202122f8f50032edf31be0021 0.0s done
+#4 CACHED
+
+#5 [internal] load metadata for docker.io/library/odoo:19.0
+#5 DONE 0.0s
+
+#6 [internal] load .dockerignore
+#6 transferring context: 2B done
+#6 DONE 0.0s
+
+#7 [1/5] FROM docker.io/library/odoo:19.0@sha256:76429765093a7b4411173f5858be3d7b8015e01d00ae80d4a0f3cc9b32c61c07
+#7 resolve docker.io/library/odoo:19.0@sha256:76429765093a7b4411173f5858be3d7b8015e01d00ae80d4a0f3cc9b32c61c07 done
+#7 CACHED
+
+#8 [internal] load build context
+#8 transferring context: 72B done
+#8 DONE 0.0s
+
+#9 [2/5] COPY scripts/prune_addons.py /tmp/prune_addons.py
+#9 DONE 0.0s
+
+#10 [3/5] RUN python3 /tmp/prune_addons.py     && rm -f /tmp/prune_addons.py
+#10 0.085 + python3 /tmp/prune_addons.py
+#10 7.973 [prune_addons] WARNING: whitelisted modules not present on disk: ['web_kanban_gauge', 'base_install', 'web_editor']
+#10 7.973 [prune_addons] Kept (79): account, analytic, auth_oauth, auth_passkey, auth_passkey_portal, auth_password_policy, auth_password_policy_portal, auth_password_policy_signup, auth_signup, auth_timeout, auth_totp, auth_totp_mail, auth_totp_portal, barcodes, base, base_automation, base_geolocalize, base_import, base_import_module, base_install_request, base_setup, base_sparse_field, base_vat, bus, calendar, calendar_sms, certificate, contacts, digest, fleet, google_gmail, hr, hr_attendance, hr_calendar, hr_expense, hr_fleet, hr_holidays, hr_holidays_attendance, hr_homeworking, hr_homeworking_calendar, hr_livechat, hr_org_chart, hr_presence, hr_recruitment, hr_recruitment_skills, hr_skills, hr_timesheet, hr_work_entry, hr_work_entry_holidays, html_editor, http_routing, iap, iap_mail, l10n_us, lunch, mail, mail_bot, mail_bot_hr, mail_plugin, microsoft_outlook, onboarding, payment, payment_adyen, payment_aps, phone_validation, portal, privacy_lookup, product, rating, resource, resource_mail, sms, social_media, uom, utm, web, web_tour, web_unsplash, website_hr_recruitment
+#10 7.973 [prune_addons] Removed (594) modules from bundled addons.
+#10 7.980 + rm -f /tmp/prune_addons.py
+#10 DONE 8.0s
+
+#11 [4/5] RUN mkdir -p /mnt/extra-addons /var/log/odoo     && chown -R odoo:odoo /mnt/extra-addons /var/log/odoo
+#11 0.140 + mkdir -p /mnt/extra-addons /var/log/odoo
+#11 0.141 + chown -R odoo:odoo /mnt/extra-addons /var/log/odoo
+#11 DONE 0.2s
+
+#12 [5/5] RUN apt-get update     && apt-get install -y --no-install-recommends curl     && rm -rf /var/lib/apt/lists/*
+#12 0.115 + apt-get update
+#12 0.510 Get:1 http://archive.ubuntu.com/ubuntu noble InRelease [256 kB]
+#12 0.528 Get:2 http://security.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+#12 1.631 Get:3 http://security.ubuntu.com/ubuntu noble-security/main amd64 Packages [2074 kB]
+#12 1.843 Get:4 http://security.ubuntu.com/ubuntu noble-security/multiverse amd64 Packages [48.4 kB]
+#12 1.857 Get:5 http://security.ubuntu.com/ubuntu noble-security/restricted amd64 Packages [3671 kB]
+#12 2.033 Get:6 http://archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+#12 2.182 Get:7 http://security.ubuntu.com/ubuntu noble-security/universe amd64 Packages [1505 kB]
+#12 2.433 Get:8 http://archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+#12 2.544 Get:9 http://archive.ubuntu.com/ubuntu noble/multiverse amd64 Packages [331 kB]
+#12 2.572 Get:10 http://archive.ubuntu.com/ubuntu noble/universe amd64 Packages [19.3 MB]
+#12 7.065 Get:11 http://archive.ubuntu.com/ubuntu noble/main amd64 Packages [1808 kB]
+#12 7.222 Get:12 http://archive.ubuntu.com/ubuntu noble/restricted amd64 Packages [117 kB]
+#12 7.442 Get:13 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [2457 kB]
+#12 7.778 Get:14 http://archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Packages [54.6 kB]
+#12 7.784 Get:15 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [2148 kB]
+#12 8.251 Get:16 http://archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Packages [3920 kB]
+#12 9.020 Get:17 http://archive.ubuntu.com/ubuntu noble-backports/multiverse amd64 Packages [671 B]
+#12 9.021 Get:18 http://archive.ubuntu.com/ubuntu noble-backports/main amd64 Packages [49.0 kB]
+#12 9.030 Get:19 http://archive.ubuntu.com/ubuntu noble-backports/universe amd64 Packages [35.9 kB]
+#12 9.167 Fetched 38.2 MB in 9s (4230 kB/s)
+#12 9.167 Reading package lists...
+#12 9.843 + apt-get install -y --no-install-recommends curl
+#12 9.849 Reading package lists...
+#12 10.60 Building dependency tree...
+#12 10.75 Reading state information...
+#12 10.94 The following additional packages will be installed:
+#12 10.95   libcurl4t64
+#12 10.97 The following packages will be upgraded:
+#12 10.97   curl libcurl4t64
+#12 11.11 2 upgraded, 0 newly installed, 0 to remove and 12 not upgraded.
+#12 11.11 Need to get 569 kB of archives.
+#12 11.11 After this operation, 2048 B of additional disk space will be used.
+#12 11.11 Get:1 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 curl amd64 8.5.0-2ubuntu10.9 [227 kB]
+#12 11.13 Get:2 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libcurl4t64 amd64 8.5.0-2ubuntu10.9 [342 kB]
+#12 11.24 perl: warning: Setting locale failed.
+#12 11.24 perl: warning: Please check that your locale settings:
+#12 11.24 	LANGUAGE = (unset),
+#12 11.24 	LC_ALL = (unset),
+#12 11.24 	LANG = "en_US.UTF-8"
+#12 11.24     are supported and installed on your system.
+#12 11.24 perl: warning: Falling back to the standard locale ("C").
+#12 11.29 debconf: delaying package configuration, since apt-utils is not installed
+#12 11.32 Fetched 569 kB in 0s (3173 kB/s)
+#12 11.34 (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 117726 files and directories currently installed.)
+#12 11.46 Preparing to unpack .../curl_8.5.0-2ubuntu10.9_amd64.deb ...
+#12 11.47 Unpacking curl (8.5.0-2ubuntu10.9) over (8.5.0-2ubuntu10.8) ...
+#12 11.53 Preparing to unpack .../libcurl4t64_8.5.0-2ubuntu10.9_amd64.deb ...
+#12 11.54 Unpacking libcurl4t64:amd64 (8.5.0-2ubuntu10.9) over (8.5.0-2ubuntu10.8) ...
+#12 11.58 Setting up libcurl4t64:amd64 (8.5.0-2ubuntu10.9) ...
+#12 11.58 Setting up curl (8.5.0-2ubuntu10.9) ...
+#12 11.59 Processing triggers for libc-bin (2.39-0ubuntu8.7) ...
+#12 11.63 + rm -rf /var/lib/apt/lists/archive.ubuntu.com_ubuntu_dists_noble-backports_InRelease /var/lib/apt/lists/archive.ubuntu.com_ubuntu_dists_noble-backports_main_binary-amd64_Packages.lz4 /var/lib/apt/lists/archive.ubuntu.com_ubuntu_dists_noble-backports_multiverse_binary-amd64_Packages.lz4 /var/lib/apt/lists/archive.ubuntu.com_ubuntu_dists_noble-backports_universe_binary-amd64_Packages.lz4 /var/lib/apt/lists/archive.ubuntu.com_ubuntu_dists_noble-updates_InRelease /var/lib/apt/lists/archive.ubuntu.com_ubuntu_dists_noble-updates_main_binary-amd64_Packages.lz4 /var/lib/apt/lists/archive.ubuntu.com_ubuntu_dists_noble-updates_multiverse_binary-amd64_Packages.lz4 /var/lib/apt/lists/archive.ubuntu.com_ubuntu_dists_noble-updates_restricted_binary-amd64_Packages.lz4 /var/lib/apt/lists/archive.ubuntu.com_ubuntu_dists_noble-updates_universe_binary-amd64_Packages.lz4 /var/lib/apt/lists/archive.ubuntu.com_ubuntu_dists_noble_InRelease /var/lib/apt/lists/archive.ubuntu.com_ubuntu_dists_noble_main_binary-amd64_Packages.lz4 /var/lib/apt/lists/archive.ubuntu.com_ubuntu_dists_noble_multiverse_binary-amd64_Packages.lz4 /var/lib/apt/lists/archive.ubuntu.com_ubuntu_dists_noble_restricted_binary-amd64_Packages.lz4 /var/lib/apt/lists/archive.ubuntu.com_ubuntu_dists_noble_universe_binary-amd64_Packages.lz4 /var/lib/apt/lists/auxfiles /var/lib/apt/lists/lock /var/lib/apt/lists/partial /var/lib/apt/lists/security.ubuntu.com_ubuntu_dists_noble-security_InRelease /var/lib/apt/lists/security.ubuntu.com_ubuntu_dists_noble-security_main_binary-amd64_Packages.lz4 /var/lib/apt/lists/security.ubuntu.com_ubuntu_dists_noble-security_multiverse_binary-amd64_Packages.lz4 /var/lib/apt/lists/security.ubuntu.com_ubuntu_dists_noble-security_restricted_binary-amd64_Packages.lz4 /var/lib/apt/lists/security.ubuntu.com_ubuntu_dists_noble-security_universe_binary-amd64_Packages.lz4
+#12 DONE 11.6s
+
+#13 exporting to image
+#13 exporting layers 0.1s done
+#13 exporting manifest sha256:191e66a2534d5b2b5ca116437541ce18e86d70064f3d1c4e522afca5e34a1f44 done
+#13 exporting config sha256:6ebe3b4ae35109db3dc265adeb456871b4575159918b74624661ac516c06c7cc done
+#13 exporting attestation manifest sha256:215ea85e6871b9a4bb7bd9f93058483507f57a804ba4eec32b617a7f54e9c267 done
+#13 exporting manifest list sha256:4965586abfad0b983eee25c563f852e82707a4cf7e4df2ee40fcf561bf519ddf done
+#13 naming to docker.io/library/odoo19-custom:latest done
+#13 unpacking to docker.io/library/odoo19-custom:latest 0.1s done
+#13 DONE 0.3s
+
+#14 resolving provenance for metadata file
+#14 DONE 0.0s
+ Image odoo19-custom:latest Built 

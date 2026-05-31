@@ -1,0 +1,20 @@
+# Drop your custom Odoo 19 addons here.
+# Each addon is a folder with __manifest__.py at its root, e.g.
+#
+# addons/
+#   my_custom_module/
+#     __manifest__.py
+#     __init__.py
+#     models/
+#     views/
+#     ...
+#
+# The folder is bind-mounted into the container at /mnt/extra-addons,
+# which is already on Odoo's addons_path.
+#
+# After adding or changing a module:
+#   docker compose restart odoo
+#
+# Then go to:
+#   Apps → Update Apps List
+# inside Odoo.
